@@ -28,6 +28,9 @@
 # python byte-compiled
 __pycache__/      
 
+# python type checking cache
+.mypy_cache
+
 # python build distribution
 dist/             
 
