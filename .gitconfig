@@ -6,3 +6,5 @@
   gpgSign = True
 [url "https://github.com/"]
   insteadOf = gh:
+[alias]
+    subcommit = "!git add $(git submodule status | awk '{print $2;}') && git commit -m $(git submodule status | awk '{print substr($1,2);}')" 
