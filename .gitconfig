@@ -1,10 +1,14 @@
+[alias]
+    subcommit = "!git add $(git submodule status | awk '{print $2;}') && git commit -m $(git submodule status | awk '{print substr($1,2);}')" 
+[commit]
+  gpgSign = True
+[pull]
+	rebase = true
+[rebase]
+	autoStash = true
+[url "https://github.com/"]
+  insteadOf = gh:
 [user]
   name = Ryan Sheatsley
   email = ryan@sheatsley.me
   signingkey = AF5888815A509644
-[commit]
-  gpgSign = True
-[url "https://github.com/"]
-  insteadOf = gh:
-[alias]
-    subcommit = "!git add $(git submodule status | awk '{print $2;}') && git commit -m $(git submodule status | awk '{print substr($1,2);}')" 
