@@ -15,6 +15,7 @@ call vundle#end()
 "         <|> PLUGIN CONFIG <|>
 let g:airline#extensions#tabline#enabled=1  " show buffers with tabs
 let g:airline_powerline_fonts=1             " use powerline fonts for statusbar
+let g:ycm_filetype_blacklist={'tex':1}      " don't use ycm for LaTeX
 autocmd VimEnter * NERDTree | wincmd p      " open nerdtree on start and switch buffer to edit file
 autocmd bufenter * if (winnr("$") == 1
             \ && exists("b:NERDTree")
@@ -54,3 +55,4 @@ map /\ :noh                                 " redraw screen without highlighting
 colorscheme onedark                         " use one dark colortheme
 set guifont=DejaVu\ Sans\ Mono
             \\ for\ Powerline               " use powerline font
+
