@@ -1,29 +1,18 @@
-set nocompatible                            " Vundle dependencies
-set rtp+=~/.vim/bundle/Vundle.vim           " set the runtime path to include Vundle and initialize
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'               " The plugin-manager for Vim
-Plugin 'dense-analysis/ale'                 " Asynchronous lint engine
-Plugin 'psf/black'                          " The uncompromising Python code formatter'
-Plugin 'tpope/vim-dispatch'                 " Asynchronous build and test dispatcher
-Plugin 'preservim/nerdtree'                 " A tree explorer plugin for vim
-Plugin 'joshdick/onedark.vim'               " A dark color scheme inspired by Atom's One Dark
-Plugin 'vim-airline/vim-airline'            " Lean & mean status/tabline for vim that's light as air
-Plugin 'rhysd/vim-clang-format'             " Vim plugin for clang-format, a formatter for C, C++...
-Plugin 'ycm-core/YouCompleteMe'             " A code-completion for Vim
-call vundle#end()
+"         <|> MANUAL PACKAGES <|>
+packadd! onedark.vim                        " A dark color scheme inpsired by Atom's One Dark
 
 "         <|> PLUGIN CONFIG <|>
-let g:airline#extensions#tabline#enabled=1  " show buffers with tabs
-let g:airline_powerline_fonts=1             " use powerline fonts for statusbar
-let g:ycm_filetype_blacklist={'tex':1}      " don't use ycm for LaTeX
 autocmd VimEnter * NERDTree | wincmd p      " open nerdtree on start and switch buffer to edit file
 autocmd bufenter * if (winnr("$") == 1
             \ && exists("b:NERDTree")
             \ && b:NERDTree.isTabTree()) 
             \ | q | endif                   " close nerdtree if no file is open
+let g:airline#extensions#tabline#enabled=1  " show buffers with tabs
+let g:airline_powerline_fonts=1             " use powerline fonts for statusbar
+let g:ycm_filetype_blacklist={'tex':1}      " don't use YCM for LaTeX
 
 "         <|> FILE-SPECIFIC <|>
-au Filetype plaintex,tex,markdown setlocal        
+au Filetype tex,markdown setlocal        
     \ textwidth=79                 
     \ spell spelllang=en                    " wrap at 79 characters & use spellchecking
 
