@@ -15,6 +15,7 @@ let g:ycm_filetype_blacklist={'tex':1}      " don't use YCM for LaTeX
 au Filetype tex,markdown setlocal        
     \ textwidth=79                 
     \ spell spelllang=en                    " wrap at 79 characters & use spellchecking
+let g:tex_flavor="latex"                    " set default tex flavor to LaTeX
 
 "         <|> EDITING <|>
 filetype indent on                          " copy indent from current line on <ENTER>
