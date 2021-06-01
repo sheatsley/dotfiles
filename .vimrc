@@ -40,9 +40,9 @@ set incsearch                               " search as characters are entered
 set smartcase                               " ... except when using capitals
 
 "  	      <|> PERSONAL <|>
-command! W write                            " vim should do this by default
-map /\ :noh                                 " redraw screen without highlighting 
+cmap W w                                    " vim should do this by default
 colorscheme onedark                         " use one dark colortheme
+nnoremap <CR> :noh<CR><CR>                  " unset last search pattern via return
 set guifont=DejaVu\ Sans\ Mono
             \\ for\ Powerline               " use powerline font
 
