@@ -1,123 +1,136 @@
-# configuration variables
-BREW="https://raw.githubusercontent.com/Homebrew/install/master/install.sh"
-ITERM=$HOME"/Library/Application\ Support/iTerm2/"
+# os-agnostic configuration variables
 GITHUB=$HOME/"repos"
-GPGCONF="/usr/local/MacGPG2/bin"
 KEYID="D97737F91189673C"
-XCODE="/Library/Preferences/com.apple.dt.Xcode IDELastGMLicenseAgreedTo"
 
-# move to home directory
-echo "Moving to $HOME ..."
-cd $HOME
-
-# install brew if needed
-if ! type brew >/dev/null
+# determine os
+if [ $(uname -s) == "Darwin" ]
 then
-    echo "Installing brew..."
-    /bin/bash -c "$(curl -fsSL $BREW)"
-fi
 
-# install homebrew-bundle, packages, casks and mas apps
-echo "Updating brew packages..."
-brew bundle --verbose --file=.brewbundle
+    # macOS configuration variables
+    BREW="https://raw.githubusercontent.com/Homebrew/install/master/install.sh"
+    ITERM=$HOME"/Library/Application\ Support/iTerm2/"
+    GPGCONF="/usr/local/MacGPG2/bin"
+    XCODE="/Library/Preferences/com.apple.dt.Xcode IDELastGMLicenseAgreedTo"
 
-# install python packages
-echo "Installing python modules..."
-pip3 install -r .pip
-
-# accept xcode license if necessary
-if ! type xcodebuild && defaults read $XCODE >/dev/null
-then
-    echo "Accepting XCode license..."
-    sudo xcodebuild -license accept 
-fi
-
-# add public gpg key to keyring
-if ! gpg -k $KEYID >/dev/null
-then
-    echo "Downloading GPG public key $KEYID ..."
-    gpg --card-edit --command-fd 0 <<< fetch
-fi
-
-# set gpg trust to ultimate
-if ! gpg -k $KEYID | grep "ultimate" >/dev/null
-then
-    echo "Setting $KEYID trust to ultimate..."
-    echo "5\ny\n" | gpg --command-fd 0 --edit-key $KEYID trust
-fi
-
-# convert yadm repo from https to ssh
-if ! yadm remote get-url origin | grep "git@github.com" >/dev/null
-then
-    echo "Changing remote url of yadm repo..."
-    yadm remote set-url origin "git@github.com:$(yadm remote get-url origin | cut -d '/' -f4-)"
-fi
-
-# decrypt yadm files
-if grep "\x00GITCRYPT" .gitrepos >/dev/null
-then
-    echo "Decrypting files, please insert Yubikey..."
-    if ! yadm crypt unlock
-    then
-        echo "Decrypt failed! Exiting..."
-        exit 1
-    fi
-fi
-
-# export env variables for ssh access with gpg
-if ! type gpgconf >/dev/null
-then 
-    echo "Setting env variables for SSH access with GPG..."
-    eval `/usr/libexec/path_helper -s`
-    export GPG_TTY="$(tty)"
-    export SSH_AUTH_SOCK="$($GPGCONF/gpgconf --list-dirs agent-ssh-socket)"
-    $GPGCONF/gpgconf --launch gpg-agent
-fi
-
-# download github repos
-echo "Updating GitHub repos..."
-while IFS="/" read -r OWNER REPO
-do
-    if [ ! -d $GITHUB/$REPO ]
-    then
-        git clone --recurse-submodules git@github.com:$OWNER/$REPO.git $GITHUB/$REPO
-    else
-        git -C $GITHUB/$REPO pull --recurse-submodules
-    fi
-done < .gitrepos
-
-# updating the remaining applications through submodules
-echo "Updating remaining applications:\n-ohmyzsh\n-Vundle.vim\n-black\n-vim-fugitive\n-YouCompleteMe\n-vim-clang-format"
-yadm submodule update --init --recursive
-yadm submodule update --remote
-
-# updating all vim plugins
-echo "Updating vim plugins:\n-black\-n-vim-clang-format\-n-vim-fugitive\n-YouCompleteMe"
-vim +PluginInstall +qall
-
-# install ycm semantic support
-if [ ! -f .vim/bundle/YouCompleteMe/third_party/ycmd/ycm_core.so ]
-then
-    echo "Installing YCM semantic support..."
-    cd .vim/bundle/YouCompleteMe 
-    ./install.py --all
+    # move to home directory
+    echo "macOS detected; moving to $HOME ..."
     cd $HOME
-fi
 
-# configure iTerm2
-if ! defaults read com.googlecode.iterm2 PrefsCustomFolder >/dev/null 2>&1
-then
-    echo "Configuring iTerm2 profiles and wigets..."
-    defaults write com.googlecode.iterm2 PrefsCustomFolder "$HOME/.iterm2"
-    mkdir -p $ITERM/Scripts/AutoLaunch
-    ln -s $GITHUB/iterm-components/*.py $ITERM/Scripts/AutoLaunch
-fi
+    # install brew if needed
+    if ! type brew >/dev/null
+    then
+        echo "Installing brew..."
+        /bin/bash -c "$(curl -fsSL $BREW)"
+    fi
 
-# configure macOS and logout (necessary for some settings to take effect)
-if ! [ $(defaults read com.apple.dock mru-spaces) -eq 0 ]
+    # install homebrew-bundle, packages, casks and mas apps
+    echo "Updating brew packages..."
+    brew bundle --verbose --file=.brewbundle
+
+    # install python packages
+    echo "Installing python modules..."
+    pip3 install -r .pip
+
+    # accept xcode license if necessary
+    if ! type xcodebuild && defaults read $XCODE >/dev/null
+    then
+        echo "Accepting XCode license..."
+        sudo xcodebuild -license accept 
+    fi
+
+    # add public gpg key to keyring
+    if ! gpg -k $KEYID >/dev/null
+    then
+        echo "Downloading GPG public key $KEYID ..."
+        gpg --card-edit --command-fd 0 <<< fetch
+    fi
+
+    # set gpg trust to ultimate
+    if ! gpg -k $KEYID | grep "ultimate" >/dev/null
+    then
+        echo "Setting $KEYID trust to ultimate..."
+        echo "5\ny\n" | gpg --command-fd 0 --edit-key $KEYID trust
+    fi
+
+    # convert yadm repo from https to ssh
+    if ! yadm remote get-url origin | grep "git@github.com" >/dev/null
+    then
+        echo "Changing remote url of yadm repo..."
+        yadm remote set-url origin "git@github.com:$(yadm remote get-url origin | cut -d '/' -f4-)"
+    fi
+
+    # decrypt yadm files
+    if grep "\x00GITCRYPT" .gitrepos >/dev/null
+    then
+        echo "Decrypting files, please insert Yubikey..."
+        if ! yadm crypt unlock
+        then
+            echo "Decrypt failed! Exiting..."
+            exit 1
+        fi
+    fi
+
+    # export env variables for ssh access with gpg
+    if ! type gpgconf >/dev/null
+    then 
+        echo "Setting env variables for SSH access with GPG..."
+        eval `/usr/libexec/path_helper -s`
+        export GPG_TTY="$(tty)"
+        export SSH_AUTH_SOCK="$($GPGCONF/gpgconf --list-dirs agent-ssh-socket)"
+        $GPGCONF/gpgconf --launch gpg-agent
+    fi
+
+    # download github repos
+    echo "Updating GitHub repos..."
+    while IFS="/" read -r OWNER REPO
+    do
+        if [ ! -d $GITHUB/$REPO ]
+        then
+            git clone --recurse-submodules git@github.com:$OWNER/$REPO.git $GITHUB/$REPO
+        else
+            git -C $GITHUB/$REPO pull --recurse-submodules
+        fi
+    done < .gitrepos
+
+    # updating the remaining applications through submodules
+    echo "Updating remaining applications & vim plugins:\n-ohmyzsh\n-onedark.vim\n-YouCompleteMe\n-ale\n-black\n-nerdtree\n-vim-airline\n-vim-clang-format\n-vim-dispatch"
+    yadm submodule update --init --recursive
+    yadm submodule update --remote
+
+    # install ycm semantic support
+    if [ ! -f .vim/pack/plugins/start/YouCompleteMe/third_party/ycmd/ycm_core.cpython-39-darwin.so ]
+    then
+        echo "Installing YCM semantic support..."
+        cd .vim/pack/plugins/start/YouCompleteMe 
+        ./install.py --all
+        cd $HOME
+    fi
+
+    # configure iTerm2
+    if ! defaults read com.googlecode.iterm2 PrefsCustomFolder >/dev/null 2>&1
+    then
+        echo "Configuring iTerm2 profiles and wigets..."
+        defaults write com.googlecode.iterm2 PrefsCustomFolder "$HOME/.iterm2"
+        mkdir -p $ITERM/Scripts/AutoLaunch
+        ln -s $GITHUB/iterm-components/*.py $ITERM/Scripts/AutoLaunch
+    fi
+
+    # configure macOS and logout (necessary for some settings to take effect)
+    if ! [ $(defaults read com.apple.dock mru-spaces) -eq 0 ]
+    then
+        echo "Setting macOS preferences and logging out..."
+        sh .macos
+        osascript -e 'tell app "System Events" to log out'
+    fi
+
+# linux bootstrap 
+elif [ $(uname -s) == "Linux" ]
 then
-    echo "Setting macOS preferences and logging out..."
-    sh .macos
-    osascript -e 'tell app "System Events" to log out'
+    echo "linux detected; moving to $HOME ..."
+    cd $HOME
+
+    # install python packages
+    echo "Installing python modules..."
+    pip3 install -r .pip
 fi
 echo "Bootstrap complete."
