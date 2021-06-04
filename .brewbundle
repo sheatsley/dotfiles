@@ -31,8 +31,6 @@ brew "latexdiff"
 brew "macvim"
 # Mac App Store command-line interface
 brew "mas"
-# Platform built on V8 to build network applications
-brew "node"
 # Open client for Cisco AnyConnect VPN
 brew "openconnect"
 # Outputs current CPU temperature for OSX
@@ -53,8 +51,7 @@ brew "ykpers"
 brew "zsh"
 # A command-line interface thesaurus
 brew "sheatsley/sheatsley/cli-thesaurus"
-# Client for the Box cloud storage service
-cask "box-drive"
+# Screen recorder and video editor
 cask "camtasia"
 # Voice and text chat software
 cask "discord"
@@ -63,6 +60,7 @@ cask "docker"
 # Web browser
 cask "firefox"
 cask "font-dejavu-sans-mono-for-powerline"
+# Back up and sync files with Google Drive
 cask "google-backup-and-sync"
 # Tools to protect your emails and files
 cask "gpg-suite"
@@ -72,6 +70,7 @@ cask "iterm2"
 cask "lastpass"
 # Full TeX Live distribution without GUI applications
 cask "mactex-no-gui"
+# Office suite
 cask "microsoft-office"
 # Open source implementation of Microsoft's .NET Framework
 cask "mono-mdk"
@@ -81,7 +80,7 @@ cask "skype"
 cask "slack"
 # Music streaming service
 cask "spotify"
-# App to run other operating systems without rebooting
+# Create, manage, and run virtual machines
 cask "vmware-fusion"
 cask "webex-meetings"
 # Open-source version of the X.Org X Window System
