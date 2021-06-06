@@ -116,3 +116,4 @@ then
     sh .macos
     osascript -e 'tell app "System Events" to log out'
 fi
+echo "Bootstrap complete"
