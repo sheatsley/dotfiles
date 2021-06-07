@@ -1,5 +1,6 @@
 fonts-powerline
 git
+git-crypt
 libpam-ssh-agent-auth
 python3-pip
 vim
