@@ -2,6 +2,9 @@
     subcommit = "!git add $(git submodule status | awk '{print $2;}') && git commit -m $(git submodule status | awk '{print substr($1,2);}')" 
 [commit]
   gpgSign = True
+[credential "https://git.overleaf.com"]
+    username = sheatsley@psu.edu
+    helper = "!f() { test \"$1\" = get && echo \"password=$(lpass show -p Overleaf)\"; }; f"
 [pull]
 	rebase = true
 [rebase]
