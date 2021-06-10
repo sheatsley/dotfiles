@@ -54,7 +54,7 @@ then
 fi
 
 # decrypt yadm files
-if grep "\x00GITCRYPT" .gitrepos >/dev/null
+if grep -qs "\x00GITCRYPT" .gitrepos
 then
     echo "Decrypting files, please insert Yubikey..."
     if ! yadm crypt unlock
