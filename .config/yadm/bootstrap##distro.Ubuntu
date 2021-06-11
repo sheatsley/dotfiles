@@ -1,14 +1,11 @@
 # linux configuration variables
 GITHUB=$HOME/"repos"
+GPGAGENT="/Users/sheatsley/.gnupg/S.gpg-agent.extra"
 KEYID="D97737F91189673C"
 
 # move to home directory
 echo "Moving to $HOME ..."
 cd $HOME
-
-# add apt repositories
-echo "Adding apt repositories:\n-yubico"
-sudo add-apt-repository ppa:yubico/stable
 
 # install apt packages
 echo "Updating apt repositories & packages..."
@@ -17,14 +14,16 @@ xargs -a .aptpackages sudo apt -y install
 
 # install python packages
 echo "Installing python modules..."
-pip3 install -r .pip
+cat .pip | xargs -n 1 pip3 install
 
 # enable gpg agent forwarding
-if ! grep "StreamLocalBindUnlink yes" >/dev/null
+if ! grep "StreamLocalBindUnlink yes" /etc/ssh/sshd_config >/dev/null
 then
     echo "Configuring OpenSSH to automatically remove stale sockets..."
     echo "StreamLocalBindUnlink yes" | sudo tee -a /etc/ssh/sshd_config >/dev/null
     sudo systemctl restart sshd
+    echo "Exiting is required, due to https://bugzilla.mindrot.org/show_bug.cgi?id=2601"
+    kill -HUP "$PPID"
 fi
 if ! grep "auth sufficient pam_ssh_agent_auth.so file=~/.ssh/authorized_keys" /etc/pam.d/sudo >/dev/null
 then
@@ -53,7 +52,14 @@ fi
 if ! gpg -k $KEYID | grep "ultimate" >/dev/null
 then
     echo "Setting $KEYID trust to ultimate..."
-    echo "5\ny\n" | gpg --command-fd 0 --edit-key $KEYID trust
+    echo -e "5\ny\n" | gpg --command-fd 0 --edit-key $KEYID trust
+fi
+
+# initialize repo with packager-managed yadm
+if ! yadm status >/dev/null
+then
+    echo "Initializing repo with packager-managed yadm..."
+    yadm clone --no-bootstrap -f "https://github.com/sheatsley/dotfiles"
 fi
 
 # convert yadm repo from https to ssh
@@ -64,7 +70,7 @@ then
 fi
 
 # decrypt yadm files
-if grep "\x00GITCRYPT" .gitrepos >/dev/null
+if grep -qsPa "\x00GITCRYPT" .gitrepos
 then
     echo "Decrypting files, please insert Yubikey..."
     if ! yadm crypt unlock
@@ -72,16 +78,6 @@ then
         echo "Decrypt failed! Exiting..."
         exit 1
     fi
-fi
-
-# export env variables for ssh access with gpg
-if ! type gpgconf >/dev/null
-then 
-    echo "Setting env variables for SSH access with GPG..."
-    eval `/usr/libexec/path_helper -s`
-    export GPG_TTY="$(tty)"
-    export SSH_AUTH_SOCK="$($GPGCONF/gpgconf --list-dirs agent-ssh-socket)"
-    $GPGCONF/gpgconf --launch gpg-agent
 fi
 
 # download github repos
@@ -97,7 +93,7 @@ do
 done < .gitrepos
 
 # updating the remaining applications through submodules
-echo "Updating remaining applications & vim plugins:\n-ohmyzsh\n-onedark.vim\n-YouCompleteMe\n-ale\n-black\n-nerdtree\n-vim-airline\n-vim-clang-format\n-vim-dispatch"
+echo -e "Updating remaining applications & vim plugins:\n-ohmyzsh\n-onedark.vim\n-YouCompleteMe\n-ale\n-black\n-nerdtree\n-vim-airline\n-vim-clang-format\n-vim-dispatch"
 yadm submodule update --init --recursive
 yadm submodule update --remote
 
