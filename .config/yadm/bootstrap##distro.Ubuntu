@@ -1,6 +1,5 @@
 # linux configuration variables
 GITHUB=$HOME/"repos"
-GPGAGENT="/Users/sheatsley/.gnupg/S.gpg-agent.extra"
 KEYID="D97737F91189673C"
 
 # move to home directory
@@ -23,7 +22,7 @@ then
     echo "StreamLocalBindUnlink yes" | sudo tee -a /etc/ssh/sshd_config >/dev/null
     sudo systemctl restart sshd
     echo "Exiting is required, due to https://bugzilla.mindrot.org/show_bug.cgi?id=2601"
-    kill -HUP "$PPID"
+    pkill -U $UID sshd 
 fi
 if ! grep "auth sufficient pam_ssh_agent_auth.so file=~/.ssh/authorized_keys" /etc/pam.d/sudo >/dev/null
 then
@@ -73,6 +72,9 @@ fi
 if grep -qsPa "\x00GITCRYPT" .gitrepos
 then
     echo "Decrypting files, please insert Yubikey..."
+
+    # sometimes the yubikey can "fall asleep"; this will wake it
+    gpg --card-status >/dev/null 2>&1
     if ! yadm crypt unlock
     then
         echo "Decrypt failed! Exiting..."
@@ -96,6 +98,13 @@ done < .gitrepos
 echo -e "Updating remaining applications & vim plugins:\n-ohmyzsh\n-onedark.vim\n-YouCompleteMe\n-ale\n-black\n-nerdtree\n-vim-airline\n-vim-clang-format\n-vim-dispatch"
 yadm submodule update --init --recursive
 yadm submodule update --remote
+
+# change default shell to zsh
+if ! grep "/home/sheatsley:/usr/bin/zsh" /etc/passwd >/dev/null
+then
+    echo "Changing default shell to zsh..."
+    chsh -s /bin/zsh
+fi
 
 # install ycm semantic support
 if [ ! -f .vim/pack/plugins/start/YouCompleteMe/third_party/ycmd/ycm_core.cpython-39-darwin.so ]
