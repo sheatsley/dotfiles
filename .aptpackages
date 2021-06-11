@@ -1,8 +1,12 @@
+cmake
+default-jre
 fonts-powerline
 git
 git-crypt
+golang
 lastpass-cli
 libpam-ssh-agent-auth
+npm
 python3-pip
 vim
 yadm
