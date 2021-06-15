@@ -10,6 +10,8 @@ autocmd bufenter * if (winnr("$") == 1
 let g:airline#extensions#tabline#enabled=1  " show buffers with tabs
 let g:airline_powerline_fonts=1             " use powerline fonts for statusbar
 let g:ycm_filetype_blacklist={'tex':1}      " don't use YCM for LaTeX
+nmap <silent> <C-n> :ALENextWrap<cr>        " move to next ALE warning or error
+nmap <silent> <C-p> :ALEPreviousWrap<cr>    " move to previous ALE warning or error
 
 "         <|> FILE-SPECIFIC <|>
 au Filetype tex,markdown setlocal        
@@ -40,7 +42,8 @@ set incsearch                               " search as characters are entered
 set smartcase                               " ... except when using capitals
 
 "  	      <|> PERSONAL <|>
-cmap W w                                    " vim should do this by default
+"nnoremap :W :w                              " vim should do this by default
+:command W w
 colorscheme onedark                         " use one dark colortheme
 nnoremap <CR> :noh<CR><CR>                  " unset last search pattern via return
 set guifont=DejaVu\ Sans\ Mono
