@@ -1,5 +1,6 @@
 [alias]
-    subcommit = "!git add $(git submodule status | awk '{print $2;}') && git commit -m $(git submodule status | awk '{print substr($1,2);}')" 
+    subcommit = "!if [ -d .git ]; then CMD=git; else CMD=yadm; fi; $CMD submodule status | while read REPO; do if [ ${REPO:0:1} = + ]; then $CMD add $(awk '{print $2;}' <<< $REPO); $CMD commit -m $(awk '{print substr($1,2);}' <<< $REPO); fi; done"
+    subupdate = "!if [ -d .git ]; then CMD=git; else CMD=yadm; fi; $CMD submodule update --remote"
 [commit]
   gpgSign = True
 [credential "https://git.overleaf.com"]
