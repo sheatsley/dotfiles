@@ -1,27 +1,36 @@
 [submodule ".oh-my-zsh"]
+    branch = master
 	path = .oh-my-zsh
 	url = https://github.com/ohmyzsh/ohmyzsh
 [submodule ".vim/pack/plugins/start/YouCompleteMe"]
+    branch = master
 	path = .vim/pack/plugins/start/YouCompleteMe
 	url = https://github.com/ycm-core/YouCompleteMe.git
 [submodule ".vim/pack/plugins/start/ale"]
+    branch = master
 	path = .vim/pack/plugins/start/ale
 	url = https://github.com/dense-analysis/ale.git
 [submodule ".vim/pack/plugins/start/black"]
+    branch = main 
 	path = .vim/pack/plugins/start/black
 	url = https://github.com/psf/black.git
 [submodule ".vim/pack/plugins/start/nerdtree"]
+    branch = master
 	path = .vim/pack/plugins/start/nerdtree
 	url = https://github.com/preservim/nerdtree.git
 [submodule ".vim/pack/plugins/start/vim-airline"]
+    branch = master
 	path = .vim/pack/plugins/start/vim-airline
 	url = https://github.com/vim-airline/vim-airline.git
 [submodule ".vim/pack/plugins/start/vim-clang-format"]
+    branch = master
 	path = .vim/pack/plugins/start/vim-clang-format
 	url = https://github.com/rhysd/vim-clang-format.git
 [submodule ".vim/pack/plugins/start/vim-dispatch"]
+    branch = master
 	path = .vim/pack/plugins/start/vim-dispatch
 	url = https://github.com/tpope/vim-dispatch.git
 [submodule ".vim/pack/plugins/opt/onedark.vim"]
+    branch = master
 	path = .vim/pack/plugins/opt/onedark.vim
 	url = https://github.com/joshdick/onedark.vim.git
