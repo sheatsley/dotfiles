@@ -9,6 +9,7 @@ numpy
 pandas
 pipupgrade
 tensorflow
+tensorflow-datasets
 torch
 torchvision
 scikit-learn
