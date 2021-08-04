@@ -1,4 +1,5 @@
 bs4
+flake8
 iterm2
 liac-arff
 matplotlib
@@ -8,7 +9,6 @@ notebook
 numpy
 pandas
 pipupgrade
-pylint
 tensorflow
 tensorflow-datasets
 torch
