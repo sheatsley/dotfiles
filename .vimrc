@@ -3,12 +3,17 @@ packadd! onedark.vim                        " A dark color scheme inpsired by At
 
 "         <|> PLUGIN CONFIG <|>
 autocmd VimEnter * NERDTree | wincmd p      " open nerdtree on start and switch buffer to edit file
+autocmd BufWritePre *.py execute ':Black'|  " run black on save
 autocmd bufenter * if (winnr("$") == 1
             \ && exists("b:NERDTree")
             \ && b:NERDTree.isTabTree()) 
             \ | q | endif                   " close nerdtree if no file is open
 let g:airline#extensions#tabline#enabled=1  " show buffers with tabs
 let g:airline_powerline_fonts=1             " use powerline fonts for statusbar
+let g:ale_fix_on_save=1                     " let ALE apply fixes on save
+let g:ale_fixers={
+    \ '*':['remove_trailing_lines',
+    \      'trim_whitespace']}              " remove extra white spaces and lines
 let g:ycm_filetype_blacklist={'tex':1}      " don't use YCM for LaTeX
 nmap <silent> <C-n> :ALENextWrap<cr>        " move to next ALE warning or error
 nmap <silent> <C-p> :ALEPreviousWrap<cr>    " move to previous ALE warning or error
