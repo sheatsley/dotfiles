@@ -1,6 +1,7 @@
 bs4
 flake8
 iterm2
+kaleido
 liac-arff
 matplotlib
 more-itertools
@@ -9,6 +10,7 @@ notebook
 numpy
 pandas
 pipupgrade
+plotly
 tensorflow
 tensorflow-datasets
 torch
