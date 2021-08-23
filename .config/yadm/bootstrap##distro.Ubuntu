@@ -9,7 +9,7 @@ cd $HOME
 # install apt packages
 echo "Updating apt repositories & packages..."
 sudo apt update && sudo apt -y upgrade
-xargs -a .aptpackages sudo apt -y install 
+xargs -a .aptpackages sudo apt -y install
 
 # install python packages
 echo "Installing python modules..."
@@ -22,7 +22,7 @@ then
     echo "StreamLocalBindUnlink yes" | sudo tee -a /etc/ssh/sshd_config >/dev/null
     sudo systemctl restart sshd
     echo "Exiting is required, due to https://bugzilla.mindrot.org/show_bug.cgi?id=2601"
-    pkill -U $UID sshd 
+    pkill -U $UID sshd
 fi
 if ! grep "auth sufficient pam_ssh_agent_auth.so file=~/.ssh/authorized_keys" /etc/pam.d/sudo >/dev/null
 then
@@ -31,7 +31,7 @@ then
 fi
 if ! printenv | grep SSH_AUTH_SOCK >/dev/null
 then
-    echo "Exporting ssh-agent keyring environment variable..."    
+    echo "Exporting ssh-agent keyring environment variable..."
     export SSH_AUTH_SOCK="/run/user/$UID/gnupg/S.gpg-agent.ssh"
 fi
 if ! sudo grep "Defaults        env_keep += SSH_AUTH_SOCK" /etc/sudoers
@@ -100,7 +100,7 @@ yadm submodule update --init --recursive
 yadm submodule update --remote
 
 # change default shell to zsh
-if ! grep "/home/sheatsley:/usr/bin/zsh" /etc/passwd >/dev/null
+if ! grep $HOME":/usr/bin/zsh" /etc/passwd >/dev/null
 then
     echo "Changing default shell to zsh..."
     chsh -s /bin/zsh
@@ -110,7 +110,7 @@ fi
 if [ ! -f .vim/pack/plugins/start/YouCompleteMe/third_party/ycmd/ycm_core.cpython-39-darwin.so ]
 then
     echo "Installing YCM semantic support..."
-    cd .vim/pack/plugins/start/YouCompleteMe 
+    cd .vim/pack/plugins/start/YouCompleteMe
     ./install.py --all
     cd $HOME
 fi
