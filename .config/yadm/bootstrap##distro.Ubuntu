@@ -107,7 +107,7 @@ then
 fi
 
 # initialize rclone mounts
-if ! grep "@reboot rclone mount onedrive" crontab -l
+if ! crontab -l | grep "@reboot rclone mount onedrive" >/dev/null
 then
     echo "Mounting rclone drives and configuring cron..."
     mkdir $HOME/OneDrive\ -\ The\ Pennsylvania\ State\ University
