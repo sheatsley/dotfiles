@@ -115,9 +115,6 @@ then
     echo "@reboot rclone mount onedrive: ~/OneDrive\ -\ The\ Pennsylvania\ State\ University --vfs-cache-mode writes" | crontab -
 fi
 
-rclone mount onedrive: ~/OneDrive\ -\ The\ Pennsylvania\ State\ University --vfs-cache-mode writes
-
-
 # install ycm semantic support
 if [ ! -f .vim/pack/plugins/start/YouCompleteMe/third_party/ycmd/ycm_core.cpython-39-darwin.so ]
 then
