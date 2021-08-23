@@ -39,6 +39,8 @@ brew "osx-cpu-temp"
 brew "p7zip"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
+# Rsync for cloud storage
+brew "rclone"
 # Safe, concurrent, practical language
 brew "rust"
 # Yet Another Dotfiles Manager
