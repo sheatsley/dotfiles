@@ -112,7 +112,7 @@ then
     echo "Mounting rclone drives and configuring cron..."
     mkdir $HOME/OneDrive\ -\ The\ Pennsylvania\ State\ University
     rclone mount onedrive: $HOME/OneDrive\ -\ The\ Pennsylvania\ State\ University --vfs-cache-mode writes &
-    echo "@reboot rclone mount onedrive: ~/OneDrive\ -\ The\ Pennsylvania\ State\ University --vfs-cache-mode writes" | crontab -
+    echo "@reboot sleep 60 && rclone mount onedrive: ~/OneDrive\ -\ The\ Pennsylvania\ State\ University --vfs-cache-mode writes" | crontab -
 fi
 
 # install ycm semantic support
