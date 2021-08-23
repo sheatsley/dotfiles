@@ -31,6 +31,6 @@
 	path = .vim/pack/plugins/start/vim-dispatch
 	url = https://github.com/tpope/vim-dispatch.git
 [submodule ".vim/pack/plugins/opt/onedark.vim"]
-    branch = master
+    branch = main 
 	path = .vim/pack/plugins/opt/onedark.vim
 	url = https://github.com/joshdick/onedark.vim.git
