@@ -9,6 +9,7 @@ libpam-ssh-agent-auth
 npm
 python3-pip
 rclone
+screen
 vim
 yadm
 zsh
