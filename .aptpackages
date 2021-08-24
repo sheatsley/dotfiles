@@ -4,10 +4,12 @@ fonts-powerline
 git
 git-crypt
 golang
+htop
 lastpass-cli
 libpam-ssh-agent-auth
 npm
 python3-pip
+python3-venv
 rclone
 screen
 vim
