@@ -13,7 +13,7 @@ xargs -a .aptpackages sudo apt -y install
 
 # install python packages
 echo "Installing python modules..."
-cat .pip | xargs -n 1 pip3 install
+cat .pip | xargs -n 1 pip3 install --upgrade
 
 # enable gpg agent forwarding
 if ! grep "StreamLocalBindUnlink yes" /etc/ssh/sshd_config >/dev/null

@@ -23,13 +23,13 @@ brew bundle --verbose --file=.brewbundle
 
 # install python packages
 echo "Installing python modules..."
-pip3 install -r .pip
+pip3 install --upgrade -r .pip
 
 # accept xcode license if necessary
 if ! type xcodebuild && defaults read $XCODE >/dev/null
 then
     echo "Accepting XCode license..."
-    sudo xcodebuild -license accept 
+    sudo xcodebuild -license accept
 fi
 
 # add public gpg key to keyring
@@ -66,7 +66,7 @@ fi
 
 # export env variables for ssh access with gpg
 if ! type gpgconf >/dev/null
-then 
+then
     echo "Setting env variables for SSH access with GPG..."
     eval `/usr/libexec/path_helper -s`
     export GPG_TTY="$(tty)"
@@ -95,7 +95,7 @@ yadm submodule update --remote
 if [ ! -f .vim/pack/plugins/start/YouCompleteMe/third_party/ycmd/ycm_core.cpython-39-darwin.so ]
 then
     echo "Installing YCM semantic support..."
-    cd .vim/pack/plugins/start/YouCompleteMe 
+    cd .vim/pack/plugins/start/YouCompleteMe
     ./install.py --all
     cd $HOME
 fi
