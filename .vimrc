@@ -37,6 +37,7 @@ set tabstop=4                               " number of visual spaces per <TAB> 
 
 "  	      <|> UI CONFIG <|>
 set number                                  " show line numbers
+set termguicolors                           " enable 24-bit color support for terminal vim
 set wildmenu                                " visual autocomplete for command menu
 syntax on                                   " sets color of text based on category of terms
 
