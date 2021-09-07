@@ -62,8 +62,8 @@ cask "docker"
 # Web browser
 cask "firefox"
 cask "font-dejavu-sans-mono-for-powerline"
-# Back up and sync files with Google Drive
-cask "google-backup-and-sync"
+# Client for the Google Drive storage service
+cask "google-drive"
 # Tools to protect your emails and files
 cask "gpg-suite"
 # Terminal emulator as alternative to Apple's Terminal app
