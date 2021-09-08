@@ -20,5 +20,8 @@ plugins=(git)
 # Source oh-my-zsh to enable settings above
 source $ZSH/oh-my-zsh.sh
 
+# Add local binaries to path
+export PATH=$HOME"/.local/bin:"$PATH
+
 # Enable yubikey for SSH (through GPG Agent Forwarding)
 export SSH_AUTH_SOCK="/run/user/$UID/gnupg/S.gpg-agent.ssh"
