@@ -37,6 +37,8 @@ brew "openconnect"
 brew "osx-cpu-temp"
 # 7-Zip (high compression file archiver) implementation
 brew "p7zip"
+# Port of pdftk in java
+brew "pdftk-java"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
 # Rsync for cloud storage
