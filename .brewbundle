@@ -41,8 +41,6 @@ brew "p7zip"
 brew "pdftk-java"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
-# Rsync for cloud storage
-brew "rclone"
 # Safe, concurrent, practical language
 brew "rust"
 # Yet Another Dotfiles Manager
@@ -76,6 +74,8 @@ cask "lastpass"
 cask "mactex-no-gui"
 # Office suite
 cask "microsoft-office"
+# Meet, chat, call, and collaborate in just one place
+cask "microsoft-teams"
 # Open source implementation of Microsoft's .NET Framework
 cask "mono-mdk"
 # Video chat, voice call and instant messaging application
