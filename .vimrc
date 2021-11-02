@@ -29,6 +29,7 @@ filetype indent on                          " copy indent from current line on <
 set clipboard=unnamed                       " copy/paste from the system clipboard
 set expandtab                               " replace <TAB> with <SPACE>
 set mouse=a                                 " enable mouse scrolling
+set nojoinspaces                            " do not insert 2 spaces after a period
 set nostartofline                           " cursor maintains column position across lines
 set scrolloff=35                            " always keep <scrolloff> lines above & below the cursor
 set shiftwidth=4                            " text is indented <shiftwidth> columns w/ '<<' & '>>'
