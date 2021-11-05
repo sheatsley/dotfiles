@@ -2,4 +2,3 @@
 .gitrepos filter=git-crypt diff=git-crypt
 .ssh/** filter=git-crypt diff=git-crypt
 .zsh_history filter=git-crypt diff=git-crypt
-.zsh_history merge=union
