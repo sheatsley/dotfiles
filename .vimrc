@@ -49,8 +49,7 @@ set incsearch                               " search as characters are entered
 set smartcase                               " ... except when using capitals
 
 "  	      <|> PERSONAL <|>
-"nnoremap :W :w                              " vim should do this by default
-:command W w
+:command W w                                " vim should do this by default
 colorscheme onedark                         " use one dark colortheme
 nnoremap <CR> :noh<CR><CR>                  " unset last search pattern via return
 set guifont=DejaVu\ Sans\ Mono
