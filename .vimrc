@@ -11,7 +11,8 @@ autocmd bufenter * if (winnr("$") == 1
 let g:airline#extensions#tabline#enabled=1  " show buffers with tabs
 let g:airline_powerline_fonts=1             " use powerline fonts for statusbar
 let g:ale_python_flake8_options=
-    \ '--max-line-length=88'                " set flake8 max line length used by black (88)
+    \ '--max-line-length=88
+    \  --extend-ignore=E203'                " set flake8 to respect black defaults
 let g:ale_fix_on_save=1                     " let ALE apply fixes on save
 let g:ale_fixers={
     \ '*':['remove_trailing_lines',
