@@ -6,10 +6,12 @@ autocmd VimEnter * NERDTree | wincmd p      " open nerdtree on start and switch 
 autocmd BufWritePre *.py execute ':Black'|  " run black on save
 autocmd bufenter * if (winnr("$") == 1
             \ && exists("b:NERDTree")
-            \ && b:NERDTree.isTabTree()) 
+            \ && b:NERDTree.isTabTree())
             \ | q | endif                   " close nerdtree if no file is open
 let g:airline#extensions#tabline#enabled=1  " show buffers with tabs
 let g:airline_powerline_fonts=1             " use powerline fonts for statusbar
+let g:ale_python_flake8_options=
+    \ '--max-line-length=88'                " set flake8 max line length used by black (88)
 let g:ale_fix_on_save=1                     " let ALE apply fixes on save
 let g:ale_fixers={
     \ '*':['remove_trailing_lines',
@@ -19,8 +21,8 @@ nmap <silent> <C-n> :ALENextWrap<cr>        " move to next ALE warning or error
 nmap <silent> <C-p> :ALEPreviousWrap<cr>    " move to previous ALE warning or error
 
 "         <|> FILE-SPECIFIC <|>
-au Filetype tex,markdown setlocal        
-    \ textwidth=79                 
+au Filetype tex,markdown setlocal
+    \ textwidth=79
     \ spell spelllang=en                    " wrap at 79 characters & use spellchecking
 let g:tex_flavor="latex"                    " set default tex flavor to LaTeX
 
@@ -54,4 +56,3 @@ colorscheme onedark                         " use one dark colortheme
 nnoremap <CR> :noh<CR><CR>                  " unset last search pattern via return
 set guifont=DejaVu\ Sans\ Mono
             \\ for\ Powerline               " use powerline font
-
