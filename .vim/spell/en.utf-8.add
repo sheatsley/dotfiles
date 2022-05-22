@@ -78,3 +78,8 @@ mistakingly
 IRB
 subsample
 backpropagation
+logit
+logits
+hyperparameter
+hyperparameters
+softmax
