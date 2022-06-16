@@ -3,7 +3,6 @@ packadd! onedark.vim                        " A dark color scheme inpsired by At
 
 "         <|> PLUGIN CONFIG <|>
 autocmd VimEnter * NERDTree | wincmd p      " open nerdtree on start and switch buffer to edit file
-autocmd BufWritePre *.py execute ':Black'|  " run black on save
 autocmd bufenter * if (winnr("$") == 1
             \ && exists("b:NERDTree")
             \ && b:NERDTree.isTabTree())
@@ -16,7 +15,9 @@ let g:ale_python_flake8_options=
 let g:ale_fix_on_save=1                     " let ALE apply fixes on save
 let g:ale_fixers={
     \ '*':['remove_trailing_lines',
-    \      'trim_whitespace']}              " remove extra white spaces and lines
+    \      'trim_whitespace'],
+    \ 'javascript': ['prettier'],
+    \ 'python': ['black']}                  " remove extra white spaces, lines, and set fixers
 let g:ycm_filetype_blacklist={'tex':1}      " don't use YCM for LaTeX
 nmap <silent> <C-n> :ALENextWrap<cr>        " move to next ALE warning or error
 nmap <silent> <C-p> :ALEPreviousWrap<cr>    " move to previous ALE warning or error
