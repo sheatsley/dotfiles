@@ -31,6 +31,8 @@ brew "latexdiff"
 brew "macvim"
 # Mac App Store command-line interface
 brew "mas"
+# Platform built on V8 to build network applications
+brew "node"
 # Open client for Cisco AnyConnect VPN
 brew "openconnect"
 # Outputs current CPU temperature for OSX
@@ -84,8 +86,6 @@ cask "slack"
 cask "spotify"
 # Data visualization software
 cask "tableau"
-# Open-source code editor
-cask "visual-studio-code"
 # Create, manage, and run virtual machines
 cask "vmware-fusion"
 # Open-source version of the X.Org X Window System
@@ -97,7 +97,5 @@ cask "zoom"
 # Collect, organize, cite, and share research sources
 cask "zotero"
 mas "Adblock Plus", id: 1432731683
-mas "Apple Configurator 2", id: 1037126344
-mas "Honey", id: 1472777122
 mas "Notability", id: 360593530
 mas "Xcode", id: 497799835
