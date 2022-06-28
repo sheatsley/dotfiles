@@ -64,6 +64,7 @@ cask "docker"
 # Web browser
 cask "firefox"
 cask "font-dejavu-sans-mono-for-powerline"
+cask "font-dejavu-sans-mono-nerd-font"
 # Tools to protect your emails and files
 cask "gpg-suite"
 # Terminal emulator as alternative to Apple's Terminal app
