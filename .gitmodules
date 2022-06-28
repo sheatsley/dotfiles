@@ -27,6 +27,10 @@
 	path = .vim/pack/plugins/start/vim-dispatch
 	url = https://github.com/tpope/vim-dispatch.git
 [submodule ".vim/pack/plugins/opt/onedark.vim"]
-    branch = main 
+    branch = main
 	path = .vim/pack/plugins/opt/onedark.vim
 	url = https://github.com/joshdick/onedark.vim.git
+[submodule ".vim/pack/plugins/start/vim-devicons"]
+    branch = master
+	path = .vim/pack/plugins/start/vim-devicons
+	url = https://github.com/ryanoasis/vim-devicons.git
