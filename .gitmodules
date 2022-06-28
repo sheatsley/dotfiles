@@ -34,3 +34,7 @@
     branch = master
 	path = .vim/pack/plugins/start/vim-devicons
 	url = https://github.com/ryanoasis/vim-devicons.git
+[submodule ".vim/pack/plugins/start/vim-nerdtree-syntax-highlight"]
+    branch = master
+	path = .vim/pack/plugins/start/vim-nerdtree-syntax-highlight
+	url = https://github.com/tiagofumo/vim-nerdtree-syntax-highlight.git
