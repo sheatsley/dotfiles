@@ -1,4 +1,5 @@
 bs4
+black
 dill
 flake8
 iterm2
