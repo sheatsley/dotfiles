@@ -10,10 +10,6 @@
     branch = master
 	path = .vim/pack/plugins/start/ale
 	url = https://github.com/dense-analysis/ale.git
-[submodule ".vim/pack/plugins/start/black"]
-    branch = main 
-	path = .vim/pack/plugins/start/black
-	url = https://github.com/psf/black.git
 [submodule ".vim/pack/plugins/start/nerdtree"]
     branch = master
 	path = .vim/pack/plugins/start/nerdtree
