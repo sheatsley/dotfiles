@@ -56,5 +56,4 @@ set smartcase                               " ... except when using capitals
 :command W w                                " vim should do this by default
 colorscheme onedark                         " use one dark colortheme
 nnoremap <CR> :noh<CR><CR>                  " unset last search pattern via return
-set guifont=DejaVu\ Sans\ Mono
-            \\ for\ Powerline               " use powerline font
+set guifont=DejaVuSansMono_Nerd_Font_Mono   " use dejavu powerline nerd font
