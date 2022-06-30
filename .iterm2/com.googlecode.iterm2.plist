@@ -1010,7 +1010,7 @@
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>DejaVuSansMonoPowerline 11</string>
+			<string>DejaVuSansMonoNerdFontCompleteM-Book 11</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<false/>
 			<key>Option Key Sends</key>
@@ -1995,7 +1995,7 @@
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>DejaVuSansMonoPowerline 11</string>
+			<string>DejaVuSansMonoNerdFontCompleteM-Book 11</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<false/>
 			<key>Option Key Sends</key>
@@ -2953,7 +2953,7 @@
 			<key>Non-ASCII Anti Aliased</key>
 			<true/>
 			<key>Normal Font</key>
-			<string>DejaVuSansMonoPowerline 11</string>
+			<string>DejaVuSansMonoNerdFontCompleteM-Book 11</string>
 			<key>Only The Default BG Color Uses Transparency</key>
 			<false/>
 			<key>Option Key Sends</key>
