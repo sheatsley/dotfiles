@@ -38,3 +38,6 @@
     branch = master
 	path = .vim/pack/plugins/start/vim-nerdtree-syntax-highlight
 	url = https://github.com/tiagofumo/vim-nerdtree-syntax-highlight.git
+[submodule ".vim/pack/plugins/start/vim-fugitive"]
+	path = .vim/pack/plugins/start/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive.git
