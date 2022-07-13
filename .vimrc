@@ -19,8 +19,8 @@ let g:ale_fixers={
     \ 'javascript': ['prettier'],
     \ 'python': ['black']}                  " remove extra white spaces, lines, and set fixers
 let g:ycm_filetype_blacklist={'tex':1}      " don't use YCM for LaTeX
-nmap <silent> <C-n> :ALENextWrap<cr>        " move to next ALE warning or error
-nmap <silent> <C-p> :ALEPreviousWrap<cr>    " move to previous ALE warning or error
+nmap <silent> <C-n> :ALENextWrap<CR>|       " move to next ALE warning or error
+nmap <silent> <C-p> :ALEPreviousWrap<CR>|   " move to previous ALE warning or error
 
 "         <|> FILE-SPECIFIC <|>
 au Filetype tex,markdown setlocal
@@ -55,5 +55,5 @@ set smartcase                               " ... except when using capitals
 "  	      <|> PERSONAL <|>
 :command W w                                " vim should do this by default
 colorscheme onedark                         " use one dark colortheme
-nnoremap <CR> :noh<CR><CR>                  " unset last search pattern via return
+nnoremap <silent> <CR> :nohlsearch<CR><CR>| " unset last search pattern via return
 set guifont=DejaVuSansMono_Nerd_Font_Mono   " use dejavu powerline nerd font
