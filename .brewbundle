@@ -27,8 +27,6 @@ brew "hugo"
 brew "lastpass-cli"
 # Compare and mark up LaTeX file differences
 brew "latexdiff"
-# GUI for vim, made for macOS
-brew "macvim"
 # Mac App Store command-line interface
 brew "mas"
 # Platform built on V8 to build network applications
@@ -73,6 +71,8 @@ cask "iterm2"
 cask "lastpass"
 # Full TeX Live distribution without GUI applications
 cask "mactex-no-gui"
+# Text editor
+cask "macvim"
 # Office suite
 cask "microsoft-office"
 # Meet, chat, call, and collaborate in just one place
