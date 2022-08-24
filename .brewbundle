@@ -85,6 +85,8 @@ cask "microsoft-teams"
 cask "mono-mdk"
 # Lightpack and Prismatik open repository
 cask "psieg-prismatik"
+# Instant messaging application focusing on security
+cask "signal"
 # Video chat, voice call and instant messaging application
 cask "skype"
 # Team communication and collaboration software
