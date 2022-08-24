@@ -1,5 +1,5 @@
 # macOS configuration variables
-BREW="https://raw.githubusercontent.com/Homebrew/install/master/install.sh"
+BREW="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 GITHUB=$HOME/"repos"
 GPGCONF="/usr/local/MacGPG2/bin"
 ITERM=$HOME"/Library/Application\ Support/iTerm2/"
