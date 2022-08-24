@@ -4,7 +4,7 @@ tap "homebrew/cask-drivers"
 tap "homebrew/cask-fonts"
 tap "homebrew/core"
 tap "homebrew/services"
-tap "sheatsley/sheatsley"
+tap "sheatsley/formulae"
 # Official Amazon AWS command-line interface
 brew "awscli"
 # Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
@@ -52,13 +52,17 @@ brew "ykpers"
 # UNIX shell (command interpreter)
 brew "zsh"
 # A command-line interface thesaurus
-brew "sheatsley/sheatsley/cli-thesaurus"
+brew "sheatsley/formulae/cli-thesaurus"
+# Electronics prototyping platform
+cask "arduino"
 # Screen recorder and video editor
 cask "camtasia"
 # Voice and text chat software
 cask "discord"
 # App to build and share containerized applications and microservices
 cask "docker"
+# Turn your phone into a webcam
+cask "epoccam"
 # Web browser
 cask "firefox"
 cask "font-dejavu-sans-mono-for-powerline"
@@ -79,6 +83,8 @@ cask "microsoft-office"
 cask "microsoft-teams"
 # Open source implementation of Microsoft's .NET Framework
 cask "mono-mdk"
+# Lightpack and Prismatik open repository
+cask "psieg-prismatik"
 # Video chat, voice call and instant messaging application
 cask "skype"
 # Team communication and collaboration software
