@@ -10,6 +10,12 @@ XCODE="/Library/Preferences/com.apple.dt.Xcode IDELastGMLicenseAgreedTo"
 echo "Moving to $HOME ..."
 cd $HOME
 
+# set computer name
+echo "Enter computer name:"
+read NAME
+echo "Setting computer name to $NAME..."
+sudo scutil --set ComputerName $NAME
+
 # install brew if needed
 if ! type brew >/dev/null
 then
