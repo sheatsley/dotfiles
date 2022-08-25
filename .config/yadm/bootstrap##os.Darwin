@@ -1,8 +1,8 @@
 # macOS configuration variables
 BREW="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-GITHUB=$HOME/"repos"
+GITHUB=$HOME"/repos"
 GPGCONF="/usr/local/MacGPG2/bin"
-ITERM=$HOME"/Library/Application\ Support/iTerm2/"
+ITERM=$HOME"/Library/Application Support/iTerm2"
 KEYID="D97737F91189673C"
 XCODE="/Library/Preferences/com.apple.dt.Xcode IDELastGMLicenseAgreedTo"
 
@@ -26,7 +26,7 @@ echo "Installing python modules..."
 pip3 install --upgrade -r .pip
 
 # accept xcode license if necessary
-if ! type xcodebuild && defaults read $XCODE >/dev/null
+if defaults read $XCODE >/dev/null
 then
     echo "Accepting XCode license..."
     sudo xcodebuild -license accept
@@ -96,7 +96,7 @@ if [ ! -f .vim/pack/plugins/start/YouCompleteMe/third_party/ycmd/ycm_core.cpytho
 then
     echo "Installing YCM semantic support..."
     cd .vim/pack/plugins/start/YouCompleteMe
-    ./install.py --all
+    python3 install.py --all
     cd $HOME
 fi
 
@@ -105,12 +105,20 @@ if ! defaults read com.googlecode.iterm2 PrefsCustomFolder >/dev/null 2>&1
 then
     echo "Configuring iTerm2 profiles and wigets..."
     defaults write com.googlecode.iterm2 PrefsCustomFolder "$HOME/.iterm2"
+    defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -int 1
     mkdir -p $ITERM/Scripts/AutoLaunch
     ln -s $GITHUB/iterm-components/*.py $ITERM/Scripts/AutoLaunch
 fi
 
+# enable night shift via nightlight
+if [ $(nightlight schedule) == "off" ]
+then
+    echo "Enabling night shift from sunset to sunrise..."
+    nightlight schedule start
+fi
+
 # configure macOS and logout (necessary for some settings to take effect)
-if ! [ $(defaults read com.apple.dock mru-spaces) -eq 0 ]
+if ! defaults read com.apple.dock mru-spaces >/dev/null
 then
     echo "Setting macOS preferences and logging out..."
     sh .macos
