@@ -18,7 +18,7 @@ defaults write com.apple.dock show-recents -int 0                               
 defaults write com.apple.dock tilesize -int 31                                        # set dock icons to 31 pixels
 defaults write com.apple.dock workspaces-auto-swoosh -int 0                           # disable auto space switching
 defaults write com.apple.finder FXEnableExtensionChangeWarning -int 0                 # disable file extension change warning
-defaults write com.apple.finder FXPreferredViewSTyle "clmv"                           # set defaultr view style in finder to column view
+defaults write com.apple.finder FXPreferredViewStyle "clmv"                           # set defaultr view style in finder to column view
 defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -int 0                # do not show external drives on desktop
 defaults write com.apple.finder ShowPathbar -int 1                                    # show path in finder
 defaults write com.apple.menuextra.clock DateFormat "EEE MMM d  h:mm a"               # show the day, month, date and time (am/pm) in the taskbar
@@ -29,6 +29,7 @@ defaults write com.apple.Safari ShowFullURLInSmartSearchField -int 1            
 defaults write com.apple.Safari "WebKitPreferences.developerExtrasEnabled" -int 1     " enable inspector in safari
 defaults write com.apple.screensaver askForPassword -int 1                            # ask for password after sleep or screensaver...
 defaults write com.apple.screensaver askForPasswordDelay -int 0                       # ... immediately
+defaults write com.apple.screensaver idleTime -int 300                                # display screen saver after five minutes
 defaults write com.apple.screensaver tokenRemovalAction -int 1                        # lock screen when login token is removed
 defaults write com.apple.sharingd DiscoverableMode "off"                              # disable airplay discovery
 defaults write com.apple.SoftwareUpdate AutomaticCheckEnabled -int 1                  # automatically update mas apps
