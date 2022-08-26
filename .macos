@@ -26,7 +26,7 @@ defaults write com.apple.Safari AutoFillPasswords -int 0                        
 defaults write com.apple.Safari HomePage "about:blank"                                # set safari homepage to about:blank
 defaults write com.apple.Safari IncludeDevelopMenu -int 1                             # include developer menu in safari
 defaults write com.apple.Safari ShowFullURLInSmartSearchField -int 1                  # show full url in safari address bar
-defaults write com.apple.Safari "WebKitPreferences.developerExtrasEnabled" -int 1     " enable inspector in safari
+defaults write com.apple.Safari "WebKitPreferences.developerExtrasEnabled" -int 1     # enable inspector in safari
 defaults write com.apple.screensaver askForPassword -int 1                            # ask for password after sleep or screensaver...
 defaults write com.apple.screensaver askForPasswordDelay -int 0                       # ... immediately
 defaults write com.apple.screensaver idleTime -int 300                                # display screen saver after five minutes
