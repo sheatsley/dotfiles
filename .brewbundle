@@ -5,6 +5,7 @@ tap "homebrew/cask-fonts"
 tap "homebrew/core"
 tap "homebrew/services"
 tap "sheatsley/formulae"
+tap "smudge/smudge"
 # Official Amazon AWS command-line interface
 brew "awscli"
 # Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
@@ -41,8 +42,12 @@ brew "p7zip"
 brew "pdftk-java"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
+# Rsync for cloud storage
+brew "rclone"
 # Safe, concurrent, practical language
 brew "rust"
+# Tools for the WireGuard secure network tunnel
+brew "wireguard-tools"
 # Yet Another Dotfiles Manager
 brew "yadm"
 # Tool for managing your YubiKey configuration
@@ -53,6 +58,8 @@ brew "ykpers"
 brew "zsh"
 # A command-line interface thesaurus
 brew "sheatsley/formulae/cli-thesaurus"
+# A CLI for configuring 'Night Shift' on macOS 🌕🌖🌗🌘🌑
+brew "smudge/smudge/nightlight"
 # Electronics prototyping platform
 cask "arduino"
 # Screen recorder and video editor
@@ -65,7 +72,6 @@ cask "docker"
 cask "epoccam"
 # Web browser
 cask "firefox"
-cask "font-dejavu-sans-mono-for-powerline"
 cask "font-dejavu-sans-mono-nerd-font"
 # Tools to protect your emails and files
 cask "gpg-suite"
@@ -77,6 +83,8 @@ cask "lastpass"
 cask "mactex-no-gui"
 # Text editor
 cask "macvim"
+# Provides updates to various Microsoft products
+cask "microsoft-auto-update"
 # Office suite
 cask "microsoft-office"
 # Meet, chat, call, and collaborate in just one place
@@ -97,6 +105,8 @@ cask "spotify"
 cask "tableau"
 # Create, manage, and run virtual machines
 cask "vmware-fusion"
+# Video communication and virtual meeting platform
+cask "webex"
 # Open-source version of the X.Org X Window System
 cask "xquartz"
 # Application for configuring any YubiKey
