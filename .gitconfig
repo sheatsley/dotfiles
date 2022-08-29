@@ -4,7 +4,7 @@
 [commit]
   gpgSign = True
 [credential "https://git.overleaf.com"]
-    username = sheatsley@psu.edu
+	username = sheatsley@wisc.edu
     helper = "!f() { if [ \"$1\" = get ]; then lpass ls >/dev/null 2>&1 || (read -p \"Lastpass username: \" USERNAME </dev/tty >/dev/tty; lpass login --trust $USERNAME </dev/tty >/dev/tty); echo \"password=$(lpass show -p Overleaf)\"; fi }; f"
 [pull]
 	rebase = true
