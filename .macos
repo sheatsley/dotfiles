@@ -3,6 +3,7 @@ defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0     
 defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0          # low pressure for second click
 defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -int 1       # enable three finger drag for trackpads
 defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerTapGesture -int 2 # enable look up with three fingers
+defaults write com.apple.airplay showInMenuBarIfPresent -int 0                        # remove airplay from menubar
 defaults write com.apple.applicationaccess allowAutoUnlock -int 1                     # allow apple watch to unlock mac
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -int 1              # do not create .ds_store files on network volumes
 defaults write com.apple.dock mru-spaces -int 0                                       # do not automatically rearrange spaces
