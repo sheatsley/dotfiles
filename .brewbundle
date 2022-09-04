@@ -24,6 +24,8 @@ brew "go"
 brew "hopenpgp-tools"
 # Configurable static site generator
 brew "hugo"
+# Update of iperf: measures TCP, UDP, and SCTP bandwidth
+brew "iperf3"
 # LastPass command-line interface tool
 brew "lastpass-cli"
 # Compare and mark up LaTeX file differences
