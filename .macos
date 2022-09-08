@@ -11,8 +11,9 @@ defaults write com.apple.dock orientation left                                  
 defaults write com.apple.dock persistent-apps -array                                  # clear the dock
 for APP in /Applications/iTerm /System/Applications/Calendar                         `# add iterm, calendar...` \
 /Applications/{"LastPass","MacVim"} /System/Applications/Messages                    `# ... lastpass, macvim, messages...` \
-/Applications/Spotify /System/Applications/Mail /Applications/{"Safari","Signal"}    `# ... spotify, mail, safari, signal...` \
-/System/Applications/{"Notes","Reminders"} /Applications/Slack; do                   `# ... notes, reminders, and slack...` \
+/Applications/{"Spotify","Bitwarden"} /System/Applications/Mail                      `# ... spotify, bitwarden, mail...` \
+/Applications/{"Safari","Signal"} /System/Applications/{"Notes","Reminders"}         `# ... safari, signal, notes, reminders...` \
+/Applications/Slack; do                                                              `# ... and slack...` \
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>'$APP'.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'; \
 done                                                                                  # ... to the dock
 defaults write com.apple.dock show-recents -int 0                                     # do not show recent apps in dock
