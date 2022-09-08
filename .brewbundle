@@ -48,6 +48,8 @@ brew "pinentry-mac"
 brew "rclone"
 # Safe, concurrent, practical language
 brew "rust"
+# Sends magic packets to wake up network-devices
+brew "wakeonlan"
 # Yet Another Dotfiles Manager
 brew "yadm"
 # Tool for managing your YubiKey configuration
@@ -62,6 +64,8 @@ brew "sheatsley/formulae/cli-thesaurus"
 brew "smudge/smudge/nightlight"
 # Electronics prototyping platform
 cask "arduino"
+# Desktop password and login vault
+cask "bitwarden"
 # Screen recorder and video editor
 cask "camtasia"
 # Voice and text chat software
