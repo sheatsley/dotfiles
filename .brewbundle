@@ -26,8 +26,6 @@ brew "hopenpgp-tools"
 brew "hugo"
 # Update of iperf: measures TCP, UDP, and SCTP bandwidth
 brew "iperf3"
-# LastPass command-line interface tool
-brew "lastpass-cli"
 # Compare and mark up LaTeX file differences
 brew "latexdiff"
 # Mac App Store command-line interface
@@ -74,13 +72,12 @@ cask "docker"
 cask "epoccam"
 # Web browser
 cask "firefox"
+# Developer targeted fonts with a high number of glyphs
 cask "font-dejavu-sans-mono-nerd-font"
 # Tools to protect your emails and files
 cask "gpg-suite"
 # Terminal emulator as alternative to Apple's Terminal app
 cask "iterm2"
-# Password manager
-cask "lastpass"
 # Full TeX Live distribution without GUI applications
 cask "mactex-no-gui"
 # Text editor
