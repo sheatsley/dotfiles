@@ -26,13 +26,19 @@ then
     softwareupdate --install-rosetta --agree-to-license
 fi
 
-# install brew if needed
+# install brew if needed (and quarantine necessary casks)
 if ! type brew >/dev/null
 then
     echo "Installing brew..."
     /bin/bash -c "$(curl -fsSL $BREW)"
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+    echo "Quarantining Prismatik..."
+    xattr -d com.apple.quarantine $HOMEBREW_PREFIX/Caskroom/psieg-prismatik/5.11.2.31/Prismatik.app
+    if [ $(uname -p) == "arm" ]
+    then
+        echo "Performing next steps for Apple Silicon..."
+        echo "eval '$(/opt/homebrew/bin/brew shellenv)'" >> $HOME/.zprofile
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
 fi
 
 # install homebrew-bundle, packages, casks and mas apps
