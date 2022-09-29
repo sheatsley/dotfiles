@@ -16,6 +16,7 @@ pip-tools
 plotly
 tensorflow
 tensorflow-datasets
+tensorflow-macos
 torch
 torchvision
 scikit-learn
