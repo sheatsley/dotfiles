@@ -10,17 +10,29 @@ XCODE="/Library/Preferences/com.apple.dt.Xcode IDELastGMLicenseAgreedTo"
 echo "Moving to $HOME ..."
 cd $HOME
 
-# set computer name
-echo "Enter computer name:"
+# set computer name if desired
+echo "Enter computer name (leave blank to skip):"
 read NAME
-echo "Setting computer name to $NAME..."
-sudo scutil --set ComputerName $NAME
+if [ -z $NAME ]
+then
+    echo "Setting computer name to $NAME..."
+    sudo scutil --set ComputerName $NAME
+fi
+
+# install rosetta if needed
+if [ $(uname -p) == "arm" ]
+then
+    echo "Installing Rosetta..."
+    softwareupdate --install-rosetta --agree-to-license
+fi
 
 # install brew if needed
 if ! type brew >/dev/null
 then
     echo "Installing brew..."
     /bin/bash -c "$(curl -fsSL $BREW)"
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
 # install homebrew-bundle, packages, casks and mas apps
@@ -112,8 +124,8 @@ then
     echo "Configuring iTerm2 profiles and wigets..."
     defaults write com.googlecode.iterm2 PrefsCustomFolder "$HOME/.iterm2"
     defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -int 1
-    mkdir -p $ITERM/Scripts/AutoLaunch
-    ln -s $GITHUB/iterm-components/*.py $ITERM/Scripts/AutoLaunch
+    mkdir -p "$ITERM/Scripts/AutoLaunch"
+    ln -s $GITHUB/iterm-components/*.py "$ITERM/Scripts/AutoLaunch"
 fi
 
 # enable night shift via nightlight
