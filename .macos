@@ -36,6 +36,7 @@ defaults write com.apple.screensaver idleTime -int 300                          
 defaults write com.apple.screensaver tokenRemovalAction -int 1                        # lock screen when login token is removed
 defaults write com.apple.sharingd DiscoverableMode "off"                              # disable airplay discovery
 defaults write com.apple.SoftwareUpdate AutomaticCheckEnabled -int 1                  # automatically update mas apps
+defaults write com.apple.SoftwareUpdate AutomaticDownload -int 1                      # automatically download os updates
 defaults write com.apple.systemuiserver menuExtras -array                            `# configure the menubar with the following apps` \
 "/System/Library/CoreServices/Menu Extras/Clock.menu"                                `# add clock to the menubar` \
 "/System/Library/CoreServices/Menu Extras/TimeMachine.menu"                          `# add time machine to the menubar`
