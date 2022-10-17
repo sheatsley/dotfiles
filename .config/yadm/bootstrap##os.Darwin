@@ -4,6 +4,7 @@ GITHUB=$HOME"/repos"
 GPGCONF="/usr/local/MacGPG2/bin"
 ITERM=$HOME"/Library/Application Support/iTerm2"
 KEYID="D97737F91189673C"
+OBS="/Applications/OBS.app/Contents/PlugIns/frontend-tools.plugin/Contents/Resources/scripts"
 XCODE="/Library/Preferences/com.apple.dt.Xcode IDELastGMLicenseAgreedTo"
 
 # move to home directory
@@ -116,7 +117,7 @@ yadm submodule update --init --recursive
 yadm submodule update --remote
 
 # install ycm semantic support
-if [ ! -f .vim/pack/plugins/start/YouCompleteMe/third_party/ycmd/ycm_core.cpython-39-darwin.so ]
+if [ ! -f .vim/pack/plugins/start/YouCompleteMe/third_party/ycmd/ycm_core.cpython-310-darwin.so ]
 then
     echo "Installing YCM semantic support..."
     cd .vim/pack/plugins/start/YouCompleteMe
@@ -139,6 +140,13 @@ if [ $(nightlight schedule) == "off" ]
 then
     echo "Enabling night shift from sunset to sunrise..."
     nightlight schedule start
+fi
+
+# add obs scripts
+if [ -f "$OBS/notifications.py" ]
+then
+    echo "Configuring OBS scripts..."
+    ln -s $GITHUB/obs-scripts/*.py $OBS
 fi
 
 # configure macOS and logout (necessary for some settings to take effect)
