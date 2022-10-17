@@ -1,49 +1,51 @@
-defaults write com.apple.AppleMultitouchTrackpad Clicking -int 1                      # enable tap to click for trackpads
-defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0           # low pressure for force click
-defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0          # low pressure for second click
-defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -int 1       # enable three finger drag for trackpads
-defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerTapGesture -int 2 # enable look up with three fingers
-defaults write com.apple.airplay showInMenuBarIfPresent -int 0                        # remove airplay from menubar
-defaults write com.apple.applicationaccess allowAutoUnlock -int 1                     # allow apple watch to unlock mac
-defaults write com.apple.desktopservices DSDontWriteNetworkStores -int 1              # do not create .ds_store files on network volumes
-defaults write com.apple.dock mru-spaces -int 0                                       # do not automatically rearrange spaces
-defaults write com.apple.dock orientation left                                        # place dock on the left
-defaults write com.apple.dock persistent-apps -array                                  # clear the dock
-for APP in /Applications/iTerm /System/Applications/Calendar                         `# add iterm, calendar...` \
-/Applications/MacVim /System/Applications/Messages                                   `# ... macvim, messages...` \
-/Applications/{"Spotify","Bitwarden"} /System/Applications/Mail                      `# ... spotify, bitwarden, mail...` \
-/Applications/{"Safari","Signal"} /System/Applications/{"Notes","Reminders"}         `# ... safari, signal, notes, reminders...` \
-/Applications/Slack; do                                                              `# ... and slack...` \
+defaults write com.apple.AppleMultitouchTrackpad Clicking -int 1                               # enable tap to click for trackpads
+defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0                    # low pressure for force click
+defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0                   # low pressure for second click
+defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -int 1                # enable three finger drag for trackpads
+defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerTapGesture -int 2          # enable look up with three fingers
+defaults write com.apple.airplay showInMenuBarIfPresent -int 0                                 # remove airplay from menubar
+defaults write com.apple.applicationaccess allowAutoUnlock -int 1                              # allow apple watch to unlock mac
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -int 1                       # do not create .ds_store files on network volumes
+defaults write com.apple.dock mru-spaces -int 0                                                # do not automatically rearrange spaces
+defaults write com.apple.dock orientation left                                                 # place dock on the left
+defaults write com.apple.dock persistent-apps -array                                           # clear the dock
+for APP in /Applications/iTerm /System/Applications/Calendar /Applications/MacVim             `# add iterm, calendar, macvim...` \
+/System/Applications/Messages /Applications/{"Spotify","Bitwarden"}                           `# messages, spotify, bitwarden...` \
+/System/Applications/Mail /Applications/{"Safari","Signal"}                                   `# mail, safari, signal...` \
+/System/Applications/{"Notes","Reminders"} /Applications/Slack; do                            `# notes, reminders, and slack...` \
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>'$APP'.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'; \
-done                                                                                  # ... to the dock
-defaults write com.apple.dock show-recents -int 0                                     # do not show recent apps in dock
-defaults write com.apple.dock tilesize -int 31                                        # set dock icons to 31 pixels
-defaults write com.apple.dock workspaces-auto-swoosh -int 0                           # disable auto space switching
-defaults write com.apple.finder FXEnableExtensionChangeWarning -int 0                 # disable file extension change warning
-defaults write com.apple.finder FXPreferredViewStyle "clmv"                           # set default view style in finder to column view
-defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -int 0                # do not show external drives on desktop
-defaults write com.apple.finder ShowPathbar -int 1                                    # show path in finder
-defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 0                    # disable dictation via keyboard shortcuts
-defaults write com.apple.menuextra.clock DateFormat "EEE MMM d  h:mm a"               # show the day, month, date and time (am/pm) in the taskbar
-defaults write com.apple.Safari AutoFillPasswords -int 0                              # do not autofill passwords in safari
-defaults write com.apple.Safari HomePage "about:blank"                                # set safari homepage to about:blank
-defaults write com.apple.Safari IncludeDevelopMenu -int 1                             # include developer menu in safari
-defaults write com.apple.Safari ShowFullURLInSmartSearchField -int 1                  # show full url in safari address bar
-defaults write com.apple.Safari "WebKitPreferences.developerExtrasEnabled" -int 1     # enable inspector in safari
-defaults write com.apple.screensaver askForPassword -int 1                            # ask for password after sleep or screensaver...
-defaults write com.apple.screensaver askForPasswordDelay -int 0                       # ... immediately
-defaults write com.apple.screensaver idleTime -int 300                                # display screen saver after five minutes
-defaults write com.apple.screensaver tokenRemovalAction -int 1                        # lock screen when login token is removed
-defaults write com.apple.sharingd DiscoverableMode "off"                              # disable airplay discovery
-defaults write com.apple.SoftwareUpdate AutomaticCheckEnabled -int 1                  # automatically update mas apps
-defaults write com.apple.SoftwareUpdate AutomaticDownload -int 1                      # automatically download os updates
-defaults write com.apple.systemuiserver menuExtras -array                            `# configure the menubar with the following apps` \
-"/System/Library/CoreServices/Menu Extras/Clock.menu"                                `# add clock to the menubar` \
-"/System/Library/CoreServices/Menu Extras/TimeMachine.menu"                          `# add time machine to the menubar`
-defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -int 1               # do not use new hard drives as backup volumes
-defaults write NSGlobalDomain AppleShowAllExtensions -int 1                           # show filename extensions in Finder
-defaults write NSGlobalDomain AppleWindowTabbingMode "manual"                         # set tabs when opening documents to manual
-defaults write NSGlobalDomain com.apple.trackpad.scaling -int 2                       # set faster tracking speed
-defaults write NSGlobalDomain InitialKeyRepeat -int 15                                # use a very short delay before key repeat starts
-defaults write NSGlobalDomain KeyRepeat -int 2                                        # use fast keyboard repeat rate
-for APP in Dock Finder Safari SystemUIServer; do killall "${APP}"; done               # kill affected applications...
+done                                                                                           # ... to the dock
+defaults write com.apple.dock show-recents -int 0                                              # do not show recent apps in dock
+defaults write com.apple.dock tilesize -int 31                                                 # set dock icons to 31 pixels
+defaults write com.apple.dock workspaces-auto-swoosh -int 0                                    # disable auto space switching
+defaults write com.apple.finder FXEnableExtensionChangeWarning -int 0                          # disable file extension change warning
+defaults write com.apple.finder FXPreferredViewStyle "clmv"                                    # set default view style in finder to column view
+defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -int 0                         # do not show external drives on desktop
+defaults write com.apple.finder ShowPathbar -int 1                                             # show path in finder
+defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 0                             # disable dictation via keyboard shortcuts
+defaults write com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers -array-add `# set the following defaults` \
+"{LSHandlerContentType=public.plain-text;LSHandlerRoleAll=org.vim.macvim;}"                   `# macvim for plaintext files` \
+"{LSHandlerContentType=public.python-script;LSHandlerRoleAll=org.vim.macvim;}"                `# macvim for python scripts`
+defaults write com.apple.menuextra.clock DateFormat "EEE MMM d  h:mm a"                        # show the day, month, date and time (am/pm) in the taskbar
+defaults write com.apple.Safari AutoFillPasswords -int 0                                       # do not autofill passwords in safari
+defaults write com.apple.Safari HomePage "about:blank"                                         # set safari homepage to about:blank
+defaults write com.apple.Safari IncludeDevelopMenu -int 1                                      # include developer menu in safari
+defaults write com.apple.Safari ShowFullURLInSmartSearchField -int 1                           # show full url in safari address bar
+defaults write com.apple.Safari "WebKitPreferences.developerExtrasEnabled" -int 1              # enable inspector in safari
+defaults write com.apple.screensaver askForPassword -int 1                                     # ask for password after sleep or screensaver...
+defaults write com.apple.screensaver askForPasswordDelay -int 0                                # ... immediately
+defaults write com.apple.screensaver idleTime -int 300                                         # display screen saver after five minutes
+defaults write com.apple.screensaver tokenRemovalAction -int 1                                 # lock screen when login token is removed
+defaults write com.apple.sharingd DiscoverableMode "off"                                       # disable airplay discovery
+defaults write com.apple.SoftwareUpdate AutomaticCheckEnabled -int 1                           # automatically update mas apps
+defaults write com.apple.SoftwareUpdate AutomaticDownload -int 1                               # automatically download os updates
+defaults write com.apple.systemuiserver menuExtras -array                                     `# configure the menubar with the following apps` \
+"/System/Library/CoreServices/Menu Extras/Clock.menu"                                         `# add clock to the menubar` \
+"/System/Library/CoreServices/Menu Extras/TimeMachine.menu"                                   `# add time machine to the menubar`
+defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -int 1                        # do not use new hard drives as backup volumes
+defaults write NSGlobalDomain AppleShowAllExtensions -int 1                                    # show filename extensions in finder
+defaults write NSGlobalDomain AppleWindowTabbingMode "manual"                                  # set tabs when opening documents to manual
+defaults write NSGlobalDomain com.apple.trackpad.scaling -int 2                                # set faster tracking speed
+defaults write NSGlobalDomain InitialKeyRepeat -int 15                                         # use a very short delay before key repeat starts
+defaults write NSGlobalDomain KeyRepeat -int 2                                                 # use fast keyboard repeat rate
+for APP in Dock Finder Safari SystemUIServer; do killall "${APP}"; done                        # kill affected applications...
