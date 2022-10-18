@@ -92,6 +92,8 @@ cask "microsoft-teams"
 cask "mono-mdk"
 # GameStream client
 cask "moonlight"
+# Open-source software for live streaming and screen recording
+cask "obs"
 # Lightpack and Prismatik open repository
 cask "psieg-prismatik"
 # Instant messaging application focusing on security
@@ -118,12 +120,7 @@ cask "zoom"
 cask "zotero"
 mas "Adblock Plus", id: 1432731683
 mas "Bitwarden", id: 1352778147
-mas "GarageBand", id: 682658836
-mas "iMovie", id: 408981434
-mas "Keynote", id: 409183694
 mas "Notability", id: 360593530
-mas "Numbers", id: 409203825
-mas "Pages", id: 409201541
 mas "PayPal Honey", id: 1472777122
 mas "WireGuard", id: 1451685025
 mas "Xcode", id: 497799835
