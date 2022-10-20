@@ -8,6 +8,10 @@ tap "sheatsley/formulae"
 tap "smudge/smudge"
 # Official Amazon AWS command-line interface
 brew "awscli"
+# Platform built on V8 to build network applications
+brew "node"
+# Secure and free password manager for all of your devices
+brew "bitwarden-cli"
 # Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
 brew "clang-format"
 # Cross-platform make
@@ -17,7 +21,7 @@ brew "git"
 # Enable transparent encryption/decryption of files in a git repo
 brew "git-crypt"
 # GNU Pretty Good Privacy (PGP) package
-brew "gnupg", link: false
+brew "gnupg"
 # Open source programming language to build simple/reliable/efficient software
 brew "go"
 # Command-line tools for OpenPGP-related operations
@@ -30,8 +34,6 @@ brew "iperf3"
 brew "latexdiff"
 # Mac App Store command-line interface
 brew "mas"
-# Platform built on V8 to build network applications
-brew "node"
 # Open client for Cisco AnyConnect VPN
 brew "openconnect"
 # Outputs current CPU temperature for OSX
