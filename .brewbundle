@@ -56,6 +56,8 @@ brew "yadm"
 brew "ykman"
 # YubiKey personalization library and tool
 brew "ykpers"
+# Command-line tool for the YubiKey PIV application
+brew "yubico-piv-tool"
 # UNIX shell (command interpreter)
 brew "zsh"
 # A command-line interface thesaurus
@@ -76,8 +78,6 @@ cask "epoccam"
 cask "firefox"
 # Developer targeted fonts with a high number of glyphs
 cask "font-dejavu-sans-mono-nerd-font"
-# Tools to protect your emails and files
-cask "gpg-suite"
 # Terminal emulator as alternative to Apple's Terminal app
 cask "iterm2"
 # Full TeX Live distribution without GUI applications
