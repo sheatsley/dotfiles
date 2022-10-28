@@ -56,8 +56,6 @@ brew "yadm"
 brew "ykman"
 # YubiKey personalization library and tool
 brew "ykpers"
-# Command-line tool for the YubiKey PIV application
-brew "yubico-piv-tool"
 # UNIX shell (command interpreter)
 brew "zsh"
 # A command-line interface thesaurus
