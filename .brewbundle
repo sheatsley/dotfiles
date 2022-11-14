@@ -110,7 +110,6 @@ cask "zoom"
 cask "zotero"
 mas "Adblock Plus", id: 1432731683
 mas "Bitwarden", id: 1352778147
-mas "Notability", id: 360593530
 mas "PayPal Honey", id: 1472777122
 mas "WireGuard", id: 1451685025
 mas "Xcode", id: 497799835
