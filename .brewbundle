@@ -34,8 +34,6 @@ brew "iperf3"
 brew "latexdiff"
 # Mac App Store command-line interface
 brew "mas"
-# Open client for Cisco AnyConnect VPN
-brew "openconnect"
 # Outputs current CPU temperature for OSX
 brew "osx-cpu-temp"
 # 7-Zip (high compression file archiver) implementation
@@ -48,8 +46,6 @@ brew "pinentry-mac"
 brew "rclone"
 # Safe, concurrent, practical language
 brew "rust"
-# Sends magic packets to wake up network-devices
-brew "wakeonlan"
 # Yet Another Dotfiles Manager
 brew "yadm"
 # Tool for managing your YubiKey configuration
@@ -64,8 +60,6 @@ brew "sheatsley/formulae/cli-thesaurus"
 brew "smudge/smudge/nightlight"
 # Electronics prototyping platform
 cask "arduino"
-# Screen recorder and video editor
-cask "camtasia"
 # Voice and text chat software
 cask "discord"
 # App to build and share containerized applications and microservices
@@ -98,8 +92,6 @@ cask "obs"
 cask "psieg-prismatik"
 # Instant messaging application focusing on security
 cask "signal"
-# Video chat, voice call and instant messaging application
-cask "skype"
 # Team communication and collaboration software
 cask "slack"
 # Music streaming service
@@ -110,8 +102,6 @@ cask "tableau"
 cask "vmware-fusion"
 # Video communication and virtual meeting platform
 cask "webex"
-# Open-source version of the X.Org X Window System
-cask "xquartz"
 # Application for configuring any YubiKey
 cask "yubico-yubikey-manager"
 # Video communication and virtual meeting platform
