@@ -27,6 +27,13 @@ then
     softwareupdate --install-rosetta --agree-to-license
 fi
 
+# check if command line tools is installed
+if ! xcode-select -p >/dev/null
+then
+    echo "Installing command line tools..."
+    xcode-select --install
+fi
+
 # install brew if needed (and quarantine necessary casks)
 if ! type brew >/dev/null
 then
@@ -51,7 +58,7 @@ echo "Installing python modules..."
 pip3 install --upgrade -r .pip
 
 # accept xcode license if necessary
-if defaults read $XCODE >/dev/null
+if ! defaults read $XCODE >/dev/null
 then
     echo "Accepting XCode license..."
     sudo xcodebuild -license accept
