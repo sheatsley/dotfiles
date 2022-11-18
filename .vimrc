@@ -7,6 +7,7 @@ autocmd bufenter * if (winnr("$") == 1
             \ && exists("b:NERDTree")
             \ && b:NERDTree.isTabTree())
             \ | q | endif                             " close nerdtree if no file is open
+autocmd FileType tex let b:dispatch='latexmk -pdf %'  " set latex compiler for dispatch
 let g:airline#extensions#tabline#enabled=1            " show buffers with tabs
 let g:airline_powerline_fonts=1                       " use powerline fonts for statusbar
 let g:ale_python_flake8_options=
