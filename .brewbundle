@@ -80,6 +80,8 @@ cask "macvim"
 cask "microsoft-auto-update"
 # Office suite
 cask "microsoft-office"
+# Remote desktop client
+cask "microsoft-remote-desktop"
 # Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
 # Open source implementation of Microsoft's .NET Framework
