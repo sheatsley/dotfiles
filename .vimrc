@@ -19,6 +19,7 @@ let g:ale_fixers={
     \      'trim_whitespace'],
     \ 'javascript': ['prettier'],
     \ 'python': ['black']}                            " remove extra white spaces, lines, and set fixers
+let g:ale_virtualtext_cursor=0                        " disable inline warnings and errors
 let NERDTreeShowHidden=1                              " show hidden files in NERDTree by default
 let g:ycm_autoclose_preview_window_after_completion=1 " when completing, let YCM close the preview window
 let g:ycm_filetype_blacklist={'tex':1}                " don't use YCM for LaTeX
