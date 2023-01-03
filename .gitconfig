@@ -11,6 +11,10 @@
 	rebase = true
 [rebase]
 	autoStash = true
+[remote "origin"]
+    fetch = "+refs/notes/*:refs/notes/*"
+    push = "HEAD"
+    push = "refs/notes/*:refs/notes/*"
 [url "https://github.com/"]
   insteadOf = gh:
 [user]
