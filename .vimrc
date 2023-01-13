@@ -26,12 +26,6 @@ let g:ycm_filetype_blacklist={'tex':1}                " don't use YCM for LaTeX
 nmap <silent> <C-n> :ALENextWrap<CR>|                 " move to next ALE warning or error
 nmap <silent> <C-p> :ALEPreviousWrap<CR>|             " move to previous ALE warning or error
 
-"         <|> FILE-SPECIFIC <|>
-au Filetype tex,markdown setlocal
-    \ textwidth=79
-    \ spell spelllang=en                              " wrap at 79 characters & use spellchecking
-let g:tex_flavor="latex"                              " set default tex flavor to LaTeX
-
 "         <|> EDITING <|>
 filetype indent on                                    " copy indent from current line on <ENTER>
 set clipboard=unnamed                                 " copy/paste from the system clipboard
@@ -51,6 +45,11 @@ set number                                            " show line numbers
 set termguicolors                                     " enable 24-bit color support for terminal vim
 set wildmenu                                          " visual autocomplete for command menu
 syntax on                                             " sets color of text based on category of terms
+
+"         <|> FILE-SPECIFIC <|>
+au Filetype tex,markdown syntax spell toplevel |
+    \ setlocal textwidth=79 spell spelllang=en        " spellcheck partial text files & wrap at 79 characters
+let g:tex_flavor="latex"                              " set default tex flavor to LaTeX
 
 "  	      <|> SEARCHING <|>
 set hlsearch                                          " highlight matches
