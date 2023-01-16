@@ -6,7 +6,7 @@
   gpgSign = True
 [credential "https://git.overleaf.com"]
 	username = sheatsley@wisc.edu
-    helper = "!f() { bw login --check &> /dev/null; if [ ! $? -eq 0 ]; then export BW_SESSION=$(bw login --raw --method 3 </dev/tty); fi; bw unlock --check &> /dev/null; if [ ! $? -eq 0 ]; then export BW_SESSION=$(bw unlock --raw </dev/tty); fi; echo \"password=$(bw get --session $BW_SESSION password overleaf.com)\"; }; . f"
+    helper = "!f() { bw login --check &> /dev/null; if [ ! $? -eq 0 ]; then export BW_SESSION=$(bw login --raw --method 3 </dev/tty); fi; bw unlock --check &> /dev/null; if [ ! $? -eq 0 ]; then export BW_SESSION=$(bw unlock --raw </dev/tty); fi; echo \"password=$(bw get --session $BW_SESSION password overleaf.com)\"; }; f"
 [pull]
 	rebase = true
 [rebase]
