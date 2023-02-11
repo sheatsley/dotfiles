@@ -20,4 +20,5 @@ tensorflow-macos
 torch
 torchvision
 scikit-learn
+seaborn
 twine
