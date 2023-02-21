@@ -41,3 +41,6 @@
 [submodule ".vim/pack/plugins/start/vim-fugitive"]
 	path = .vim/pack/plugins/start/vim-fugitive
 	url = https://github.com/tpope/vim-fugitive.git
+[submodule ".oh-my-plugins/plugins/zsh-autosuggestions"]
+	path = .oh-my-plugins/plugins/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions
