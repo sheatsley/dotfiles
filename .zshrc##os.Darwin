@@ -25,6 +25,3 @@ source $ZSH/oh-my-zsh.sh
 export GPG_TTY="$(tty)"
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 gpgconf --launch gpg-agent
-
-# Customize prompt.
-prompt_context(){prompt_segment black default "%t %m"}
