@@ -9,8 +9,8 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -int 1        
 defaults write com.apple.dock mru-spaces -int 0                                                # do not automatically rearrange spaces
 defaults write com.apple.dock orientation left                                                 # place dock on the left
 defaults write com.apple.dock persistent-apps -array                                           # clear the dock
-for APP in /Applications/{"iTerm","OBS","Moonlight","MacVim"}                                 `# add iterm, obs, moonlight, macvim...` \
-/System/Applications/Messages /Applications/{"Spotify","Bitwarden"}                           `# messages, spotify, bitwarden...` \
+for APP in /Applications/{"iTerm","OBS","Moonlight"}                                          `# add iterm, obs, moonlight ...` \
+/System/Applications/Messages /Applications/{"Spotify"}                                       `# messages, spotify...` \
 /System/Applications/Mail /Applications/{"Safari","Signal","Discord"}                         `# mail, safari, signal, discord...` \
 /System/Applications/{"Calendar","Notes","Reminders"} /Applications/Slack; do                 `# calendar, notes, reminders, & slack...` \
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>'$APP'.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'; \
