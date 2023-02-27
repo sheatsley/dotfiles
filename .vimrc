@@ -42,7 +42,7 @@ set tabstop=4                                         " number of visual spaces 
 "  	      <|> UI CONFIG <|>
 set completeopt+=popup                                " show completion information in a popup window
 set completepopup=highlight:Pmenu                     " set popup window color to completion menu color
-set number                                            " show line numbers
+set number relativenumber                             " show hybrid line numbers
 set termguicolors                                     " enable 24-bit color support for terminal vim
 set wildmenu                                          " visual autocomplete for command menu
 syntax on                                             " sets color of text based on category of terms
