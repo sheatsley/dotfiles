@@ -1,7 +1,9 @@
+autoimport
 bs4
 black
 dill
 flake8
+isort
 iterm2
 kaleido
 liac-arff
