@@ -7,6 +7,7 @@ autocmd bufenter * if (winnr("$") == 1
             \ && exists("b:NERDTree")
             \ && b:NERDTree.isTabTree())
             \ | q | endif                             " close nerdtree if no file is open
+autocmd FileType python setlocal commentstring=#\ %s  " configure commentary for python
 autocmd FileType tex let
     \ b:dispatch='latexmk -pdf main.tex'              " set latex compiler for dispatch
 let g:airline#extensions#tabline#enabled=1            " show buffers with tabs
@@ -16,16 +17,19 @@ let g:ale_python_flake8_options=
     \  --extend-ignore=E203'                          " set flake8 to respect black defaults
 let g:ale_fix_on_save=1                               " let ALE apply fixes on save
 let g:ale_fixers={
-    \ '*':['remove_trailing_lines',
-    \      'trim_whitespace'],
+    \ '*':['autoimport', 'isort',
+    \       'remove_trailing_lines',
+    \       'trim_whitespace'],
     \ 'javascript': ['prettier'],
     \ 'python': ['black']}                            " remove extra white spaces, lines, and set fixers
 let g:ale_virtualtext_cursor=0                        " disable inline warnings and errors
-let NERDTreeShowHidden=1                              " show hidden files in NERDTree by default
+let NERDTreeShowHidden=1                              " show hidden files in nerdtree by default
 let g:ycm_autoclose_preview_window_after_completion=1 " when completing, let YCM close the preview window
 let g:ycm_filetype_blacklist={'tex':1}                " don't use YCM for LaTeX
 nmap <silent> <C-n> :ALENextWrap<CR>|                 " move to next ALE warning or error
-nmap <silent> <C-p> :ALEPreviousWrap<CR>|             " move to previous ALE warning or error
+nmap <silent> <CS-n> :ALEPreviousWrap<CR>|            " move to previous ALE warning or error
+nnoremap <silent> <expr> <C-p> (expand('%') =~
+    \ 'NERD_tree' ? "\<c-w>\<c-w>" : '').":FZF\<cr>"  " do not open files in nerdtree with fzf
 
 "         <|> EDITING <|>
 filetype indent on                                    " copy indent from current line on <ENTER>
