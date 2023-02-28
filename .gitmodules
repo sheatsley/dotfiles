@@ -2,10 +2,6 @@
     branch = master
 	path = .oh-my-zsh
 	url = https://github.com/ohmyzsh/ohmyzsh
-[submodule ".vim/pack/plugins/start/YouCompleteMe"]
-    branch = master
-	path = .vim/pack/plugins/start/YouCompleteMe
-	url = https://github.com/ycm-core/YouCompleteMe.git
 [submodule ".vim/pack/plugins/start/ale"]
     branch = master
 	path = .vim/pack/plugins/start/ale
@@ -57,3 +53,6 @@
 	path = .vim/pack/plugins/start/coc.nvim
 	url = https://github.com/neoclide/coc.nvim.git
 	branch = release
+[submodule ".vim/pack/plugins/start/vim-polyglot"]
+	path = .vim/pack/plugins/start/vim-polyglot
+	url = https://github.com/sheerun/vim-polyglot.git
