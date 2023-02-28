@@ -2,16 +2,22 @@
 packadd! onedark.vim                                        " A dark color scheme inpsired by Atom's One Dark
 
 "         <|> PLUGIN CONFIG <|>
-autocmd bufenter * if (winnr("$") == 1
-            \ && exists("b:NERDTree")
+autocmd bufenter * if (winnr('$') == 1
+            \ && exists('b:NERDTree')
             \ && b:NERDTree.isTabTree())
             \ | q | endif                                   " close nerdtree if no file is open
 autocmd FileType python setlocal commentstring=#\ %s        " configure commentary for python
 autocmd FileType tex let b:dispatch='latexmk -pdf main.tex' " set latex compiler for dispatch
 autocmd VimEnter * NERDTree | wincmd p                      " open nerdtree on start and switch buffer to edit file
+inoremap <silent><expr> <TAB>
+    \ coc#pum#visible() ? coc#pum#next(1) :
+    \ CheckBackspace() ? '\<Tab>' :
+    \ coc#refresh()                                         " use tab to go forwardwards in autcomplete
+inoremap <expr><S-TAB> coc#pum#visible()
+    \ ? coc#pum#prev(1) : "\<C-h>"                          " use shift-tab to go backwards in autocomplete
 let g:airline#extensions#tabline#enabled=1                  " show buffers with tabs
 let g:airline_powerline_fonts=1                             " use powerline fonts for statusbar
-let g:ale_linters={"python": ['flake8']}                    " set linters for ale to use
+let g:ale_linters={'python': ['flake8']}                    " set linters for ale to use
 let g:ale_python_flake8_options='--max-line-length=88
     \  --extend-ignore=E203'                                " set flake8 to respect black defaults
 let g:ale_fix_on_save=1                                     " let ALE apply fixes on save
@@ -22,11 +28,11 @@ let g:ale_fixers={
 let g:ale_sign_error = '✘'                                  " use icons instead of >> for errors in ale
 let g:ale_sign_warning = '⚠'                                " use icons instead of -- for warnings in ale
 let NERDTreeShowHidden=1                                    " show hidden files in nerdtree by default
-nnoremap <silent> K :call CocAction("doHover")<CR>          " induce hover action from lsp
-nnoremap <silent> <expr> <C-p> (expand('%') =~ 'NERD_tree'
+nnoremap <silent> K :call CocAction("doHover")<CR>|         " induce hover action from lsp
+nnoremap <silent> <expr> <C-o> (expand('%') =~ 'NERD_tree'
     \ ? "\<c-w>\<c-w>" : '').":FZF\<CR>"                    " do not open files in nerdtree with fzf
 nnoremap <silent> <C-n> :ALENextWrap<CR>|                   " move to next ALE warning or error
-nnoremap <silent> <CS-n> :ALEPreviousWrap<CR>|              " move to previous ALE warning or error
+nnoremap <silent> <C-p> :ALEPreviousWrap<CR>|               " move to previous ALE warning or error
 
 "         <|> EDITING <|>
 filetype indent on                                          " copy indent from current line on <ENTER>
@@ -48,7 +54,7 @@ syntax on                                                   " sets color of text
 "         <|> FILE-SPECIFIC <|>
 au Filetype tex,markdown syntax spell toplevel |
     \ setlocal textwidth=79 spell spelllang=en              " spellcheck partial text files & wrap at 79 characters
-let g:tex_flavor="latex"                                    " set default tex flavor to LaTeX
+let g:tex_flavor='latex'                                    " set default tex flavor to LaTeX
 
 "  	      <|> SEARCHING <|>
 set hlsearch                                                " highlight matches
@@ -59,7 +65,7 @@ set smartcase                                               " ... except when us
 "  	      <|> PERSONAL <|>
 :command W w                                                " vim should do this by default
 colorscheme onedark                                         " use one dark colortheme
-nnoremap <silent> <CR> :nohlsearch<CR><CR>|                 " unset last search pattern via return
+nnoremap <silent> <CR> :nohlsearch<CR>|                     " unset last search pattern via return
 set guifont=DejaVuSansMono_Nerd_Font_Mono                   " use dejavu powerline nerd font
 hi Normal guibg=NONE ctermbg=NONE                           " use a transparent background
 hi Terminal guibg=NONE ctermbg=NONE                         " use a transparent terminal
