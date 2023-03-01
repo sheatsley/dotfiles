@@ -9,11 +9,9 @@ autocmd bufenter * if (winnr('$') == 1
 autocmd FileType python setlocal commentstring=#\ %s        " configure commentary for python
 autocmd FileType tex let b:dispatch='latexmk -pdf main.tex' " set latex compiler for dispatch
 autocmd VimEnter * NERDTree | wincmd p                      " open nerdtree on start and switch buffer to edit file
-inoremap <silent><expr> <TAB>
-    \ coc#pum#visible() ? coc#pum#next(1) :
-    \ CheckBackspace() ? '\<Tab>' :
-    \ coc#refresh()                                         " use tab to go forwardwards in autcomplete
-inoremap <expr><S-TAB> coc#pum#visible()
+inoremap <silent> <expr> <tab> pumvisible()
+    \ ? coc#_select_confirm() : "\<C-g>u\<TAB>"             " use tab to go forwards in autocomplete
+inoremap <silent> <expr> <S-TAB> pumvisible()
     \ ? coc#pum#prev(1) : "\<C-h>"                          " use shift-tab to go backwards in autocomplete
 let g:airline#extensions#tabline#enabled=1                  " show buffers with tabs
 let g:airline_powerline_fonts=1                             " use powerline fonts for statusbar
@@ -65,7 +63,9 @@ set smartcase                                               " ... except when us
 "  	      <|> PERSONAL <|>
 :command W w                                                " vim should do this by default
 colorscheme onedark                                         " use one dark colortheme
-nnoremap <silent> <CR> :nohlsearch<CR>|                     " unset last search pattern via return
-set guifont=DejaVuSansMono_Nerd_Font_Mono                   " use dejavu powerline nerd font
 hi Normal guibg=NONE ctermbg=NONE                           " use a transparent background
 hi Terminal guibg=NONE ctermbg=NONE                         " use a transparent terminal
+let &t_SI = "\<Esc>]50;CursorShape=1\x7"                    " Vertical bar in insert mode
+let &t_EI = "\<Esc>]50;CursorShape=0\x7"                    " Block in normal mode
+nnoremap <silent> <CR> :nohlsearch<CR>|                     " unset last search pattern via return
+set guifont=DejaVuSansMono_Nerd_Font_Mono                   " use dejavu powerline nerd font
