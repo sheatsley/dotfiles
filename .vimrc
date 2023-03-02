@@ -9,10 +9,10 @@ autocmd bufenter * if (winnr('$') == 1
 autocmd FileType python setlocal commentstring=#\ %s        " configure commentary for python
 autocmd FileType tex let b:dispatch='latexmk -pdf main.tex' " set latex compiler for dispatch
 autocmd VimEnter * NERDTree | wincmd p                      " open nerdtree on start and switch buffer to edit file
-inoremap <silent> <expr> <tab> pumvisible()
-    \ ? coc#_select_confirm() : "\<C-g>u\<TAB>"             " use tab to go forwards in autocomplete
-inoremap <silent> <expr> <S-TAB> pumvisible()
-    \ ? coc#pum#prev(1) : "\<C-h>"                          " use shift-tab to go backwards in autocomplete
+inoremap <silent> <expr> <tab> coc#pum#visible()
+    \ ? coc#pum#next(1) : "\<TAB>"                          " use tab to go forwards in autocomplete
+inoremap <silent> <expr> <S-TAB> coc#pum#visible()
+    \ ? coc#pum#prev(1) : "\<S-Tab>"                        " use shift-tab to go backwards in autocomplete
 let g:airline#extensions#tabline#enabled=1                  " show buffers with tabs
 let g:airline_powerline_fonts=1                             " use powerline fonts for statusbar
 let g:ale_linters={'python': ['flake8']}                    " set linters for ale to use
@@ -22,13 +22,13 @@ let g:ale_fix_on_save=1                                     " let ALE apply fixe
 let g:ale_fixers={
     \ '*':['remove_trailing_lines', 'trim_whitespace'],
     \ 'javascript': ['prettier'],
-    \ 'python': ['autoimport', 'isort', 'black']}           " remove extra white spaces, lines, and set fixers
+    \ 'python': ['isort', 'black']}           " remove extra white spaces, lines, and set fixers
 let g:ale_sign_error = '✘'                                  " use icons instead of >> for errors in ale
 let g:ale_sign_warning = '⚠'                                " use icons instead of -- for warnings in ale
 let NERDTreeShowHidden=1                                    " show hidden files in nerdtree by default
 nnoremap <silent> K :call CocAction("doHover")<CR>|         " induce hover action from lsp
 nnoremap <silent> <expr> <C-o> (expand('%') =~ 'NERD_tree'
-    \ ? "\<c-w>\<c-w>" : '').":FZF\<CR>"                    " do not open files in nerdtree with fzf
+    \ ? "\<c-w>\<c-w>" : '').":Files\<CR>"                  " do not open files in nerdtree with fzf
 nnoremap <silent> <C-n> :ALENextWrap<CR>|                   " move to next ALE warning or error
 nnoremap <silent> <C-p> :ALEPreviousWrap<CR>|               " move to previous ALE warning or error
 
