@@ -1,4 +1,3 @@
-autoimport
 bs4
 black
 dill
@@ -9,12 +8,9 @@ kaleido
 liac-arff
 matplotlib
 more-itertools
-mypy
-notebook
 numpy
 pandas
 pipupgrade
-pip-tools
 plotly
 tensorflow
 tensorflow-datasets
