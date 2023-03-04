@@ -9,11 +9,16 @@ autocmd bufenter * if (winnr('$') == 1
 autocmd FileType python setlocal commentstring=#\ %s        " configure commentary for python
 autocmd FileType tex let b:dispatch='latexmk -pdf main.tex' " set latex compiler for dispatch
 autocmd VimEnter * NERDTree | wincmd p                      " open nerdtree on start and switch buffer to edit file
+command! -bang -nargs=? -complete=dir Files call
+    \ fzf#vim#files(<q-args>,
+    \ fzf#vim#with_preview({'sink': 'drop', 'options':
+    \ ['--layout=reverse', '--info=inline']}), <bang>0)     " use drop as fzf sync with a nice preview
 inoremap <silent> <expr> <tab> coc#pum#visible()
     \ ? coc#pum#next(1) : "\<TAB>"                          " use tab to go forwards in autocomplete
 inoremap <silent> <expr> <S-TAB> coc#pum#visible()
     \ ? coc#pum#prev(1) : "\<S-Tab>"                        " use shift-tab to go backwards in autocomplete
-let g:airline#extensions#tabline#enabled=1                  " show buffers with tabs
+let g:airline#extensions#tabline#buffer_nr_show=1           " show buffer number in tabline
+let g:airline#extensions#tabline#enabled=1                  " show buffers in tabline
 let g:airline_powerline_fonts=1                             " use powerline fonts for statusbar
 let g:ale_linters={'python': ['flake8']}                    " set linters for ale to use
 let g:ale_python_flake8_options='--max-line-length=88
@@ -22,7 +27,7 @@ let g:ale_fix_on_save=1                                     " let ALE apply fixe
 let g:ale_fixers={
     \ '*':['remove_trailing_lines', 'trim_whitespace'],
     \ 'javascript': ['prettier'],
-    \ 'python': ['isort', 'black']}           " remove extra white spaces, lines, and set fixers
+    \ 'python': ['black', 'isort']}                         " remove extra white spaces, lines, and set fixers
 let g:ale_sign_error = '✘'                                  " use icons instead of >> for errors in ale
 let g:ale_sign_warning = '⚠'                                " use icons instead of -- for warnings in ale
 let NERDTreeShowHidden=1                                    " show hidden files in nerdtree by default
