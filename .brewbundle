@@ -8,6 +8,8 @@ tap "sheatsley/formulae"
 tap "smudge/smudge"
 # Official Amazon AWS command-line interface
 brew "awscli"
+# Clone of cat(1) with syntax highlighting and Git integration
+brew "bat"
 # Platform built on V8 to build network applications
 brew "node"
 # Secure and free password manager for all of your devices
