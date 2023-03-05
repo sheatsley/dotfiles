@@ -14,6 +14,8 @@ brew "bat"
 brew "node"
 # Secure and free password manager for all of your devices
 brew "bitwarden-cli"
+# Create and view interactive cheat sheets for *nix commands
+brew "cheat"
 # Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
 brew "clang-format"
 # Cross-platform make
