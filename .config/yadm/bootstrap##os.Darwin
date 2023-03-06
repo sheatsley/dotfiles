@@ -123,14 +123,8 @@ echo "Updating remaining applications & vim plugins:\n-ohmyzsh\n-onedark.vim\n-Y
 yadm submodule update --init --recursive
 yadm submodule update --remote
 
-# install ycm semantic support
-if [ ! -f .vim/pack/plugins/start/YouCompleteMe/third_party/ycmd/ycm_core.cpython-310-darwin.so ]
-then
-    echo "Installing YCM semantic support..."
-    cd .vim/pack/plugins/start/YouCompleteMe
-    python3 install.py --all
-    cd $HOME
-fi
+# run through vimrc and initialize helptags
+vim .vimrc "+helptags ALL" +qall
 
 # configure iTerm2
 if ! defaults read com.googlecode.iterm2 PrefsCustomFolder >/dev/null 2>&1
