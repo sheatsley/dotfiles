@@ -28,8 +28,10 @@ let g:ale_fixers={
     \ '*':['remove_trailing_lines', 'trim_whitespace'],
     \ 'javascript': ['prettier'],
     \ 'python': ['black', 'isort']}                         " remove extra white spaces, lines, and set fixers
-let g:ale_sign_error = '✘'                                  " use icons instead of >> for errors in ale
-let g:ale_sign_warning = '⚠'                                " use icons instead of -- for warnings in ale
+let g:ale_sign_error='✘'                                    " use icons instead of >> for errors in ale
+let g:ale_sign_warning='⚠'                                  " use icons instead of -- for warnings in ale
+let g:coc_global_extensions=["coc-jedi", "coc-json",
+    \ "coc-pairs"]                                          " add python, json, and auto pairs coc extensions
 let NERDTreeShowHidden=1                                    " show hidden files in nerdtree by default
 nnoremap <silent> K :call CocAction("doHover")<CR>|         " induce hover action from lsp
 nnoremap <silent> <expr> <C-o> (expand('%') =~ 'NERD_tree'
