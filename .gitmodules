@@ -2,14 +2,6 @@
     branch = master
 	path = .oh-my-zsh
 	url = https://github.com/ohmyzsh/ohmyzsh
-[submodule ".vim/pack/plugins/start/ale"]
-    branch = master
-	path = .vim/pack/plugins/start/ale
-	url = https://github.com/dense-analysis/ale.git
-[submodule ".vim/pack/plugins/start/nerdtree"]
-    branch = master
-	path = .vim/pack/plugins/start/nerdtree
-	url = https://github.com/preservim/nerdtree.git
 [submodule ".vim/pack/plugins/start/vim-airline"]
     branch = master
 	path = .vim/pack/plugins/start/vim-airline
@@ -26,14 +18,6 @@
     branch = main
 	path = .vim/pack/plugins/opt/onedark.vim
 	url = https://github.com/joshdick/onedark.vim.git
-[submodule ".vim/pack/plugins/start/vim-devicons"]
-    branch = master
-	path = .vim/pack/plugins/start/vim-devicons
-	url = https://github.com/ryanoasis/vim-devicons.git
-[submodule ".vim/pack/plugins/start/vim-nerdtree-syntax-highlight"]
-    branch = master
-	path = .vim/pack/plugins/start/vim-nerdtree-syntax-highlight
-	url = https://github.com/tiagofumo/vim-nerdtree-syntax-highlight.git
 [submodule ".vim/pack/plugins/start/vim-fugitive"]
 	path = .vim/pack/plugins/start/vim-fugitive
 	url = https://github.com/tpope/vim-fugitive.git
@@ -56,3 +40,6 @@
 [submodule ".vim/pack/plugins/start/vim-polyglot"]
 	path = .vim/pack/plugins/start/vim-polyglot
 	url = https://github.com/sheerun/vim-polyglot.git
+[submodule ".vim/pack/plugins/start/vim-isort"]
+	path = .vim/pack/plugins/start/vim-isort
+	url = https://github.com/fisadev/vim-isort.git
