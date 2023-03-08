@@ -28,7 +28,6 @@ nnoremap <silent> <C-p> <Plug>(coc-diagnostic-prev)|        " move to previous c
 
 "         <|> EDITING <|>
 filetype indent on                                          " copy indent from current line on <ENTER>
-set autochdir                                               " update working directory dynamically
 set clipboard=unnamed                                       " copy/paste from the system clipboard
 set expandtab                                               " replace <TAB> with <SPACE>
 set mouse=a                                                 " enable mouse scrolling
@@ -62,6 +61,8 @@ set smartcase                                               " ... except when us
 colorscheme onedark                                         " use one dark colortheme
 hi Normal guibg=NONE ctermbg=NONE                           " use a transparent background
 hi Terminal guibg=NONE ctermbg=NONE                         " use a transparent terminal
+hi! link CocSymbolClass Structure                           " set coc class symbol color to Structure color
+hi! link CocSymbolVariable Identifier                       " set coc variable symbol color to Identifer color
 let &t_SI = "\<Esc>]50;CursorShape=1\x7"                    " Vertical bar in insert mode
 let &t_EI = "\<Esc>]50;CursorShape=0\x7"                    " Block in normal mode
 nnoremap <silent> <CR> :nohlsearch<CR>|                     " unset last search pattern via return
