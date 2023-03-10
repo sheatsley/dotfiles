@@ -1,40 +1,9 @@
 {
+    // coc: https://github.com/neoclide/coc.nvim
     "coc.preferences.formatOnSave": true,
     "diagnostic.errorSign": "\uea87",
     "diagnostic.hintSign": "\uf0eb",
     "diagnostic.warningSign": "\uf071",
-    "explorer.buffer.root.template": "[icon & 1] Buffers",
-    "explorer.file.cdCommand": "tcd",
-    "explorer.file.root.template": "[icon & 1] Files ([root]) [fullpath]",
-    "explorer.file.reveal.auto": true,
-    "explorer.focus": false,
-    "explorer.icon.enableNerdfont": true,
-    "explorer.keyMappings.global": {
-        "<C-S>": "open:split",
-        "<C-T>": "open:tab",
-        "<C-V>": "open:vsplit"
-    },
-    "explorer.sources": [
-        {
-            "name": "buffer",
-            "expand": true
-        },
-        {
-            "name": "file",
-            "expand": true
-        }
-    ],
-    "explorer.width": 30,
-    "pyright.disableCompletion": true,
-    "pyright.inlayHints.functionReturnTypes": false,
-    "pyright.inlayHints.variableTypes": false,
-    "python.analysis.typeCheckingMode": "off",
-    "python.formatting.provider": "black",
-    "python.linting.flake8Args": [
-        "--max-line-length=88",
-        "--extend-ignore=E203"
-    ],
-    "python.linting.flake8Enabled": true,
     "suggest.noselect": true,
     "suggest.completionItemKindLabels": {
         "class": "\uea8c",
@@ -62,5 +31,66 @@
         "unit": "\uf475",
         "value": "\uf89f",
         "variable": "\ue624",
-    }
+    },
+    // diagnostic-languageserver: https://github.com/iamcco/diagnostic-languageserver
+    "diagnostic-languageserver.enable": true,
+    "diagnostic-languageserver.filetypes": {
+        "python": [
+            "flake8",
+        ],
+    },
+    "diagnostic-languageserver.formatFiletypes": {
+        "python": [
+            "black",
+            "isort",
+        ],
+    },
+    "diagnostic-languageserver.formatters": {
+        "isort": {
+            "args": [
+                "--quiet",
+                "--profile",
+                "black",
+                "-",
+            ],
+        },
+    },
+    "diagnostic-languageserver.linters": {
+        "flake8": {
+            "args": [
+                "--format=%(row)d,%(col)d,%(code).1s,%(code)s: %(text)s",
+                "--max-line-length=88",
+                "--extend-ignore=E203",
+                "-"
+            ],
+        },
+    },
+    "diagnostic-languageserver.mergeConfig": true,
+    // explorer: https://github.com/weirongxu/coc-explorer
+    "explorer.buffer.root.template": "[icon & 1] Buffers",
+    "explorer.file.cdCommand": "tcd",
+    "explorer.file.root.template": "[icon & 1] Files ([root]) [fullpath]",
+    "explorer.file.reveal.auto": true,
+    "explorer.focus": false,
+    "explorer.icon.enableNerdfont": true,
+    "explorer.keyMappings.global": {
+        "<C-S>": "open:split",
+        "<C-T>": "open:tab",
+        "<C-V>": "open:vsplit"
+    },
+    "explorer.sources": [
+        {
+            "name": "buffer",
+            "expand": true
+        },
+        {
+            "name": "file",
+            "expand": true
+        }
+    ],
+    // pyright: https://github.com/microsoft/pyright
+    "pyright.disableCompletion": true,
+    "pyright.inlayHints.functionReturnTypes": false,
+    "pyright.inlayHints.variableTypes": false,
+    "python.analysis.typeCheckingMode": "off"
 }
