@@ -48,4 +48,5 @@ defaults write NSGlobalDomain AppleWindowTabbingMode "manual"                   
 defaults write NSGlobalDomain com.apple.trackpad.scaling -int 2                                # set faster tracking speed
 defaults write NSGlobalDomain InitialKeyRepeat -int 15                                         # use a very short delay before key repeat starts
 defaults write NSGlobalDomain KeyRepeat -int 2                                                 # use fast keyboard repeat rate
+defaults write NSGlobalDomain NSQuitAlwaysKeepsWindows -int 1                                  # restore windows when opening apps
 for APP in Dock Finder Safari SystemUIServer; do killall "${APP}"; done                        # kill affected applications...
