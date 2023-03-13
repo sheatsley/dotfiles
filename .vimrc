@@ -3,8 +3,9 @@ packadd! onedark.vim                                        " A dark color schem
 
 "        🔌 Plugins 🔌
 autocmd BufEnter * if winnr("$") == 1 |
-  \ if &filetype == "coc-explorer" | q |
-  \ else | exe "CocCommand explorer"| endif | endif         " open explorer on new tabs & close it if last window
+  \ if &filetype == "coc-explorer" |
+  \ call feedkeys(":quit\<CR>") | else |
+  \ exe "CocCommand explorer"| endif | endif                " open explorer on new tabs & close it if last window
 autocmd BufWritePre <buffer> call <SID>Fixers()             " call fixers on save
 autocmd FileType python setlocal commentstring=#\ %s        " configure commentary for python
 autocmd FileType tex let b:dispatch="latexmk -pdf main.tex" " set latex compiler for dispatch
@@ -13,6 +14,9 @@ inoremap <silent> <expr> <TAB> coc#pum#visible()
 inoremap <silent> <expr> <S-TAB> coc#pum#visible()
   \ ? coc#pum#prev(1) : "\<S-Tab>"                          " use shift-tab to go backwards in autocomplete
 let g:airline#extensions#tabline#enabled=1                  " show buffers in tabline
+let g:airline#extensions#tabline#show_close_button=0        " do not show close button in tabline
+let g:airline#extensions#tabline#show_splits=0              " do not show open split in tabline
+let g:airline#extensions#tabline#tab_nr_type=1              " show tab number in tabline
 let g:airline_powerline_fonts=1                             " use powerline fonts for statusbar
 let g:coc_global_extensions=["coc-diagnostic",
   \ "coc-dictionary", "coc-explorer", "coc-jedi",
