@@ -46,3 +46,9 @@
 [submodule ".vim/pack/plugins/start/markdown-preview.nvim"]
 	path = .vim/pack/plugins/start/markdown-preview.nvim
 	url = https://github.com/iamcco/markdown-preview.nvim.git
+[submodule ".vim/pack/plugins/start/vim-obsession"]
+	path = .vim/pack/plugins/start/vim-obsession
+	url = https://github.com/tpope/vim-obsession.git
+[submodule ".vim/pack/plugins/start/vim-devicons"]
+	path = .vim/pack/plugins/start/vim-devicons
+	url = https://github.com/ryanoasis/vim-devicons.git
