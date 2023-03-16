@@ -50,6 +50,8 @@ brew "pinentry-mac"
 brew "rclone"
 # Safe, concurrent, practical language
 brew "rust"
+# Tools for the WireGuard secure network tunnel
+brew "wireguard-tools"
 # Yet Another Dotfiles Manager
 brew "yadm"
 # Tool for managing your YubiKey configuration
@@ -62,6 +64,8 @@ brew "zsh"
 brew "sheatsley/formulae/cli-thesaurus"
 # A CLI for configuring 'Night Shift' on macOS 🌕🌖🌗🌘🌑
 brew "smudge/smudge/nightlight"
+# Tools for building Android applications
+cask "android-studio"
 # Electronics prototyping platform
 cask "arduino"
 # Voice and text chat software
