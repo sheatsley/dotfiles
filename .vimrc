@@ -24,8 +24,8 @@ let g:coc_global_extensions=["coc-diagnostic",
   \ "coc-dictionary", "coc-explorer", "coc-jedi",
   \ "coc-json", "coc-pairs", "coc-pyright", "coc-vimlsp"]       " add coc extensions for writing, editing, and coding
 let g:vista#renderer#icons={"variable":"\ue624"}                " bugfix for variable render
-let g:vista_default_executive="coc"                             " let coc power vista
 let g:vista_stay_on_open=0                                      " do not focus vista on open
+let g:vista_executive_for={"python": "coc", "vim": "coc"}       " let coc power vista for code filetypes
 nnoremap <silent> K :call CocAction("doHover")<CR>|             " induce hover action from lsp
 nnoremap <silent> <expr> <C-b> (expand("%") =~
   \ "coc-explorer" ? "\<c-w>\<c-w>" : "").":Buffers\<CR>"       " do not open buffers in explorer with fzf
@@ -37,7 +37,7 @@ nnoremap <silent> <C-p> <Plug>(coc-diagnostic-prev)|            " move to previo
 "        🖋 Editing 🖋
 filetype indent on                                              " copy indent from current line on <ENTER>
 nnoremap <silent> <CR> :nohlsearch<CR>|                         " unset last search pattern via return
-tnoremap <silent> <expr> <C-L> Clear()                          " use a better way to clear the terminal screen
+tnoremap <silent> <expr> <C-L> <SID>Clear()                     " use a better way to clear the terminal screen
 set clipboard=unnamed                                           " copy/paste from the system clipboard
 set dictionary+=/usr/share/dict/words                           " add dictionary completion support
 set expandtab                                                   " replace <TAB> with <SPACE>
