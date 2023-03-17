@@ -7,10 +7,12 @@ autocmd FileType python setlocal commentstring=#\ %s            " configure comm
 autocmd FileType tex let b:dispatch="latexmk -pdf main.tex"     " set latex compiler for dispatch
 autocmd VimEnter,TabNew * exe "CocCom explorer" | exe "Vista" | " open explorer and vista on each tab
 autocmd WinClosed * autocmd BufEnter * if winnr("$") == 2 &&
-  \ count(["coc-explorer", "vista"], getwinvar(1, "&ft")) &&
-  \ count(["coc-explorer", "vista"], getwinvar(2, "&ft")) |
-  \ if tabpagenr("$") == 1 | call feedkeys(":qa\<CR>") | else
-  \ | call feedkeys(":tabc\<CR>") | endif | endif               " close explorer and vista if they are the last two windows
+  \ count(["coc-explorer", "vista", "vista_markdown"],
+  \ getwinvar(1, "&ft")) &&
+  \ count(["coc-explorer", "vista", "vista_markdown"],
+  \ getwinvar(2, "&ft")) | if tabpagenr("$") == 1 |
+  \ call feedkeys(":qa\<CR>") | else |
+  \ call feedkeys(":tabc\<CR>") | endif | endif                 " close explorer and vista if they are the last two windows
 inoremap <silent> <expr> <TAB> coc#pum#visible()
   \ ? coc#pum#next(1) : "\<TAB>"                                " use tab to go forwards in autocomplete
 inoremap <silent> <expr> <S-TAB> coc#pum#visible()
