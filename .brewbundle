@@ -50,8 +50,6 @@ brew "pinentry-mac"
 brew "rclone"
 # Safe, concurrent, practical language
 brew "rust"
-# Tools for the WireGuard secure network tunnel
-brew "wireguard-tools"
 # Yet Another Dotfiles Manager
 brew "yadm"
 # Tool for managing your YubiKey configuration
