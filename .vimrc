@@ -14,9 +14,10 @@ autocmd WinClosed * autocmd BufEnter * if winnr("$") == 2 &&
   \ call feedkeys(":qa\<CR>") | else |
   \ call feedkeys(":tabc\<CR>") | endif | endif                 " close explorer and vista if they are the last two windows
 inoremap <silent> <expr> <TAB> coc#pum#visible()
-  \ ? coc#pum#next(1) : "\<TAB>"                                " use tab to go forwards in autocomplete
+  \ ? coc#pum#next(1) : "\<TAB>"|                               " use tab to go forwards in autocomplete
 inoremap <silent> <expr> <S-TAB> coc#pum#visible()
-  \ ? coc#pum#prev(1) : "\<S-Tab>"                              " use shift-tab to go backwards in autocomplete
+  \ ? coc#pum#prev(1) : "\<S-TAB>"|                             " use shift-tab to go backwards in autocomplete
+imap <silent> <script> <expr> <C-E> copilot#Accept("\<CR>")     " use control-e to accept copilot suggestion
 let g:airline#extensions#tabline#enabled=1                      " show buffers in tabline
 let g:airline#extensions#tabline#show_close_button=0            " do not show close button in tabline
 let g:airline#extensions#tabline#show_splits=0                  " do not show open split in tabline
@@ -25,6 +26,7 @@ let g:airline_powerline_fonts=1                                 " use powerline 
 let g:coc_global_extensions=["coc-diagnostic",
   \ "coc-dictionary", "coc-explorer", "coc-jedi",
   \ "coc-json", "coc-pairs", "coc-pyright", "coc-vimlsp"]       " add coc extensions for writing, editing, and coding
+let g:copilot_no_tab_map=1                                      " do not map tab to copilot
 let g:vista#renderer#icons={"variable":"\ue624"}                " bugfix for variable render
 let g:vista_stay_on_open=0                                      " do not focus vista on open
 let g:vista_executive_for={"python": "coc", "vim": "coc"}       " let coc power vista for code filetypes
@@ -33,8 +35,10 @@ nnoremap <silent> <expr> <C-b> (expand("%") =~
   \ "coc-explorer" ? "\<c-w>\<c-w>" : "").":Buffers\<CR>"       " do not open buffers in explorer with fzf
 nnoremap <silent> <expr> <C-o> (expand("%") =~
   \ "coc-explorer" ? "\<c-w>\<c-w>" : "").":Files\<CR>"         " do not open files in explorer with fzf
-nnoremap <silent> <C-n> <Plug>(coc-diagnostic-next)|            " move to next coc diagnostic
-nnoremap <silent> <C-p> <Plug>(coc-diagnostic-prev)|            " move to previous coc diagnostic
+nnoremap <silent> <C-g> :Rg<CR>|                                " open ripgrep with control-g
+nnoremap <silent> <C-n> <Plug>(coc-diagnostic-next)|            " move to next coc diagnostic with control-n
+nnoremap <silent> <C-p> <Plug>(coc-diagnostic-prev)|            " move to previous coc diagnostic with control-p
+set tagfunc=CocTagfunc                                          " let coc drive tags
 
 "        🖋 Editing 🖋
 filetype indent on                                              " copy indent from current line on <ENTER>
