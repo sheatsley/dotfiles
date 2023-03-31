@@ -48,6 +48,8 @@ brew "pdftk-java"
 brew "pinentry-mac"
 # Rsync for cloud storage
 brew "rclone"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
 # Safe, concurrent, practical language
 brew "rust"
 # Yet Another Dotfiles Manager
