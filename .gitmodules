@@ -55,3 +55,6 @@
 [submodule ".vim/pack/plugins/start/vista.vim"]
 	path = .vim/pack/plugins/start/vista.vim
 	url = https://github.com/liuchengxu/vista.vim.git
+[submodule ".vim/pack/plugins/start/copilot.vim"]
+	path = .vim/pack/plugins/start/copilot.vim
+	url = https://github.com/github/copilot.vim.git
