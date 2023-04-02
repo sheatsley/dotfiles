@@ -119,9 +119,11 @@ do
 done < .gitrepos
 
 # updating the remaining applications through submodules
-echo "Updating remaining applications & vim plugins:\n-ohmyzsh\n-onedark.vim\n-YouCompleteMe\n-ale\n-black\n-nerdtree\n-vim-airline\n-vim-clang-format\n-vim-dispatch"
+echo "Updating remaining applications & vim plugins..."
 yadm submodule update --init --recursive
 yadm submodule update --remote
+vim "+call mkdp#util#install()" +qall
+vim "+Copilot setup" +qall
 
 # run through vimrc and initialize helptags
 vim .vimrc "+helptags ALL" +qall
