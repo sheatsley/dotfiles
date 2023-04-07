@@ -1,10 +1,10 @@
 export DOCKER_HOST="ssh://fenestras"                         # set docker host
 export GPG_TTY="$(tty)"                                      # set tty device for current shell
-export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket) # set agent ssh socket
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket) # set ssh agent socket
 export ZSH_CUSTOM=$HOME"/.oh-my-plugins"                     # set custom plugin folder
 export ZSH=$HOME"/.oh-my-zsh"                                # set oh-my-zsh-installation
 ENABLE_CORRECTION="true"                                     # enable command auto-correction
 plugins=(copyfile zsh-autosuggestions)                       # load files into clipboard & provide fish-like autosuggestions
 ZSH_THEME="agnoster"                                         # load agnoster theme
 source $ZSH/oh-my-zsh.sh                                     # enable above settings
-gpgconf --launch gpg-agent                                   # enalbe yubikey for ssh
+gpgconf --launch gpg-agent                                   # enable yubikey for ssh
