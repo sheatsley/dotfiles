@@ -6,8 +6,6 @@ tap "homebrew/core"
 tap "homebrew/services"
 tap "sheatsley/formulae"
 tap "smudge/smudge"
-# Official Amazon AWS command-line interface
-brew "awscli"
 # Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
 # Platform built on V8 to build network applications
@@ -121,5 +119,6 @@ cask "zotero"
 mas "Adblock Plus", id: 1432731683
 mas "Bitwarden", id: 1352778147
 mas "PayPal Honey", id: 1472777122
+mas "VBAN Talkie Cherry", id: 1553486090
 mas "WireGuard", id: 1451685025
 mas "Xcode", id: 497799835
