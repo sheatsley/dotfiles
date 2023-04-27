@@ -22,6 +22,8 @@ brew "cmake"
 brew "git"
 # Enable transparent encryption/decryption of files in a git repo
 brew "git-crypt"
+# Git extension for versioning large files
+brew "git-lfs"
 # GNU Pretty Good Privacy (PGP) package
 brew "gnupg"
 # Open source programming language to build simple/reliable/efficient software
@@ -70,8 +72,8 @@ cask "arduino"
 cask "discord"
 # App to build and share containerized applications and microservices
 cask "docker"
-# Turn your phone into a webcam
-cask "epoccam"
+# Elgato FACECAM configuration tool
+cask "elgato-camera-hub"
 # Web browser
 cask "firefox"
 # Developer targeted fonts with a high number of glyphs
