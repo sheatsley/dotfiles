@@ -6,6 +6,7 @@ tap "homebrew/core"
 tap "homebrew/services"
 tap "sheatsley/formulae"
 tap "smudge/smudge"
+tap "tsung-ju/iguanatexmac"
 # Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
 # Platform built on V8 to build network applications
@@ -38,16 +39,12 @@ brew "iperf3"
 brew "latexdiff"
 # Mac App Store command-line interface
 brew "mas"
-# Outputs current CPU temperature for OSX
-brew "osx-cpu-temp"
 # 7-Zip (high compression file archiver) implementation
 brew "p7zip"
 # Port of pdftk in java
 brew "pdftk-java"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
-# Rsync for cloud storage
-brew "rclone"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
 # Safe, concurrent, practical language
@@ -64,10 +61,10 @@ brew "zsh"
 brew "sheatsley/formulae/cli-thesaurus"
 # A CLI for configuring 'Night Shift' on macOS 🌕🌖🌗🌘🌑
 brew "smudge/smudge/nightlight"
-# Tools for building Android applications
-cask "android-studio"
 # Electronics prototyping platform
 cask "arduino"
+# Virtual Audio Driver
+cask "blackhole-2ch"
 # Voice and text chat software
 cask "discord"
 # App to build and share containerized applications and microservices
@@ -78,8 +75,10 @@ cask "elgato-camera-hub"
 cask "firefox"
 # Developer targeted fonts with a high number of glyphs
 cask "font-dejavu-sans-mono-nerd-font"
+cask "iguanatexmac"
 # Terminal emulator as alternative to Apple's Terminal app
 cask "iterm2"
+cask "latexit-metadata"
 # Full TeX Live distribution without GUI applications
 cask "mactex-no-gui"
 # Text editor
@@ -110,8 +109,6 @@ cask "spotify"
 cask "tableau"
 # Create, manage, and run virtual machines
 cask "vmware-fusion"
-# Video communication and virtual meeting platform
-cask "webex"
 # Application for configuring any YubiKey
 cask "yubico-yubikey-manager"
 # Video communication and virtual meeting platform
@@ -120,6 +117,7 @@ cask "zoom"
 cask "zotero"
 mas "Adblock Plus", id: 1432731683
 mas "Bitwarden", id: 1352778147
+mas "GarageBand", id: 682658836
 mas "PayPal Honey", id: 1472777122
 mas "VBAN Talkie Cherry", id: 1553486090
 mas "WireGuard", id: 1451685025
