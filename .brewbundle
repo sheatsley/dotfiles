@@ -1,8 +1,6 @@
 tap "homebrew/bundle"
-tap "homebrew/cask"
 tap "homebrew/cask-drivers"
 tap "homebrew/cask-fonts"
-tap "homebrew/core"
 tap "homebrew/services"
 tap "sheatsley/formulae"
 tap "smudge/smudge"
@@ -45,6 +43,8 @@ brew "p7zip"
 brew "pdftk-java"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.11"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
 # Safe, concurrent, practical language
