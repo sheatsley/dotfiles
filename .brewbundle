@@ -7,10 +7,6 @@ tap "smudge/smudge"
 tap "tsung-ju/iguanatexmac"
 # Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
-# Platform built on V8 to build network applications
-brew "node"
-# Secure and free password manager for all of your devices
-brew "bitwarden-cli"
 # Create and view interactive cheat sheets for *nix commands
 brew "cheat"
 # Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
@@ -37,6 +33,8 @@ brew "iperf3"
 brew "latexdiff"
 # Mac App Store command-line interface
 brew "mas"
+# Platform built on V8 to build network applications
+brew "node"
 # 7-Zip (high compression file archiver) implementation
 brew "p7zip"
 # Port of pdftk in java
@@ -59,8 +57,6 @@ brew "ykpers"
 brew "zsh"
 # A command-line interface thesaurus
 brew "sheatsley/formulae/cli-thesaurus"
-# A CLI for configuring 'Night Shift' on macOS 🌕🌖🌗🌘🌑
-brew "smudge/smudge/nightlight"
 # Electronics prototyping platform
 cask "arduino"
 # Virtual Audio Driver
@@ -81,8 +77,6 @@ cask "iterm2"
 cask "latexit-metadata"
 # Full TeX Live distribution without GUI applications
 cask "mactex-no-gui"
-# Text editor
-cask "macvim"
 # Provides updates to various Microsoft products
 cask "microsoft-auto-update"
 # Office suite
@@ -95,8 +89,6 @@ cask "microsoft-teams"
 cask "mono-mdk"
 # GameStream client
 cask "moonlight"
-# Open-source software for live streaming and screen recording
-cask "obs"
 # Lightpack and Prismatik open repository
 cask "psieg-prismatik"
 # Instant messaging application focusing on security
