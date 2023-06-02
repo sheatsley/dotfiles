@@ -20,13 +20,6 @@ then
     sudo scutil --set ComputerName $NAME
 fi
 
-# install rosetta if needed
-if [ $(uname -p) == "arm" ]
-then
-    echo "Installing Rosetta..."
-    softwareupdate --install-rosetta --agree-to-license
-fi
-
 # check if command line tools is installed
 if ! xcode-select -p >/dev/null
 then
@@ -131,11 +124,9 @@ vim .vimrc "+helptags ALL" +qall
 # configure iTerm2
 if ! defaults read com.googlecode.iterm2 PrefsCustomFolder >/dev/null 2>&1
 then
-    echo "Configuring iTerm2 profiles and wigets..."
+    echo "Configuring iTerm2 profile..."
     defaults write com.googlecode.iterm2 PrefsCustomFolder "$HOME/.iterm2"
     defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -int 1
-    mkdir -p "$ITERM/Scripts/AutoLaunch"
-    ln -s $GITHUB/iterm-components/*.py "$ITERM/Scripts/AutoLaunch"
 fi
 
 # enable night shift via nightlight
