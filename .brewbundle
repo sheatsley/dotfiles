@@ -1,5 +1,4 @@
 tap "homebrew/bundle"
-tap "homebrew/cask-drivers"
 tap "homebrew/cask-fonts"
 tap "homebrew/services"
 tap "sheatsley/formulae"
@@ -7,6 +6,8 @@ tap "smudge/smudge"
 tap "tsung-ju/iguanatexmac"
 # Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.11"
 # Create and view interactive cheat sheets for *nix commands
 brew "cheat"
 # Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
@@ -41,8 +42,6 @@ brew "p7zip"
 brew "pdftk-java"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.11"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
 # Safe, concurrent, practical language
@@ -110,6 +109,10 @@ cask "zotero"
 mas "Adblock Plus", id: 1432731683
 mas "Bitwarden", id: 1352778147
 mas "GarageBand", id: 682658836
+mas "iMovie", id: 408981434
+mas "Keynote", id: 409183694
+mas "Numbers", id: 409203825
+mas "Pages", id: 409201541
 mas "PayPal Honey", id: 1472777122
 mas "VBAN Talkie Cherry", id: 1553486090
 mas "WireGuard", id: 1451685025
