@@ -84,8 +84,6 @@ cask "microsoft-office"
 cask "microsoft-remote-desktop"
 # Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
-# Open source implementation of Microsoft's .NET Framework
-cask "mono-mdk"
 # GameStream client
 cask "moonlight"
 # Lightpack and Prismatik open repository
@@ -113,7 +111,6 @@ mas "iMovie", id: 408981434
 mas "Keynote", id: 409183694
 mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
-mas "PayPal Honey", id: 1472777122
 mas "VBAN Talkie Cherry", id: 1553486090
 mas "WireGuard", id: 1451685025
 mas "Xcode", id: 497799835
