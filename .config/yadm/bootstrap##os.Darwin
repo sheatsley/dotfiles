@@ -13,10 +13,16 @@ cd $HOME
 # set computer name if desired
 echo "Enter computer name (leave blank to skip):"
 read NAME
-if [ -z $NAME ]
+if ! [ -z $NAME ]
 then
     echo "Setting computer name to $NAME..."
     sudo scutil --set ComputerName $NAME
+fi
+# install rosetta if needed
+if [ $(uname -p) = "arm" ] && /usr/bin/pgrep -q oahd
+then
+    echo "Installing Rosetta..."
+    softwareupdate --install-rosetta --agree-to-license
 fi
 
 # check if command line tools is installed
@@ -26,14 +32,12 @@ then
     xcode-select --install
 fi
 
-# install brew if needed (and quarantine necessary casks)
+# install brew if needed
 if ! type brew >/dev/null
 then
     echo "Installing brew..."
     /bin/bash -c "$(curl -fsSL $BREW)"
-    echo "Quarantining Prismatik..."
-    xattr -d com.apple.quarantine $HOMEBREW_PREFIX/Caskroom/psieg-prismatik/5.11.2.31/Prismatik.app
-    if [ $(uname -p) == "arm" ]
+    if [ $(uname -p) = "arm" ]
     then
         echo "Performing next steps for Apple Silicon..."
         echo "eval '$(/opt/homebrew/bin/brew shellenv)'" >> $HOME/.zprofile
@@ -41,9 +45,10 @@ then
     fi
 fi
 
-# install homebrew-bundle, packages, casks and mas apps
+# install (and quarantine) homebrew-bundle, packages, casks and mas apps
 echo "Updating brew packages..."
 brew bundle --verbose --file=.brewbundle
+xattr -dr com.apple.quarantine $HOMEBREW_PREFIX/Caskroom/psieg-prismatik/5.11.2.31/Prismatik.app
 
 # install python packages
 echo "Installing python modules..."
