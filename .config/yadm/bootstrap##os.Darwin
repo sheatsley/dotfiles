@@ -13,13 +13,13 @@ cd $HOME
 # set computer name if desired
 echo "Enter computer name (leave blank to skip):"
 read NAME
-if ! [ -z $NAME ]
+if ! [ -z "$NAME" ]
 then
     echo "Setting computer name to $NAME..."
     sudo scutil --set ComputerName $NAME
 fi
 # install rosetta if needed
-if [ $(uname -p) = "arm" ] && /usr/bin/pgrep -q oahd
+if [ $(uname -p) = "arm" ] && ! /usr/bin/pgrep -q oahd
 then
     echo "Installing Rosetta..."
     softwareupdate --install-rosetta --agree-to-license
