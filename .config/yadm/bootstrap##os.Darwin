@@ -17,6 +17,7 @@ if ! [ -z "$NAME" ]
 then
     echo "Setting computer name to $NAME..."
     sudo scutil --set ComputerName $NAME
+    sudo scutil --set HostName $NAME
 fi
 # install rosetta if needed
 if [ $(uname -p) = "arm" ] && ! /usr/bin/pgrep -q oahd
