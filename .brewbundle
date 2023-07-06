@@ -4,6 +4,7 @@ tap "homebrew/services"
 tap "sheatsley/formulae"
 tap "smudge/smudge"
 tap "tsung-ju/iguanatexmac"
+tap "universal-ctags/universal-ctags"
 # Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
 # Interpreted, interactive, object-oriented programming language
@@ -56,6 +57,8 @@ brew "ykpers"
 brew "zsh"
 # A command-line interface thesaurus
 brew "sheatsley/formulae/cli-thesaurus"
+# Maintained ctags implementation
+brew "universal-ctags/universal-ctags/universal-ctags", args: ["HEAD"]
 # Electronics prototyping platform
 cask "arduino"
 # Virtual Audio Driver
@@ -96,6 +99,8 @@ cask "slack"
 cask "spotify"
 # Data visualization software
 cask "tableau"
+# Combine, shape, and clean your data for analysis
+cask "tableau-prep"
 # Create, manage, and run virtual machines
 cask "vmware-fusion"
 # Application for configuring any YubiKey
