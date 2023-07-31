@@ -42,6 +42,8 @@ set tagfunc=CocTagFunc                                          " let coc drive 
 filetype indent on                                              " copy indent from current line on <ENTER>
 nnoremap <silent> <CR> :nohlsearch<CR>|                         " unset last search pattern via return
 tnoremap <silent> <expr> <C-L> <SID>Clear()                     " use a better way to clear the terminal screen
+set autoread                                                    " automatically read files when changed outside vim
+set autowriteall                                                " automatically write when switching buffers
 set clipboard=unnamed                                           " copy/paste from the system clipboard
 set dictionary+=/usr/share/dict/words                           " add dictionary completion support
 set expandtab                                                   " replace <TAB> with <SPACE>
