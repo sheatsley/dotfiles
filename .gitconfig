@@ -7,6 +7,11 @@
 [credential "https://git.overleaf.com"]
 	username = sheatsley@wisc.edu
     helper = osxkeychain
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
 [pull]
 	rebase = true
 [rebase]
@@ -21,8 +26,3 @@
   name = Ryan Sheatsley
   email = ryan@sheatsley.me
   signingkey = AF5888815A509644
-[filter "lfs"]
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
