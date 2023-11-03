@@ -59,10 +59,10 @@
     "diagnostic-languageserver.linters": {
         "flake8": {
             "args": [
+                "--extend-ignore=E203",
                 "--format=%(row)d,%(col)d,%(code).1s,%(code)s: %(text)s",
                 "--max-line-length=88",
-                "--extend-ignore=E203",
-                "-"
+                "--stdin-display-name=__init__.py",
             ],
         },
     },
