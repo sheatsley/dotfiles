@@ -7,8 +7,6 @@ tap "tsung-ju/iguanatexmac"
 tap "universal-ctags/universal-ctags"
 # Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.11"
 # Create and view interactive cheat sheets for *nix commands
 brew "cheat"
 # Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
@@ -33,6 +31,8 @@ brew "hugo"
 brew "iperf3"
 # Compare and mark up LaTeX file differences
 brew "latexdiff"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.11"
 # Mac App Store command-line interface
 brew "mas"
 # Platform built on V8 to build network applications
