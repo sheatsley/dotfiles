@@ -41,7 +41,6 @@ set tagfunc=CocTagFunc                                          " let coc drive 
 "        🖋 Editing 🖋
 filetype indent on                                              " copy indent from current line on <ENTER>
 nnoremap <silent> <CR> :nohlsearch<CR>|                         " unset last search pattern via return
-tnoremap <silent> <expr> <C-L> <SID>Clear()                     " use a better way to clear the terminal screen
 set autoread                                                    " automatically read files when changed outside vim
 set autowriteall                                                " automatically write when switching buffers
 set clipboard=unnamed                                           " copy/paste from the system clipboard
@@ -84,13 +83,6 @@ let &t_EI="\<Esc>]50;CursorShape=0\x7"                          " Block in norma
 set guifont=DejaVuSansMono_Nerd_Font_Mono                       " use dejavu powerline nerd font
 
 "        🧮 Functions 🧮
-function! <SID>Clear()                                          " add stdout to scrollback buffer and clear the screen
-    let row=min([bufnr()->term_getcursor()[0]-1, bufnr()->term_getsize()[0]-2])
-    if row > 0
-        call term_sendkeys("", "tput indn " . row . " && clear \<CR>")
-    endif
-    return ""
-endfunction
 function! <SID>Fixers()                                         " remove trailing lines and trim whitespace
   if !&binary && &filetype != 'diff' && mode() ==# 'n'
     let l:cursor=getpos(".")
