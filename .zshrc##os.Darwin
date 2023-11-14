@@ -8,3 +8,15 @@ plugins=(copyfile zsh-autosuggestions)                       # load files into c
 ZSH_THEME="agnoster"                                         # load agnoster theme
 source $ZSH/oh-my-zsh.sh                                     # enable above settings
 gpgconf --launch gpg-agent                                   # enable yubikey for ssh
+function zwidget::clear                                      # clear terminal by scrolling (populates scrollback buffer)
+{
+  echo -ne "\033[6n" > /dev/tty
+  read -t 1 -s -d 'R' row < /dev/tty
+  row=${row##*\[}
+  row=$((${row%;*} - 1))
+  if [ $row -gt 0 ]; then
+    tput indn $row && clear && zle redisplay
+  fi
+}
+zle -N zwidget::clear
+bindkey '^l' zwidget::clear
