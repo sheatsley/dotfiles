@@ -63,6 +63,7 @@
                 "--format=%(row)d,%(col)d,%(code).1s,%(code)s: %(text)s",
                 "--max-line-length=88",
                 "--stdin-display-name=__init__.py",
+                "-"
             ],
         },
     },
