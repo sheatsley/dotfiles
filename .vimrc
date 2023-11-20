@@ -13,10 +13,6 @@ autocmd WinClosed * autocmd BufEnter * if winnr("$") == 2 &&
   \ getwinvar(2, "&ft")) | if tabpagenr("$") == 1 |
   \ call feedkeys(":qa\<CR>") | else |
   \ call feedkeys(":tabc\<CR>") | endif | endif                 " close explorer and vista if they are the last two windows
-inoremap <silent> <expr> <TAB> coc#pum#visible()
-  \ ? coc#pum#next(1) : "\<TAB>"|                               " use tab to go forwards in autocomplete
-inoremap <silent> <expr> <S-TAB> coc#pum#visible()
-  \ ? coc#pum#prev(1) : "\<S-TAB>"|                             " use shift-tab to go backwards in autocomplete
 let g:airline#extensions#tabline#enabled=1                      " show buffers in tabline
 let g:airline#extensions#tabline#show_close_button=0            " do not show close button in tabline
 let g:airline#extensions#tabline#show_splits=0                  " do not show open split in tabline
