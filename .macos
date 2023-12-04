@@ -6,6 +6,7 @@ defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerTapGesture -
 defaults write com.apple.airplay showInMenuBarIfPresent -int 0                                 # remove airplay from menubar
 defaults write com.apple.applicationaccess allowAutoUnlock -int 1                              # allow apple watch to unlock mac
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -int 1                       # do not create .ds_store files on network volumes
+defaults write com.apple.dock expose-group-apps -int 1                                         # group windows by application in exposé
 defaults write com.apple.dock mru-spaces -int 0                                                # do not automatically rearrange spaces
 defaults write com.apple.dock orientation left                                                 # place dock on the left
 defaults write com.apple.dock persistent-apps -array                                           # clear the dock
