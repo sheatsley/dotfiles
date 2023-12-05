@@ -93,6 +93,7 @@
     // pyright: https://github.com/microsoft/pyright
     "pyright.disableCompletion": true,
     "pyright.inlayHints.functionReturnTypes": false,
+    "pyright.inlayHints.parameterTypes": false,
     "pyright.inlayHints.variableTypes": false,
     "python.analysis.typeCheckingMode": "off"
 }
