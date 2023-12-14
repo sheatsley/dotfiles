@@ -49,7 +49,6 @@ fi
 # install (and quarantine) homebrew-bundle, packages, casks and mas apps
 echo "Updating brew packages..."
 brew bundle --verbose --file=.brewbundle
-xattr -dr com.apple.quarantine $HOMEBREW_PREFIX/Caskroom/psieg-prismatik/5.11.2.31/Prismatik.app
 
 # install python packages
 echo "Installing python modules..."
