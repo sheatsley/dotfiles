@@ -87,8 +87,6 @@ cask "microsoft-remote-desktop"
 cask "microsoft-teams"
 # GameStream client
 cask "moonlight"
-# Lightpack and Prismatik open repository
-cask "psieg-prismatik"
 # Instant messaging application focusing on security
 cask "signal"
 # Team communication and collaboration software
