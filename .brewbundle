@@ -71,6 +71,8 @@ cask "docker"
 cask "firefox"
 # Developer targeted fonts with a high number of glyphs
 cask "font-dejavu-sans-mono-nerd-font"
+# The successor to Hyperion aka Hyperion Next Generation
+cask "hyperion-ng"
 cask "iguanatexmac"
 # Terminal emulator as alternative to Apple's Terminal app
 cask "iterm2"
