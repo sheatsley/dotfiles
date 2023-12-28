@@ -1,7 +1,7 @@
 # macOS configuration variables
 BREW="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 GITHUB=$HOME"/repos"
-GPGCONF="/usr/local/MacGPG2/bin"
+GPGCONF="/opt/homebrew/bin"
 KEYID="D97737F91189673C"
 XCODE="/Library/Preferences/com.apple.dt.Xcode IDELastGMLicenseAgreedTo"
 
