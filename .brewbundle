@@ -31,8 +31,6 @@ brew "hugo"
 brew "iperf3"
 # Compare and mark up LaTeX file differences
 brew "latexdiff"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.11"
 # Mac App Store command-line interface
 brew "mas"
 # Platform built on V8 to build network applications
@@ -43,6 +41,8 @@ brew "p7zip"
 brew "pdftk-java"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.11"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
 # Safe, concurrent, practical language
@@ -97,6 +97,8 @@ cask "slack"
 cask "spotify"
 # Data visualization software
 cask "tableau"
+# Keyboard configurator
+cask "via"
 # Create, manage, and run virtual machines
 cask "vmware-fusion"
 # Application for configuring any YubiKey
