@@ -10,7 +10,7 @@ defaults write com.apple.dock expose-group-apps -int 1                          
 defaults write com.apple.dock mru-spaces -int 0                                                # do not automatically rearrange spaces
 defaults write com.apple.dock orientation left                                                 # place dock on the left
 defaults write com.apple.dock persistent-apps -array                                           # clear the dock
-for APP in /Applications/{"iTerm","Hyperion","Moonlight"}                                     `# add iterm, hyperion, moonlight...` \
+for APP in /Applications/{"iTerm","Moonlight"}                                                `# add iterm, moonlight...` \
 /System/Applications/Messages /Applications/Spotify                                           `# messages, spotify...` \
 /System/Applications/Mail /System/Cryptexes/App/System/Applications/Safari                    `# mail, safari...` \
 /Applications/{"Signal","Discord"} /System/Applications/{"Calendar","Notes","Reminders"}      `# signal, discord, calendar, notes, reminders...` \
