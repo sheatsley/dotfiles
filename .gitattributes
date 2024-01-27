@@ -2,6 +2,7 @@
 .iter filter=git-crypt diff=git-crypt
 .gitrepos filter=git-crypt diff=git-crypt
 .repono filter=git-crypt diff=git-crypt
+.repono-ii filter=git-crypt diff=git-crypt
 .ssh/** filter=git-crypt diff=git-crypt
 .wireguard/** filter=git-crypt diff=git-crypt
 .zsh_history filter=git-crypt diff=git-crypt
