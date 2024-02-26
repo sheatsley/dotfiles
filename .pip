@@ -13,10 +13,8 @@ optuna
 pandas
 pipupgrade
 plotly
-ray[tune]
 tensorflow
 tensorflow-datasets
-tensorflow-macos
 torch
 torchvision
 scikit-learn
