@@ -1,10 +1,14 @@
 tap "homebrew/bundle"
+tap "homebrew/cask"
 tap "homebrew/cask-fonts"
+tap "homebrew/core"
 tap "homebrew/services"
 tap "sheatsley/formulae"
 tap "smudge/smudge"
 tap "tsung-ju/iguanatexmac"
 tap "universal-ctags/universal-ctags"
+# Arduino command-line interface
+brew "arduino-cli"
 # Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
 # Create and view interactive cheat sheets for *nix commands
@@ -29,6 +33,8 @@ brew "hopenpgp-tools"
 brew "hugo"
 # Update of iperf: measures TCP, UDP, and SCTP bandwidth
 brew "iperf3"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.12"
 # Compare and mark up LaTeX file differences
 brew "latexdiff"
 # Mac App Store command-line interface
@@ -47,6 +53,8 @@ brew "python@3.11"
 brew "ripgrep"
 # Safe, concurrent, practical language
 brew "rust"
+# Maintained ctags implementation
+brew "universal-ctags"
 # Yet Another Dotfiles Manager
 brew "yadm"
 # Tool for managing your YubiKey configuration
@@ -57,15 +65,11 @@ brew "ykpers"
 brew "zsh"
 # A command-line interface thesaurus
 brew "sheatsley/formulae/cli-thesaurus"
-# Maintained ctags implementation
-brew "universal-ctags/universal-ctags/universal-ctags", args: ["HEAD"]
-# Electronics prototyping platform
-cask "arduino"
 # Virtual Audio Driver
 cask "blackhole-2ch"
 # Voice and text chat software
 cask "discord"
-# App to build and share containerized applications and microservices
+# App to build and share containerised applications and microservices
 cask "docker"
 # Web browser
 cask "firefox"
@@ -105,7 +109,7 @@ cask "vmware-fusion"
 cask "yubico-yubikey-manager"
 # Video communication and virtual meeting platform
 cask "zoom"
-# Collect, organize, cite, and share research sources
+# Collect, organise, cite, and share research sources
 cask "zotero"
 mas "Adblock Plus", id: 1432731683
 mas "Bitwarden", id: 1352778147
