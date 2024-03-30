@@ -2,6 +2,8 @@
     // coc: https://github.com/neoclide/coc.nvim
     "coc.preferences.extensionUpdateCheck": "weekly",
     "coc.preferences.formatOnSave": true,
+    "coc.preferences.willSaveHandlerTimeout": 1000,
+    "coc.preferences.formatOnSaveTimeout": 1000,
     "diagnostic.errorSign": "\uea87",
     "diagnostic.hintSign": "\uf0eb",
     "diagnostic.warningSign": "\uf071",
