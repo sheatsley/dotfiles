@@ -20,7 +20,8 @@ let g:airline#extensions#tabline#tab_nr_type=1                  " show tab numbe
 let g:airline_powerline_fonts=1                                 " use powerline fonts for statusbar
 let g:coc_global_extensions=["coc-diagnostic",
   \ "coc-dictionary", "coc-explorer", "coc-jedi",
-  \ "coc-json", "coc-pairs", "coc-pyright", "coc-vimlsp"]       " add coc extensions for writing, editing, and coding
+  \ "coc-json", "coc-pairs", "coc-pyright", "coc-vimlsp",
+  \ "coc-vimtex"]                                               " add coc extensions for writing, editing, and coding
 let g:vista#renderer#icons={"variable":"\ue624"}                " bugfix for variable render
 let g:vista_stay_on_open=0                                      " do not focus vista on open
 let g:vista_executive_for={"python": "coc", "vim": "coc"}       " let coc power vista for code filetypes
