@@ -2,7 +2,7 @@ tap "homebrew/bundle"
 # Arduino command-line interface
 brew "arduino-cli"
 # Enable transparent encryption/decryption of files in a git repo
-brew "transcrypt"
+brew "git-crypt"
 # GNU Pretty Good Privacy (PGP) package
 brew "gnupg"
 # Update of iperf: measures TCP, UDP, and SCTP bandwidth
