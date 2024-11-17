@@ -6,5 +6,6 @@ more-itertools
 numpy
 pandas
 pelican[markdown]
+requests
 seaborn
 twine
