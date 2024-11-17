@@ -18,6 +18,8 @@ brew "leetup"
 brew "yadm"
 # Voice and text chat software
 cask "discord"
+# Terminal emulator as alternative to Apple's Terminal app
+cask "iterm2"
 # App to build and share containerised applications and microservices
 cask "docker"
 # Web browser
