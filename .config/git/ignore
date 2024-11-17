@@ -40,8 +40,5 @@ build/
 # vim swapfiles
 [._]*.s[a-w][a-z]
 
-# vim session
-Session.vim
-
 # microsoft office temporary files
 ~$*

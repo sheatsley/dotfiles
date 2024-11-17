@@ -6,14 +6,6 @@
     branch = master
 	path = .vim/pack/plugins/start/vim-airline
 	url = https://github.com/vim-airline/vim-airline.git
-[submodule ".vim/pack/plugins/start/vim-clang-format"]
-    branch = master
-	path = .vim/pack/plugins/start/vim-clang-format
-	url = https://github.com/rhysd/vim-clang-format.git
-[submodule ".vim/pack/plugins/start/vim-dispatch"]
-    branch = master
-	path = .vim/pack/plugins/start/vim-dispatch
-	url = https://github.com/tpope/vim-dispatch.git
 [submodule ".vim/pack/plugins/opt/onedark.vim"]
     branch = main
 	path = .vim/pack/plugins/opt/onedark.vim
@@ -40,21 +32,15 @@
 [submodule ".vim/pack/plugins/start/vim-polyglot"]
 	path = .vim/pack/plugins/start/vim-polyglot
 	url = https://github.com/sheerun/vim-polyglot.git
-[submodule ".vim/pack/plugins/start/vim-husk"]
-	path = .vim/pack/plugins/start/vim-husk
-	url = https://github.com/vim-utils/vim-husk.git
 [submodule ".vim/pack/plugins/start/markdown-preview.nvim"]
 	path = .vim/pack/plugins/start/markdown-preview.nvim
 	url = https://github.com/iamcco/markdown-preview.nvim.git
-[submodule ".vim/pack/plugins/start/vim-obsession"]
-	path = .vim/pack/plugins/start/vim-obsession
-	url = https://github.com/tpope/vim-obsession.git
 [submodule ".vim/pack/plugins/start/vim-devicons"]
 	path = .vim/pack/plugins/start/vim-devicons
 	url = https://github.com/ryanoasis/vim-devicons.git
-[submodule ".vim/pack/plugins/start/vista.vim"]
-	path = .vim/pack/plugins/start/vista.vim
-	url = https://github.com/liuchengxu/vista.vim.git
 [submodule ".vim/pack/plugins/start/copilot.vim"]
 	path = .vim/pack/plugins/start/copilot.vim
 	url = https://github.com/github/copilot.vim.git
+[submodule ".vim/pack/plugins/start/vim-rsi"]
+	path = .vim/pack/plugins/start/vim-rsi
+	url = https://github.com/tpope/vim-rsi.git

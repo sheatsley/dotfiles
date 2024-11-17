@@ -7,21 +7,10 @@
 [credential "https://git.overleaf.com"]
 	username = sheatsley@wisc.edu
     helper = osxkeychain
-[filter "lfs"]
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
 [pull]
 	rebase = true
 [rebase]
 	autoStash = true
-[remote "origin"]
-    fetch = "+refs/notes/*:refs/notes/*"
-    push = "HEAD"
-    push = "refs/notes/*:refs/notes/*"
-[url "https://github.com/"]
-  insteadOf = gh:
 [user]
   name = Ryan Sheatsley
   email = ryan@sheatsley.me

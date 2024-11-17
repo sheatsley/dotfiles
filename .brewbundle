@@ -1,94 +1,36 @@
 tap "homebrew/bundle"
-tap "homebrew/cask"
-tap "homebrew/cask-fonts"
-tap "homebrew/core"
-tap "homebrew/services"
-tap "sheatsley/formulae"
-tap "smudge/smudge"
-tap "tsung-ju/iguanatexmac"
-tap "universal-ctags/universal-ctags"
 # Arduino command-line interface
 brew "arduino-cli"
-# Clone of cat(1) with syntax highlighting and Git integration
-brew "bat"
-# Create and view interactive cheat sheets for *nix commands
-brew "cheat"
-# Formatting tools for C, C++, Obj-C, Java, JavaScript, TypeScript
-brew "clang-format"
-# Cross-platform make
-brew "cmake"
-# Distributed revision control system
-brew "git"
 # Enable transparent encryption/decryption of files in a git repo
-brew "git-crypt"
-# Git extension for versioning large files
-brew "git-lfs"
+brew "transcrypt"
 # GNU Pretty Good Privacy (PGP) package
 brew "gnupg"
-# Open source programming language to build simple/reliable/efficient software
-brew "go"
-# Command-line tools for OpenPGP-related operations
-brew "hopenpgp-tools"
-# Configurable static site generator
-brew "hugo"
 # Update of iperf: measures TCP, UDP, and SCTP bandwidth
 brew "iperf3"
-# Interpreted, interactive, object-oriented programming language
-brew "python@3.12"
 # Compare and mark up LaTeX file differences
 brew "latexdiff"
 # Mac App Store command-line interface
 brew "mas"
-# Platform built on V8 to build network applications
-brew "node"
-# 7-Zip (high compression file archiver) implementation
-brew "p7zip"
-# Port of pdftk in java
-brew "pdftk-java"
-# Pinentry for GPG on Mac
-brew "pinentry-mac"
 # Interpreted, interactive, object-oriented programming language
-brew "python@3.11"
-# Search tool like grep and The Silver Searcher
-brew "ripgrep"
-# Safe, concurrent, practical language
-brew "rust"
-# Maintained ctags implementation
-brew "universal-ctags"
+brew "python"
+brew "leetup"
 # Yet Another Dotfiles Manager
 brew "yadm"
-# Tool for managing your YubiKey configuration
-brew "ykman"
-# YubiKey personalization library and tool
-brew "ykpers"
-# UNIX shell (command interpreter)
-brew "zsh"
-# A command-line interface thesaurus
-brew "sheatsley/formulae/cli-thesaurus"
-# Virtual Audio Driver
-cask "blackhole-2ch"
 # Voice and text chat software
 cask "discord"
 # App to build and share containerised applications and microservices
 cask "docker"
 # Web browser
 cask "firefox"
-# Developer targeted fonts with a high number of glyphs
 cask "font-dejavu-sans-mono-nerd-font"
 # The successor to Hyperion aka Hyperion Next Generation
 cask "hyperion-ng"
-cask "iguanatexmac"
-# Terminal emulator as alternative to Apple's Terminal app
-cask "iterm2"
-cask "latexit-metadata"
 # Full TeX Live distribution without GUI applications
 cask "mactex-no-gui"
 # Provides updates to various Microsoft products
 cask "microsoft-auto-update"
 # Office suite
 cask "microsoft-office"
-# Remote desktop client
-cask "microsoft-remote-desktop"
 # Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
 # GameStream client
@@ -99,25 +41,16 @@ cask "signal"
 cask "slack"
 # Music streaming service
 cask "spotify"
-# Data visualization software
-cask "tableau"
 # Keyboard configurator
 cask "via"
 # Create, manage, and run virtual machines
 cask "vmware-fusion"
 # Application for configuring any YubiKey
 cask "yubico-yubikey-manager"
+# Pinentry for GPG on Mac
+brew "pinentry-mac"
 # Video communication and virtual meeting platform
 cask "zoom"
 # Collect, organise, cite, and share research sources
 cask "zotero"
 mas "Adblock Plus", id: 1432731683
-mas "Bitwarden", id: 1352778147
-mas "GarageBand", id: 682658836
-mas "iMovie", id: 408981434
-mas "Keynote", id: 409183694
-mas "Numbers", id: 409203825
-mas "Pages", id: 409201541
-mas "VBAN Talkie Cherry", id: 1553486090
-mas "WireGuard", id: 1451685025
-mas "Xcode", id: 497799835

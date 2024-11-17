@@ -2,17 +2,12 @@
 packadd! onedark.vim                                            " A dark color scheme inpsired by Atom's One Dark
 
 "        🔌 Plugins 🔌
+autocmd BufEnter * if (winnr("$") == 1 &&
+  \ &filetype == 'coc-explorer') | q | endif                    " close explorer if it is the only window
 autocmd BufWritePre <buffer> call <SID>Fixers()                 " call fixers on save
 autocmd FileType python setlocal commentstring=#\ %s            " configure commentary for python
 autocmd FileType tex let b:dispatch="latexmk -pdf main.tex"     " set latex compiler for dispatch
-autocmd VimEnter,TabNew * exe "CocCom explorer" | exe "Vista" | " open explorer and vista on each tab
-autocmd WinClosed * autocmd BufEnter * if winnr("$") == 2 &&
-  \ count(["coc-explorer", "vista", "vista_markdown"],
-  \ getwinvar(1, "&ft")) &&
-  \ count(["coc-explorer", "vista", "vista_markdown"],
-  \ getwinvar(2, "&ft")) | if tabpagenr("$") == 1 |
-  \ call feedkeys(":qa\<CR>") | else |
-  \ call feedkeys(":tabc\<CR>") | endif | endif                 " close explorer and vista if they are the last two windows
+autocmd VimEnter,TabNew * exe "CocCom explorer" |               " open explorer and vista on each tab
 let g:airline#extensions#tabline#enabled=1                      " show buffers in tabline
 let g:airline#extensions#tabline#show_close_button=0            " do not show close button in tabline
 let g:airline#extensions#tabline#show_splits=0                  " do not show open split in tabline
