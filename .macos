@@ -4,7 +4,6 @@ defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0    
 defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -int 1                # enable three finger drag for trackpads
 defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerTapGesture -int 2          # enable look up with three fingers
 defaults write com.apple.airplay showInMenuBarIfPresent -int 0                                 # remove airplay from menubar
-defaults write com.apple.applicationaccess allowAutoUnlock -int 1                              # allow apple watch to unlock mac
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -int 1                       # do not create .ds_store files on network volumes
 defaults write com.apple.dock expose-group-apps -int 1                                         # group windows by application in exposé
 defaults write com.apple.dock mru-spaces -int 0                                                # do not automatically rearrange spaces
@@ -13,7 +12,8 @@ defaults write com.apple.dock persistent-apps -array                            
 for APP in /Applications/{"iTerm","Moonlight"}                                                `# add iterm, moonlight...` \
 /System/Applications/Messages /Applications/Spotify                                           `# messages, spotify...` \
 /System/Applications/Mail /System/Cryptexes/App/System/Applications/Safari                    `# mail, safari...` \
-/Applications/{"Signal","Discord"} /System/Applications/{"Calendar","Notes","Reminders"}      `# signal, discord, calendar, notes, reminders...` \
+/Applications/{"Signal","Discord"} /System/Applications/Calendar                              `# signal, discord, calendar...` \
+/Users/Sheatsley/"Google Chat" /System/Applications/{"Notes","Reminders"}                     `# google chat, notes, reminders...` \
 /Applications/Slack; do                                                                       `# & slack` \
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>'$APP'.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'; \
 done                                                                                           # ... to the dock
@@ -26,19 +26,12 @@ defaults write com.apple.finder FXPreferredViewStyle "NLsv"                     
 defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -int 0                         # do not show external drives on desktop
 defaults write com.apple.finder ShowPathbar -int 1                                             # show path in finder
 defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 0                             # disable dictation via keyboard shortcuts
-defaults write com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers -array-add `# set the following defaults` \
-"{LSHandlerContentType=public.plain-text;LSHandlerRoleAll=org.vim.macvim;}"                   `# macvim for plaintext files` \
-"{LSHandlerContentType=public.python-script;LSHandlerRoleAll=org.vim.macvim;}"                `# macvim for python scripts`
 defaults write com.apple.menuextra.clock DateFormat "EEE MMM d  h:mm a"                        # show the day, month, date and time (am/pm) in the taskbar
-defaults write com.apple.Safari AutoFillPasswords -int 0                                       # do not autofill passwords in safari
+defaults write com.apple.Safari EnableNarrowTabs -int 1                                        # use compact tabs in safari
 defaults write com.apple.Safari HomePage "about:blank"                                         # set safari homepage to about:blank
 defaults write com.apple.Safari IncludeDevelopMenu -int 1                                      # include developer menu in safari
 defaults write com.apple.Safari ShowFullURLInSmartSearchField -int 1                           # show full url in safari address bar
 defaults write com.apple.Safari "WebKitPreferences.developerExtrasEnabled" -int 1              # enable inspector in safari
-defaults write com.apple.screensaver askForPassword -int 1                                     # ask for password after sleep or screensaver...
-defaults write com.apple.screensaver askForPasswordDelay -int 0                                # ... immediately
-defaults write com.apple.screensaver idleTime -int 300                                         # display screen saver after five minutes
-defaults write com.apple.screensaver tokenRemovalAction -int 1                                 # lock screen when login token is removed
 defaults write com.apple.sharingd DiscoverableMode "off"                                       # disable airplay discovery
 defaults write com.apple.SoftwareUpdate AutomaticCheckEnabled -int 1                           # automatically update mas apps
 defaults write com.apple.SoftwareUpdate AutomaticDownload -int 1                               # automatically download os updates
