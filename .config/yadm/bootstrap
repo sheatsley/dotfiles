@@ -1,107 +1,95 @@
-# macOS configuration variables
-BREW="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-GITHUB=$HOME"/repos"
-GPGCONF="/opt/homebrew/bin"
-KEYID="D97737F91189673C"
-XCODE="/Library/Preferences/com.apple.dt.Xcode IDELastGMLicenseAgreedTo"
+#!/usr/bin/python3
+"""
+This script defines the bootstrap used in https://github.com/sheatsley/dotfiles
+"""
 
-# move to home directory
-echo "Moving to $HOME ..."
-cd $HOME
+import os
+import subprocess
 
-# set computer name if desired
-echo "Enter computer name (leave blank to skip):"
-read NAME
-if ! [ -z "$NAME" ]
-then
-    echo "Setting computer name to $NAME..."
-    sudo scutil --set ComputerName $NAME
-    sudo scutil --set HostName $NAME
-    sudo scutil --set LocalHostName $NAME
-fi
-# install rosetta if needed
-if [ $(uname -p) = "arm" ] && ! /usr/bin/pgrep -q oahd
-then
-    echo "Installing Rosetta..."
-    softwareupdate --install-rosetta --agree-to-license
-fi
 
-# check if command line tools is installed
-if ! xcode-select -p >/dev/null
-then
-    echo "Installing command line tools..."
-    xcode-select --install
-fi
+def install_brew_packages(file=".brewbundle"):
+    """
+    """
+    print("Installing brew packages...")
+    return subprocess.run(args=["brew", "bundle", "--force", f"--file={file}", "cleanup"]).returncode
 
-# install brew if needed
-if ! type brew >/dev/null
-then
-    echo "Installing brew..."
-    /bin/bash -c "$(curl -fsSL $BREW)"
-    if [ $(uname -p) = "arm" ]
-    then
-        echo "Performing next steps for Apple Silicon..."
-        echo "eval '$(/opt/homebrew/bin/brew shellenv)'" >> $HOME/.zprofile
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    fi
-fi
+def install_homebrew(url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"):
+    """
+    """
+    print("Installing brew...")
+    return subprocess.run(args=["/bin/bash", "-c", f"$(curl -fsSL {url})"]).returncode
 
-# install (and quarantine) homebrew-bundle, packages, casks and mas apps
-echo "Updating brew packages..."
-brew bundle --verbose --file=.brewbundle
+def install_pip_packages(file=".pip"):
+    """
+    """
+    print("Installing python modules...")
+    return subprocess.run(args=["pip3", "install", "--upgrade", "-r", file]).returncode
 
-# install python packages
-echo "Installing python modules..."
-pip3 install --upgrade -r .pip
+def set_computer_name():
+    """
+    """
+    print("Enter computer name:")
+    name = input()
+    returncodes = []
+    for pref in "ComputerName", "HostName", "LocalHostName":
+        returncodes.append(subprocess.run(args=["sudo", "scutil", "--set", pref, name]))
+    return 0 if all([rc.returncode == 0 for rc in returncodes]) else 1
 
-# accept xcode license if necessary
-if ! defaults read $XCODE >/dev/null
-then
-    echo "Accepting XCode license..."
-    sudo xcodebuild -license accept
-fi
+def set_public_key(key):
+    """
+    """
+    print(f"Adding GPG public key {key} to keyring and setting trust to ulimate...")
+    returncodes = []
+    returncodes.append(subprocess.run(args=["gpg", "--card-edit", "--command-fd", "0"], input="fetch").returncode)
+    returncodes.append(subprocess.run(args=["gpg", "--edit-key", key, "--command-fd", "0"], input="trust\n5\ny\n").returncode)
+    return 0 if all([rc.returncode == 0 for rc in returncodes]) else 1
 
-# add public gpg key to keyring
-if ! gpg -k $KEYID >/dev/null
-then
-    echo "Downloading GPG public key $KEYID ..."
-    gpg --card-edit --command-fd 0 <<< fetch
-fi
+def set_git_crypt(key):
+    """
+    """
+    print(f"Decrypting files with {key}...")
+    return subprocess.run(args=["yadm", "crypt", "unlock"]).returncode
 
-# set gpg trust to ultimate
-if ! gpg -k $KEYID | grep "ultimate" >/dev/null
-then
-    echo "Setting $KEYID trust to ultimate..."
-    echo "5\ny\n" | gpg --command-fd 0 --edit-key $KEYID trust
-fi
+def set_github_repos(directory="repos", file=".gitrepos", jobs=8):
+    """
+    """
+    print("Setting up GitHub repos...")
+    with open(file, "r") as f:
+        for repo in f.readlines():
 
-# convert yadm repo from https to ssh
-if ! yadm remote get-url origin | grep "git@github.com" >/dev/null
-then
-    echo "Changing remote url of yadm repo..."
-    yadm remote set-url origin "git@github.com:$(yadm remote get-url origin | cut -d '/' -f4-)"
-fi
 
-# decrypt yadm files
-if grep -qs "\x00GITCRYPT" .gitrepos
-then
-    echo "Decrypting files, please insert Yubikey..."
-    if ! yadm crypt unlock
-    then
-        echo "Decrypt failed! Exiting..."
-        exit 1
-    fi
-fi
+    return subprocess.run(args=["yadm", "clone", "
 
-# export env variables for ssh access with gpg
-if ! type gpgconf >/dev/null
-then
-    echo "Setting env variables for SSH access with GPG..."
-    eval `/usr/libexec/path_helper -s`
-    export GPG_TTY="$(tty)"
-    export SSH_AUTH_SOCK="$($GPGCONF/gpgconf --list-dirs agent-ssh-socket)"
-    $GPGCONF/gpgconf --launch gpg-agent
-fi
+def set_gpg_agent():
+    """
+    """
+    print("Setting GPG agent...")
+    returncodes = []
+    returncodes.append(subprocess.run(args=["eval", "/usr/libexec/path_helper -s"]).returncode)
+    returncodes.append(subprocess.run(args=["export", "GPG_TTY=\"$(tty)\""]).returncode)
+    returncodes.append(subprocess.run(args=["export", "SSH_AUTH_SOCK=\"$(gpgconf --list-dirs agent-ssh-socket)"]).returncode)
+    returncodes.append(subprocess.run(args=["gpgconf", "--launch", "gpg-agent"]).returncode)
+    return 0 if all([rc.returncode == 0 for rc in returncodes]) else 1
+
+def set_yadm_repo():
+    """
+    """
+    print("Changing remote url of yadm repo...")
+    reponame = subprocess.run(args=["yadm", "remote", "get-url", "origin"], capture_output=True).stdout.decode(encoding="utf-8").strip().split(":").pop()
+    return subprocess.run(args=["yadm", "remote", "set-url", "origin", reponame]).returncode
+
+def check(key="D97737F91189673C"):
+    """
+    """
+    names = []
+    for pref in "ComputerName", "HostName", "LocalHostName":
+        names.append(subprocess.run(args=["scutil", "--get", pref],capture_output=True).stdout.decode(encoding="utf-8").strip())
+    subprocess.run(args=["type", "brew"],stdout=subprocess.DEVNULL).returncode
+    subprocess.run(args=["gpg", "-k", key],stdout=subprocess.DEVNULL).returncode
+    subprocess.run(args=["yadm", "remote", "get-url", "origin"],capture_output=True).stdout.decode(encoding="utf-8").startswith("http")
+    not subprocess.run(args=["grep","-qs",r"\x00GITCRYPT",".gitrepos"]).returncode
+    subprocess.run(args=["type", "gpgconf"],stdout=subprocess.DEVNULL).returncode
+    return None
 
 # download github repos
 echo "Updating GitHub repos..."
@@ -109,9 +97,9 @@ while IFS="/" read -r OWNER REPO
 do
     if [ ! -d $GITHUB/$REPO ]
     then
-        git clone --recurse-submodules git@github.com:$OWNER/$REPO.git $GITHUB/$REPO
+        git clone --jobs 8 --recurse-submodules git@github.com:$OWNER/$REPO.git $GITHUB/$REPO
     else
-        git -C $GITHUB/$REPO pull --recurse-submodules
+        git -C $GITHUB/$REPO pull --jobs 8 --recurse-submodules
     fi
 done < .gitrepos
 
@@ -141,3 +129,8 @@ then
     osascript -e 'tell app "System Events" to log out'
 fi
 echo "Bootstrap complete"
+
+if __name__ == "__main__":
+    """
+    """
+    raise SystemExit(0)
