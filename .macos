@@ -20,6 +20,7 @@ done                                                                            
 defaults write com.apple.dock show-recents -int 0                                              # do not show recent apps in dock
 defaults write com.apple.dock size-immutable -int 1                                            # disable dock resizing
 defaults write com.apple.dock tilesize -int 31                                                 # set dock icons to 31 pixels
+defaults write com.apple.dock wvous-br-corner -int 0                                           # disable bottom-right hot corner
 defaults write com.apple.dock workspaces-auto-swoosh -int 0                                    # disable auto space switching
 defaults write com.apple.finder FXEnableExtensionChangeWarning -int 0                          # disable file extension change warning
 defaults write com.apple.finder FXPreferredViewStyle "NLsv"                                    # set default view style in finder to list view
