@@ -23,6 +23,7 @@ cask "iterm2"
 # App to build and share containerised applications and microservices
 cask "docker"
 # Web browser
+cask utm
 cask "firefox"
 cask "font-dejavu-sans-mono-nerd-font"
 # The successor to Hyperion aka Hyperion Next Generation
