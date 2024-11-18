@@ -7,7 +7,7 @@ autocmd BufEnter * if (winnr("$") == 1 &&
 autocmd BufWritePre <buffer> call <SID>Fixers()                 " call fixers on save
 autocmd FileType python setlocal commentstring=#\ %s            " configure commentary for python
 autocmd FileType tex let b:dispatch="latexmk -pdf main.tex"     " set latex compiler for dispatch
-autocmd VimEnter,TabNew * exe "CocCom explorer" |               " open explorer and vista on each tab
+autocmd VimEnter,TabNew * exe "CocCom explorer" |               " open explorer on new tabs
 let g:airline#extensions#tabline#enabled=1                      " show buffers in tabline
 let g:airline#extensions#tabline#show_close_button=0            " do not show close button in tabline
 let g:airline#extensions#tabline#show_splits=0                  " do not show open split in tabline
@@ -17,9 +17,6 @@ let g:coc_global_extensions=["coc-diagnostic",
   \ "coc-dictionary", "coc-explorer", "coc-jedi",
   \ "coc-json", "coc-pairs", "coc-pyright", "coc-vimlsp",
   \ "coc-vimtex"]                                               " add coc extensions for writing, editing, and coding
-let g:vista#renderer#icons={"variable":"\ue624"}                " bugfix for variable render
-let g:vista_stay_on_open=0                                      " do not focus vista on open
-let g:vista_executive_for={"python": "coc", "vim": "coc"}       " let coc power vista for code filetypes
 nnoremap <silent> K :call CocAction("doHover")<CR>|             " induce hover action from lsp
 nnoremap <silent> <expr> <C-b> (expand("%") =~
   \ "coc-explorer" ? "\<c-w>\<c-w>" : "").":Buffers\<CR>"       " do not open buffers in explorer with fzf
