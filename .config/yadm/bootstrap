@@ -10,7 +10,29 @@ import subprocess
 def install_brew_packages(file=".brewbundle"):
     """ """
     print("Installing brew packages...")
-    subprocess.run(args=["brew", "bundle", "--force", f"--file={file}"], check=True)
+    subprocess.run(
+        args=["NONINTERACTIVE=1", "brew", "bundle", f"--file={file}"],
+        check=True,
+    )
+    subprocess.run(
+        args=[
+            "NONINTERACTIVE=1",
+            "brew",
+            "bundle",
+            f"--file={file}",
+            "--force",
+            "cleanup",
+        ],
+        check=True,
+    )
+    subprocess.run(
+        args=["NONINTERACTIVE=1", "brew", "upgrade"],
+        check=True,
+    )
+    subprocess.run(
+        args=["NONINTERACTIVE=1", "brew", "cleanup"],
+        check=True,
+    )
     return None
 
 
@@ -30,7 +52,9 @@ def install_homebrew(
 def install_pip_packages(file=".pip"):
     """ """
     print("Installing python modules...")
-    subprocess.run(args=["pip3", "install", "--upgrade", "-r", file], check=True)
+    subprocess.run(
+        args=["pip3", "install", "--upgrade", "--requirement", file], check=True
+    )
     return None
 
 
