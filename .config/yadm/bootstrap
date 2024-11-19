@@ -201,8 +201,8 @@ def set_yadm_repo():
 
 def check(key="D97737F91189673C"):
     """ """
-    # switch to home directory
     os.chdir(os.path.expanduser("~"))
+    tasks = [install_brew_packages(), install_pip_packages(), install_submodules()]
     names = []
     for pref in "ComputerName", "HostName", "LocalHostName":
         names.append(
@@ -210,16 +210,39 @@ def check(key="D97737F91189673C"):
             .stdout.decode(encoding="utf-8")
             .strip()
         )
-    subprocess.run(args=["type", "brew"], stdout=subprocess.DEVNULL).returncode
-    subprocess.run(args=["gpg", "-k", key], stdout=subprocess.DEVNULL).returncode
-    subprocess.run(
-        args=["yadm", "remote", "get-url", "origin"], capture_output=True
-    ).stdout.decode(encoding="utf-8").startswith("http")
-    not subprocess.run(args=["grep", "-qs", r"\x00GITCRYPT", ".gitrepos"]).returncode
-    subprocess.run(args=["type", "gpgconf"], stdout=subprocess.DEVNULL).returncode
+    if names[0] != names[1] or names[0] != names[2]:
+        tasks.append(set_computer_name())
+    if subprocess.run(args=["type", "brew"], stdout=subprocess.DEVNULL).returncode != 0:
+        tasks.append(install_homebrew())
+    if (
+        subprocess.run(args=["gpg", "-k", key], stdout=subprocess.DEVNULL).returncode
+        != 0
+    ):
+        tasks.append(set_public_key(key))
+    if (
+        subprocess.run(
+            args=["yadm", "remote", "get-url", "origin"], capture_output=True
+        )
+        .stdout.decode(encoding="utf-8")
+        .startswith("http")
+    ):
+        tasks.append(set_yadm_repo())
+    if (
+        not subprocess.run(
+            args=["grep", "-qs", r"\x00GITCRYPT", ".gitrepos"]
+        ).returncode
+        != 0
+    ):
+        tasks.append(set_git_crypt(key))
+    if (
+        subprocess.run(args=["type", "gpgconf"], stdout=subprocess.DEVNULL).returncode
+        != 0
+    ):
+        tasks.append(set_gpg_agent())
     return None
 
 
 if __name__ == "__main__":
     """ """
+    check()
     raise SystemExit(0)
