@@ -11,27 +11,9 @@ def install_brew_packages(file=".brewbundle"):
     """ """
     print("Installing brew packages...")
     subprocess.run(
-        args=["NONINTERACTIVE=1", "brew", "bundle", f"--file={file}"],
+        args=["brew", "bundle", "install", "--cleanup"],
         check=True,
-    )
-    subprocess.run(
-        args=[
-            "NONINTERACTIVE=1",
-            "brew",
-            "bundle",
-            f"--file={file}",
-            "--force",
-            "cleanup",
-        ],
-        check=True,
-    )
-    subprocess.run(
-        args=["NONINTERACTIVE=1", "brew", "upgrade"],
-        check=True,
-    )
-    subprocess.run(
-        args=["NONINTERACTIVE=1", "brew", "cleanup"],
-        check=True,
+        env={"HOMEBREW_BUNDLE_FILE": file, "NONINTERACTIVE": "1"},
     )
     return None
 
@@ -44,7 +26,7 @@ def install_homebrew(
     filename = url.split("/").pop()
     subprocess.run(args=["curl", "-o", f"/tmp/{filename}", "-fssSL", url], check=True)
     subprocess.run(
-        args=["NONINTERACTIVE=1", "/bin/bash", f"/tmp/{filename}"], check=True
+        args=["/bin/bash", f"/tmp/{filename}"], check=True, env={"NONINTERACTIVE": "1"}
     )
     return None
 
@@ -53,7 +35,9 @@ def install_pip_packages(file=".pip"):
     """ """
     print("Installing python modules...")
     subprocess.run(
-        args=["pip3", "install", "--upgrade", "--requirement", file], check=True
+        args=["pip3", "install", "--upgrade", "--requirement", file],
+        check=True,
+        env={"PIP_NO_INPUT": "1"},
     )
     return None
 
