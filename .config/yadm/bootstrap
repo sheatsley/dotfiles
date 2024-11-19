@@ -9,11 +9,12 @@ import subprocess
 
 def install_brew_packages(file=".brewbundle"):
     """ """
+    env = os.environ.copy()
     print("Installing brew packages...")
     subprocess.run(
         args=["brew", "bundle", "install", "--cleanup"],
         check=True,
-        env={"HOMEBREW_BUNDLE_FILE": file, "NONINTERACTIVE": "1"},
+        env=env | {"HOMEBREW_BUNDLE_FILE": file, "NONINTERACTIVE": "1"},
     )
     return None
 
@@ -23,10 +24,13 @@ def install_homebrew(
 ):
     """ """
     print("Installing brew...")
+    env = os.environ.copy()
     filename = url.split("/").pop()
     subprocess.run(args=["curl", "-o", f"/tmp/{filename}", "-fssSL", url], check=True)
     subprocess.run(
-        args=["/bin/bash", f"/tmp/{filename}"], check=True, env={"NONINTERACTIVE": "1"}
+        args=["/bin/bash", f"/tmp/{filename}"],
+        check=True,
+        env=env | {"NONINTERACTIVE": "1"},
     )
     return None
 
@@ -34,10 +38,11 @@ def install_homebrew(
 def install_pip_packages(file=".pip"):
     """ """
     print("Installing python modules...")
+    env = os.environ.copy()
     subprocess.run(
         args=["pip3", "install", "--upgrade", "--requirement", file],
         check=True,
-        env={"PIP_NO_INPUT": "1"},
+        env=env | {"PIP_NO_INPUT": "1"},
     )
     return None
 
@@ -82,7 +87,7 @@ def set_computer_name():
     return None
 
 
-def set_public_key(key):
+def set_public_key(key="D97737F91189673C"):
     """ """
     print(f"Adding GPG public key {key} to keyring and setting trust to ulimate...")
     subprocess.run(
@@ -96,7 +101,7 @@ def set_public_key(key):
     return None
 
 
-def set_git_crypt(key):
+def set_git_crypt(key="D97737F91189673C"):
     """ """
     print(f"Decrypting files with {key}...")
     subprocess.run(args=["yadm", "crypt", "unlock"], check=True)
@@ -141,13 +146,34 @@ def set_github_repos(directory="repos", file=".gitrepos", jobs=8):
 def set_gpg_agent():
     """ """
     print("Setting GPG agent...")
-    subprocess.run(args=["eval", "/usr/libexec/path_helper -s"], check=True)
-    subprocess.run(args=["export", 'GPG_TTY="$(tty)"'], check=True)
-    subprocess.run(
-        args=["export", 'SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)'],
-        check=True,
+    env = os.environ.copy()
+    env["PATH"] = (
+        subprocess.run(
+            args=["/usr/libexec/path_helper"], capture_output=True, check=True
+        )
+        .stdout.decode(encoding="utf-8")
+        .strip()
+        .split(";")
+        .pop(0)
+        .split("=")
+        .pop()
+        .strip('"')
     )
-    subprocess.run(args=["gpgconf", "--launch", "gpg-agent"], check=True)
+    env["GPG_TTY"] = (
+        subprocess.run(args=["tty"], capture_output=True, check=True)
+        .stdout.decode(encoding="utf-8")
+        .strip()
+    )
+    env["SSH_AUTH_SOCK"] = (
+        subprocess.run(
+            args=["gpgconf", "--list-dirs", "agent-ssh-socket"],
+            capture_output=True,
+            check=True,
+        )
+        .stdout.decode(encoding="utf-8")
+        .strip()
+    )
+    subprocess.run(args=["gpgconf", "--launch", "gpg-agent"], check=True, env=env)
     return None
 
 
@@ -216,41 +242,44 @@ def check(key="D97737F91189673C"):
             .replace("-", " ")
         )
     if names[0] != names[1] or names[0] != names[2]:
-        tasks.append(set_computer_name())
+        tasks.append(set_computer_name)
     if subprocess.run(args=["type", "brew"], stdout=subprocess.DEVNULL).returncode != 0:
-        tasks.append(install_homebrew())
-    tasks.append(install_brew_packages())
-    tasks.append(install_pip_packages())
-    if (
-        subprocess.run(args=["gpg", "-k", key], stdout=subprocess.DEVNULL).returncode
-        != 0
-    ):
-        tasks.append(set_public_key(key))
-    if (
-        subprocess.run(
-            args=["yadm", "remote", "get-url", "origin"], capture_output=True
+        tasks.append(install_homebrew)
+    tasks.append(install_brew_packages)
+    tasks.append(install_pip_packages)
+    try:
+        subprocess.run(args=["gpg", "-k", key], check=True)
+    except:
+        tasks.append(set_public_key)
+    try:
+        assert (
+            subprocess.run(
+                args=["yadm", "remote", "get-url", "origin"],
+                capture_output=True,
+                check=True,
+            )
+            .stdout.decode(encoding="utf-8")
+            .startswith("http")
         )
-        .stdout.decode(encoding="utf-8")
-        .startswith("http")
-    ):
-        tasks.append(set_yadm_repo())
+    except:
+        tasks.append(set_yadm_repo)
     if (
         not subprocess.run(
             args=["grep", "-qs", r"\x00GITCRYPT", ".gitrepos"]
         ).returncode
         != 0
     ):
-        tasks.append(set_git_crypt(key))
+        tasks.append(set_git_crypt)
     if (
         subprocess.run(args=["type", "gpgconf"], stdout=subprocess.DEVNULL).returncode
         != 0
     ):
-        tasks.append(set_gpg_agent())
-    tasks.append(set_github_repos())
-    tasks.append(install_submodules())
-    tasks.append(install_vim_plugins())
-    tasks.append(set_iterm2())
-    tasks.append(set_macos_defaults())
+        tasks.append(set_gpg_agent)
+    tasks.append(set_github_repos)
+    tasks.append(install_submodules)
+    tasks.append(install_vim_plugins)
+    tasks.append(set_iterm2)
+    tasks.append(set_macos_defaults)
     for task in tasks:
         task()
     return None
