@@ -10,9 +10,10 @@ import subprocess
 def install_brew_packages(file=".brewbundle"):
     """ """
     print("Installing brew packages...")
-    return subprocess.run(
-        args=["brew", "bundle", "--force", f"--file={file}", "cleanup"]
-    ).returncode
+    subprocess.run(
+        args=["brew", "bundle", "--force", f"--file={file}", "cleanup"], check=True
+    )
+    return None
 
 
 def install_homebrew(
@@ -20,19 +21,23 @@ def install_homebrew(
 ):
     """ """
     print("Installing brew...")
-    return subprocess.run(args=["/bin/bash", "-c", f"$(curl -fsSL {url})"]).returncode
+    filename = url.split("/").pop()
+    subprocess.run(args=["curl", "-o", f"/tmp/{filename}", "-fssSL", url], check=True)
+    subprocess.run(args=["/bin/bash", f"/tmp/{filename}"], check=True)
+    return None
 
 
 def install_pip_packages(file=".pip"):
     """ """
     print("Installing python modules...")
-    return subprocess.run(args=["pip3", "install", "--upgrade", "-r", file]).returncode
+    subprocess.run(args=["pip3", "install", "--upgrade", "-r", file], check=True)
+    return None
 
 
 def install_submodules():
     """ """
     print("Installing yadm submodules...")
-    return subprocess.run(
+    subprocess.run(
         args=[
             "yadm",
             "submodule",
@@ -41,57 +46,53 @@ def install_submodules():
             "--recursive",
             "--remote",
             "--rebase",
-        ]
-    ).returncode
+        ],
+        check=True,
+    )
+    return None
 
 
 def install_vim_plugins():
     """ """
     print("Installing vim plugins...")
-    returncodes = []
-    returncodes.append(
-        subprocess.run(args=["vim", "+call mkdp#util#install()", "+qall"]).returncode
-    )
-    returncodes.append(
-        subprocess.run(args=["vim", "+Copilot setup", "+qall"]).returncode
-    )
-    returncodes.append(
-        subprocess.run(args=["vim", ".vimrc", "+helptags ALL", "+qall"]).returncode
-    )
-    return 0 if all([rc.returncode == 0 for rc in returncodes]) else 1
+    subprocess.run(args=["vim", "+call mkdp#util#install()", "+qall"], check=True)
+    subprocess.run(args=["vim", "+Copilot setup", "+qall"], check=True)
+    subprocess.run(args=["vim", ".vimrc", "+helptags ALL", "+qall"], check=True)
+    return None
 
 
 def set_computer_name():
     """ """
     print("Enter computer name:")
     name = input()
-    returncodes = []
-    for pref in "ComputerName", "HostName", "LocalHostName":
-        returncodes.append(subprocess.run(args=["sudo", "scutil", "--set", pref, name]))
-    return 0 if all([rc.returncode == 0 for rc in returncodes]) else 1
+    subprocess.run(args=["sudo", "scutil", "--set", "ComputerName", name], check=True)
+    subprocess.run(args=["sudo", "scutil", "--set", "HostName", name], check=True)
+    subprocess.run(
+        args=["sudo", "scutil", "--set", "LocalHostName", name.replace(" ", "-")],
+        check=True,
+    )
+    return None
 
 
 def set_public_key(key):
     """ """
     print(f"Adding GPG public key {key} to keyring and setting trust to ulimate...")
-    returncodes = []
-    returncodes.append(
-        subprocess.run(
-            args=["gpg", "--card-edit", "--command-fd", "0"], input="fetch"
-        ).returncode
+    subprocess.run(
+        args=["gpg", "--card-edit", "--command-fd", "0"], check=True, input="fetch"
     )
-    returncodes.append(
-        subprocess.run(
-            args=["gpg", "--edit-key", key, "--command-fd", "0"], input="trust\n5\ny\n"
-        ).returncode
+    subprocess.run(
+        args=["gpg", "--edit-key", key, "--command-fd", "0"],
+        check=True,
+        input="trust\n5\ny\n",
     )
-    return 0 if all([rc.returncode == 0 for rc in returncodes]) else 1
+    return None
 
 
 def set_git_crypt(key):
     """ """
     print(f"Decrypting files with {key}...")
-    return subprocess.run(args=["yadm", "crypt", "unlock"]).returncode
+    subprocess.run(args=["yadm", "crypt", "unlock"], check=True)
+    return None
 
 
 def set_github_repos(directory="repos", file=".gitrepos", jobs=8):
@@ -110,7 +111,8 @@ def set_github_repos(directory="repos", file=".gitrepos", jobs=8):
                         "--recurse-submodules",
                         f"git@github.com:{owner}/{name}.git",
                         f"{directory}/{name}",
-                    ]
+                    ],
+                    check=True,
                 )
             else:
                 subprocess.run(
@@ -122,64 +124,57 @@ def set_github_repos(directory="repos", file=".gitrepos", jobs=8):
                         "--jobs",
                         str(jobs),
                         "--recurse-submodules",
-                    ]
+                    ],
+                    check=True,
                 )
-    return 0
+    return None
 
 
 def set_gpg_agent():
     """ """
     print("Setting GPG agent...")
-    returncodes = []
-    returncodes.append(
-        subprocess.run(args=["eval", "/usr/libexec/path_helper -s"]).returncode
+    subprocess.run(args=["eval", "/usr/libexec/path_helper -s"], check=True)
+    subprocess.run(args=["export", 'GPG_TTY="$(tty)"'], check=True)
+    subprocess.run(
+        args=["export", 'SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)'],
+        check=True,
     )
-    returncodes.append(subprocess.run(args=["export", 'GPG_TTY="$(tty)"']).returncode)
-    returncodes.append(
-        subprocess.run(
-            args=["export", 'SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)']
-        ).returncode
-    )
-    returncodes.append(
-        subprocess.run(args=["gpgconf", "--launch", "gpg-agent"]).returncode
-    )
-    return 0 if all([rc.returncode == 0 for rc in returncodes]) else 1
+    subprocess.run(args=["gpgconf", "--launch", "gpg-agent"], check=True)
+    return None
 
 
 def set_iterm2():
     """ """
     print("Configuring iTerm2 profile...")
-    returncodes = []
-    returncodes.append(
-        subprocess.run(
-            args=[
-                "defaults",
-                "write",
-                "com.googlecode.iterm2",
-                "PrefsCustomFolder",
-                "$HOME/.iterm2",
-            ]
-        ).returncode
+    subprocess.run(
+        args=[
+            "defaults",
+            "write",
+            "com.googlecode.iterm2",
+            "PrefsCustomFolder",
+            "$HOME/.iterm2",
+        ],
+        check=True,
     )
-    returncodes.append(
-        subprocess.run(
-            args=[
-                "defaults",
-                "write",
-                "com.googlecode.iterm2",
-                "LoadPrefsFromCustomFolder",
-                "-int",
-                "1",
-            ]
-        ).returncode
+    subprocess.run(
+        args=[
+            "defaults",
+            "write",
+            "com.googlecode.iterm2",
+            "LoadPrefsFromCustomFolder",
+            "-int",
+            "1",
+        ],
+        check=True,
     )
-    return 0 if all([rc.returncode == 0 for rc in returncodes]) else 1
+    return None
 
 
 def set_macos_defaults(file=".macos"):
     """ """
     print("Setting macOS defaults...")
-    return subprocess.run(args=["sh", file]).returncode
+    subprocess.run(args=["sh", file], check=True)
+    return None
 
 
 def set_yadm_repo():
@@ -187,16 +182,17 @@ def set_yadm_repo():
     print("Changing remote url of yadm repo...")
     reponame = (
         subprocess.run(
-            args=["yadm", "remote", "get-url", "origin"], capture_output=True
+            args=["yadm", "remote", "get-url", "origin"],
+            capture_output=True,
+            check=True,
         )
         .stdout.decode(encoding="utf-8")
         .strip()
         .split(":")
         .pop()
     )
-    return subprocess.run(
-        args=["yadm", "remote", "set-url", "origin", reponame]
-    ).returncode
+    subprocess.run(args=["yadm", "remote", "set-url", "origin", reponame], check=True)
+    return None
 
 
 def check(key="D97737F91189673C"):
