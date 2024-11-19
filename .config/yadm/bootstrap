@@ -10,9 +10,7 @@ import subprocess
 def install_brew_packages(file=".brewbundle"):
     """ """
     print("Installing brew packages...")
-    subprocess.run(
-        args=["brew", "bundle", "--force", f"--file={file}", "cleanup"], check=True
-    )
+    subprocess.run(args=["brew", "bundle", "--force", f"--file={file}"], check=True)
     return None
 
 
@@ -23,7 +21,9 @@ def install_homebrew(
     print("Installing brew...")
     filename = url.split("/").pop()
     subprocess.run(args=["curl", "-o", f"/tmp/{filename}", "-fssSL", url], check=True)
-    subprocess.run(args=["/bin/bash", f"/tmp/{filename}"], check=True)
+    subprocess.run(
+        args=["NONINTERACTIVE=1", "/bin/bash", f"/tmp/{filename}"], check=True
+    )
     return None
 
 
@@ -205,6 +205,7 @@ def check(key="D97737F91189673C"):
             subprocess.run(args=["scutil", "--get", pref], capture_output=True)
             .stdout.decode(encoding="utf-8")
             .strip()
+            .replace("-", " ")
         )
     if names[0] != names[1] or names[0] != names[2]:
         tasks.append(set_computer_name())
