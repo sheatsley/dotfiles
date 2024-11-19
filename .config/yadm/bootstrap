@@ -202,7 +202,7 @@ def set_yadm_repo():
 def check(key="D97737F91189673C"):
     """ """
     os.chdir(os.path.expanduser("~"))
-    tasks = [install_brew_packages(), install_pip_packages(), install_submodules()]
+    tasks = []
     names = []
     for pref in "ComputerName", "HostName", "LocalHostName":
         names.append(
@@ -214,6 +214,8 @@ def check(key="D97737F91189673C"):
         tasks.append(set_computer_name())
     if subprocess.run(args=["type", "brew"], stdout=subprocess.DEVNULL).returncode != 0:
         tasks.append(install_homebrew())
+    tasks.append(install_brew_packages())
+    tasks.append(install_pip_packages())
     if (
         subprocess.run(args=["gpg", "-k", key], stdout=subprocess.DEVNULL).returncode
         != 0
@@ -239,6 +241,13 @@ def check(key="D97737F91189673C"):
         != 0
     ):
         tasks.append(set_gpg_agent())
+    tasks.append(set_github_repos())
+    tasks.append(install_submodules())
+    tasks.append(install_vim_plugins())
+    tasks.append(set_iterm2())
+    tasks.append(set_macos_defaults())
+    for task in tasks:
+        task()
     return None
 
 
