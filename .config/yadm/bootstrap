@@ -96,12 +96,15 @@ def set_public_key(key="D97737F91189673C"):
     """ """
     print(f"Adding GPG public key {key} to keyring and setting trust to ulimate...")
     subprocess.run(
-        args=["gpg", "--card-edit", "--command-fd", "0"], check=True, input=b"fetch"
+        args=["gpg", "--card-edit", "--command-fd", "0"],
+        check=True,
+        text=True,
+        input="fetch\n",
     )
     subprocess.run(
-        args=["gpg", "--edit-key", key, "--command-fd", "0"],
+        args=["gpg", "--command-fd", "0", "--edit-key", key, "trust"],
         check=True,
-        input=b"trust\n5\ny\n",
+        input=b"5\ny\n",
     )
     return None
 
@@ -253,7 +256,9 @@ def check(key="D97737F91189673C"):
     tasks.append(install_brew_packages)
     tasks.append(install_pip_packages)
     try:
-        subprocess.run(args=["gpg", "-k", key], check=True)
+        assert "ultimate" in subprocess.run(
+            args=["gpg", "-k", key], capture_output=True, check=True
+        ).stdout.decode(encoding="utf-8")
     except:
         tasks.append(set_public_key)
     try:
