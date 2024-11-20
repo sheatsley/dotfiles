@@ -40,6 +40,11 @@ def install_pip_packages(file=".pip"):
     print("Installing python modules...")
     env = os.environ.copy()
     subprocess.run(
+        args=["pip3", "install", "--upgrade", "pip"],
+        check=True,
+        env=env | {"PIP_NO_INPUT": "1"},
+    )
+    subprocess.run(
         args=["pip3", "install", "--upgrade", "--requirement", file],
         check=True,
         env=env | {"PIP_NO_INPUT": "1"},
@@ -91,12 +96,12 @@ def set_public_key(key="D97737F91189673C"):
     """ """
     print(f"Adding GPG public key {key} to keyring and setting trust to ulimate...")
     subprocess.run(
-        args=["gpg", "--card-edit", "--command-fd", "0"], check=True, input="fetch"
+        args=["gpg", "--card-edit", "--command-fd", "0"], check=True, input=b"fetch"
     )
     subprocess.run(
         args=["gpg", "--edit-key", key, "--command-fd", "0"],
         check=True,
-        input="trust\n5\ny\n",
+        input=b"trust\n5\ny\n",
     )
     return None
 
