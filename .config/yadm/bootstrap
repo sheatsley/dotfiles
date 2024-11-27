@@ -297,11 +297,13 @@ def check(key="D97737F91189673C"):
         != 0
     ):
         tasks.append(set_gpg_agent)
-    if (
-        subprocess.run(args=["tailscale", "status"], stdout=subprocess.DEVNULL).returncode
-        != 0
-    ):
+    try:
+        assert (
+            subprocess.run(args=["tailscale", "status"], stdout=subprocess.DEVNULL).returncode
+        )
         gitlab = True
+    except:
+        gitlab = False
     tasks.append(set_github_repos)
     tasks.append(install_submodules)
     tasks.append(install_vim_plugins)
@@ -319,8 +321,8 @@ if __name__ == "__main__":
     """
     TODO
     - Use text=True to avoid decoding stdout
-    - Refactor git cloning to do consulting separately (need to make sure tailscale is running)
     - Don't run subtask *only if* main task check fails (if main task fails, who cares)
+    - Add environment variables to os.environ
     """
     check()
     raise SystemExit(0)
