@@ -73,9 +73,9 @@ def install_submodules():
 def install_vim_plugins():
     """ """
     print("Installing vim plugins...")
-    subprocess.run(args=["vim", "+call mkdp#util#install()", "+qall"], check=True)
-    subprocess.run(args=["vim", "+Copilot setup", "+qall"], check=True)
-    subprocess.run(args=["vim", ".vimrc", "+helptags ALL", "+qall"], check=True)
+    subprocess.run(args=["vim", "'+call mkdp#util#install()'", "+qall"], check=True)
+    subprocess.run(args=["vim", "'+Copilot setup'", "+qall"], check=True)
+    subprocess.run(args=["vim", ".vimrc", "'+helptags ALL'", "+qall"], check=True)
     return None
 
 
@@ -299,7 +299,7 @@ def check(key="D97737F91189673C"):
         tasks.append(set_gpg_agent)
     try:
         assert (
-            subprocess.run(args=["tailscale", "status"], stdout=subprocess.DEVNULL).returncode
+            subprocess.run(args=["tailscale", "status"], stdout=subprocess.DEVNULL, timeout=2).returncode
         )
         gitlab = True
     except:
@@ -310,8 +310,8 @@ def check(key="D97737F91189673C"):
     tasks.append(set_iterm2)
     tasks.append(set_macos_defaults)
     for task in tasks:
-        if task == set_github_repos and gitlab:
-            task(gitlab=True)
+        if task == set_github_repos:
+            task(gitlab=gitlab)
         else:
             task()
     return None
