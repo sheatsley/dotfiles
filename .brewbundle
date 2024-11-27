@@ -15,6 +15,7 @@ brew "mas"
 # Interpreted, interactive, object-oriented programming language
 brew "python"
 brew "leetup"
+brew "node"
 # Yet Another Dotfiles Manager
 brew "yadm"
 # Voice and text chat software
