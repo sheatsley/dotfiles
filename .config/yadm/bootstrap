@@ -116,7 +116,7 @@ def set_git_crypt(key="D97737F91189673C"):
     return None
 
 
-def set_github_repos(directory="repos", file=".gitrepos", jobs=8):
+def set_github_repos(directory="repos", file=".gitrepos", gitlab=False, jobs=8):
     """ """
     print("Setting up GitHub repos...")
     with open(file, "r") as f:
@@ -127,9 +127,6 @@ def set_github_repos(directory="repos", file=".gitrepos", jobs=8):
                     args=[
                         "git",
                         "clone",
-                        "--jobs",
-                        str(jobs),
-                        "--recurse-submodules",
                         f"git@github.com:{owner}/{name}.git",
                         f"{directory}/{name}",
                     ],
@@ -148,14 +145,28 @@ def set_github_repos(directory="repos", file=".gitrepos", jobs=8):
                     ],
                     check=True,
                 )
+            if gitlab:
+                subprocess.run(
+                    args=[
+                        "git",
+                        "-C",
+                        f"{directory}/{name}",
+                        "submodule"
+                        "update",
+                        "--init",
+                        "--recursive",
+                        "--jobs",
+                        str(jobs),
+                    ],
+                    check=True,
+                )
     return None
-
 
 def set_gpg_agent():
     """ """
     print("Setting GPG agent...")
     env = os.environ.copy()
-    env["PATH"] = (
+    os.environ["PATH"] = (
         subprocess.run(
             args=["/usr/libexec/path_helper"], capture_output=True, check=True
         )
@@ -167,12 +178,12 @@ def set_gpg_agent():
         .pop()
         .strip('"')
     )
-    env["GPG_TTY"] = (
+    os.environ["GPG_TTY"] = (
         subprocess.run(args=["tty"], capture_output=True, check=True)
         .stdout.decode(encoding="utf-8")
         .strip()
     )
-    env["SSH_AUTH_SOCK"] = (
+    os.environ["SSH_AUTH_SOCK"] = (
         subprocess.run(
             args=["gpgconf", "--list-dirs", "agent-ssh-socket"],
             capture_output=True,
@@ -182,6 +193,7 @@ def set_gpg_agent():
         .strip()
     )
     subprocess.run(args=["gpgconf", "--launch", "gpg-agent"], check=True, env=env)
+    subprocess.run(args=["gpg-connect-agent", "updatestartuptty", "/bye"], check=True, env=env)
     return None
 
 
@@ -281,21 +293,34 @@ def check(key="D97737F91189673C"):
     ):
         tasks.append(set_git_crypt)
     if (
-        subprocess.run(args=["type", "gpgconf"], stdout=subprocess.DEVNULL).returncode
+        subprocess.run(args=["ssh-add", "-l"], stdout=subprocess.DEVNULL).returncode
         != 0
     ):
         tasks.append(set_gpg_agent)
+    if (
+        subprocess.run(args=["tailscale", "status"], stdout=subprocess.DEVNULL).returncode
+        != 0
+    ):
+        gitlab = True
     tasks.append(set_github_repos)
     tasks.append(install_submodules)
     tasks.append(install_vim_plugins)
     tasks.append(set_iterm2)
     tasks.append(set_macos_defaults)
     for task in tasks:
-        task()
+        if task == set_github_repos and gitlab:
+            task(gitlab=True)
+        else:
+            task()
     return None
 
 
 if __name__ == "__main__":
-    """ """
+    """
+    TODO
+    - Use text=True to avoid decoding stdout
+    - Refactor git cloning to do consulting separately (need to make sure tailscale is running)
+    - Don't run subtask *only if* main task check fails (if main task fails, who cares)
+    """
     check()
     raise SystemExit(0)
