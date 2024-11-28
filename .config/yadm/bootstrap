@@ -16,6 +16,15 @@ def install_brew_packages(file=".brewbundle"):
         check=True,
         env=env | {"HOMEBREW_BUNDLE_FILE": file, "NONINTERACTIVE": "1"},
     )
+    subprocess.run(
+        args=["mkdir", "-p", "/Users/sheatsley/Applications"],
+        check=True,
+    )
+    for app in os.listdir(f"{os.path.expanduser('~')}.app/"):
+        subprocess.run(
+            args=["ln", "-s", f"{os.path.expanduser('~')}.app/{app}", "/Users/sheatsley/Applications/"],
+            check=True,
+        )
     return None
 
 
