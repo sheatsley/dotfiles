@@ -15,7 +15,7 @@ def install_brew_packages(file=".brewbundle"):
     subprocess.run(
         args=["brew", "bundle", "install", "--cleanup"],
         check=True,
-        env=env | {"HOMEBREW_BUNDLE_FILE": file, "NONINTERACTIVE": "1"},
+        env=env | {"HOMEBREW_BUNDLE_FILE": file},
     )
     return None
 
@@ -32,6 +32,21 @@ def install_homebrew(
         args=["/bin/bash", f"/tmp/{filename}"],
         check=True,
         env=env | {"NONINTERACTIVE": "1"},
+    )
+    subprocess.run(
+        args=["echo", ">>", "~/.zprofile"],
+        check=True,
+    )
+    homebrew_path = subprocess.run(
+        args=["/opt/homebrew/bin/brew", "shellenv"], capture_output=True, check=True
+    ).stdout.decode(encoding="utf-8")
+    subprocess.run(
+        args=["echo", homebrew_path, ">>" "~/.zprofile"],
+        check=True,
+    )
+    subprocess.run(
+        args=["source", "~/.zprofile"],
+        check=True,
     )
     return None
 
@@ -82,9 +97,10 @@ def install_vim_plugins():
 
 def refresh_sudo(complete, interval=60):
     """ """
+    print("Refreshing sudo credentials...")
     subprocess.run(args=["sudo", "-v"], check=True)
     while not complete.is_set():
-        subprocess.run(args=["sudo", "-n", "true"], check=True)
+        subprocess.run(args=["sudo", "-v"], check=True)
         complete.wait(interval)
     return None
 
@@ -266,7 +282,7 @@ def check(key="D97737F91189673C"):
     """ """
     os.chdir(os.path.expanduser("~"))
     complete = threading.Event()
-    sudo_thread = threading.Thread(args=complete, target=refresh_sudo)
+    sudo_thread = threading.Thread(args=(complete,), target=refresh_sudo)
     tasks = []
     names = []
     for pref in "ComputerName", "HostName", "LocalHostName":
