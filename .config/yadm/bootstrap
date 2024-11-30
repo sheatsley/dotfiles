@@ -324,6 +324,7 @@ def check(key="D97737F91189673C"):
     tasks.append(install_vim_plugins)
     tasks.append(set_iterm2)
     tasks.append(set_macos_defaults)
+    sudo_thread.start()
     for task in tasks:
         if task == set_github_repos:
             task(gitlab=gitlab)
@@ -337,10 +338,11 @@ def check(key="D97737F91189673C"):
 if __name__ == "__main__":
     """
     TODO
-    - Use text=True to avoid decoding stdout
+    - Use text=True to avoid decoding stdout (standardize args)
     - Don't run subtask *only if* main task check fails (if main task fails, who cares)
     - Add environment variables to os.environ
     - Prompt to give terminal full disk access
+    - Declare commands as strings and use split when passing to subprocess.run
     """
     check()
     raise SystemExit(0)
