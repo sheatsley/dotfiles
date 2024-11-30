@@ -4,6 +4,8 @@
     subupdate = "!if [ -d .git ]; then CMD=git; else CMD=yadm; fi; $CMD submodule update --remote --rebase; $CMD submodule foreach git submodule update --recursive;"
 [commit]
   gpgSign = True
+[core]
+  hooksPath = ~/.config/yadm/hooks
 [credential "https://git.overleaf.com"]
 	username = sheatsley@wisc.edu
     helper = osxkeychain
