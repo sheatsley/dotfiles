@@ -56,6 +56,4 @@ brew "pinentry-mac"
 cask "zoom"
 # Collect, organise, cite, and share research sources
 cask "zotero"
-cask "chatgpt"
 cask "tailscale"
-mas "Adblock Plus", id: 1432731683
