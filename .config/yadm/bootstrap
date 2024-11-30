@@ -74,9 +74,9 @@ def install_submodules():
 def install_vim_plugins():
     """ """
     print("Installing vim plugins...")
-    subprocess.run(args=["vim", "'+call mkdp#util#install()'", "+qall"], check=True)
-    subprocess.run(args=["vim", "'+Copilot setup'", "+qall"], check=True)
-    subprocess.run(args=["vim", ".vimrc", "'+helptags ALL'", "+qall"], check=True)
+    subprocess.run(args=["vim", "+call mkdp#util#install()", "+qall"], check=True)
+    subprocess.run(args=["vim", "+Copilot setup", "+qall"], check=True)
+    subprocess.run(args=["vim", ".vimrc", "+helptags ALL", "+qall"], check=True)
     return None
 
 def refresh_sudo(complete, interval=60):
