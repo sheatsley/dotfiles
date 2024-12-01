@@ -33,21 +33,16 @@ def install_homebrew(
         check=True,
         env=env | {"NONINTERACTIVE": "1"},
     )
-    subprocess.run(
-        args=["echo", ">>", "~/.zprofile"],
-        check=True,
-    )
-    homebrew_path = subprocess.run(
+    with open(f"{os.path.expanduser('~')}/.zprofile", "a") as zprofile:
+        zprofile.write("\n")
+        zprofile.write('eval "$(/opt/homebrew/bin/brew shellenv)"\n')
+    homebrew_paths = subprocess.run(
         args=["/opt/homebrew/bin/brew", "shellenv"], capture_output=True, check=True
     ).stdout.decode(encoding="utf-8")
-    subprocess.run(
-        args=["echo", homebrew_path, ">>" "~/.zprofile"],
-        check=True,
-    )
-    subprocess.run(
-        args=["source", "~/.zprofile"],
-        check=True,
-    )
+    for line in homebrew_paths.split("\n"):
+        if line.startswith("PATH"):
+            var, value = line.split(";").pop(0).split("=")
+            os.environ[var] = value.strip('"')
     return None
 
 
