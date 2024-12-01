@@ -265,10 +265,13 @@ def set_yadm_repo():
         )
         .stdout.decode(encoding="utf-8")
         .strip()
-        .split(":")
+        .split("github.com/")
         .pop()
     )
-    subprocess.run(args=["yadm", "remote", "set-url", "origin", reponame], check=True)
+    subprocess.run(
+        args=["yadm", "remote", "set-url", "origin", f"git@github.com:{reponame}"],
+        check=True,
+    )
     return None
 
 
