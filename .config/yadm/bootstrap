@@ -229,7 +229,7 @@ def set_iterm2():
             "write",
             "com.googlecode.iterm2",
             "PrefsCustomFolder",
-            "$HOME/.iterm2",
+            f"{os.path.expanduser('~')}/.iterm2",
         ],
         check=True,
     )
