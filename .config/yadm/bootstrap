@@ -5,357 +5,317 @@ This script defines the bootstrap used in https://github.com/sheatsley/dotfiles
 
 import os
 import subprocess
-import threading
+import time
 
 
-def install_brew_packages(file=".brewbundle"):
+def bootstrap(key="D97737F91189673C"):
     """ """
-    env = os.environ.copy()
-    print("Installing brew packages...")
-    subprocess.run(
-        args=["brew", "bundle", "install", "--cleanup"],
-        check=True,
-        env=env | {"HOMEBREW_BUNDLE_FILE": file},
-    )
-    return None
 
-
-def install_homebrew(
-    url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh",
-):
-    """ """
-    print("Installing brew...")
-    env = os.environ.copy()
-    filename = url.split("/").pop()
-    subprocess.run(args=["curl", "-o", f"/tmp/{filename}", "-fssSL", url], check=True)
-    subprocess.run(
-        args=["/bin/bash", f"/tmp/{filename}"],
-        check=True,
-        env=env | {"NONINTERACTIVE": "1"},
-    )
-    with open(f"{os.path.expanduser('~')}/.zprofile", "a") as zprofile:
-        zprofile.write("\n")
-        zprofile.write('eval "$(/opt/homebrew/bin/brew shellenv)"\n')
-    homebrew_paths = subprocess.run(
-        args=["/opt/homebrew/bin/brew", "shellenv"], capture_output=True, check=True
-    ).stdout.decode(encoding="utf-8")
-    for line in homebrew_paths.split("\n"):
-        if line.startswith("PATH"):
-            var, value = line.split(";").pop(0).split("=")
-            os.environ[var] = value.strip('"')
-    return None
-
-
-def install_pip_packages(file=".pip"):
-    """ """
-    print("Installing python modules...")
-    env = os.environ.copy()
-    subprocess.run(
-        args=["pip3", "install", "--upgrade", "pip"],
-        check=True,
-        env=env | {"PIP_NO_INPUT": "1"},
-    )
-    subprocess.run(
-        args=["pip3", "install", "--upgrade", "--requirement", file],
-        check=True,
-        env=env | {"PIP_NO_INPUT": "1"},
-    )
-    return None
-
-
-def install_submodules():
-    """ """
-    print("Installing yadm submodules...")
-    subprocess.run(
-        args=[
-            "yadm",
-            "submodule",
-            "update",
-            "--init",
-            "--recursive",
-            "--remote",
-            "--rebase",
-        ],
-        check=True,
-    )
-    return None
-
-
-def install_vim_plugins():
-    """ """
-    print("Installing vim plugins...")
-    subprocess.run(args=["vim", "+Copilot setup", "+qall"], check=True)
-    subprocess.run(args=["vim", ".vimrc", "+helptags ALL", "+qall"], check=True)
-    return None
-
-
-def refresh_sudo(complete, interval=60):
-    """ """
-    print("Refreshing sudo credentials...")
-    subprocess.run(args=["sudo", "-v"], check=True)
-    while not complete.is_set():
-        subprocess.run(args=["sudo", "-v"], check=True)
-        complete.wait(interval)
-    return None
-
-
-def set_computer_name():
-    """ """
-    print("Enter computer name:")
-    name = input()
-    subprocess.run(args=["sudo", "scutil", "--set", "ComputerName", name], check=True)
-    subprocess.run(args=["sudo", "scutil", "--set", "HostName", name], check=True)
-    subprocess.run(
-        args=["sudo", "scutil", "--set", "LocalHostName", name.replace(" ", "-")],
-        check=True,
-    )
-    return None
-
-
-def set_public_key(key="D97737F91189673C"):
-    """ """
-    print(f"Adding GPG public key {key} to keyring and setting trust to ulimate...")
-    subprocess.run(
-        args=["gpg", "--card-edit", "--command-fd", "0"],
-        check=True,
-        text=True,
-        input="fetch\n",
-    )
-    subprocess.run(
-        args=["gpg", "--command-fd", "0", "--edit-key", key, "trust"],
-        check=True,
-        input=b"5\ny\n",
-    )
-    return None
-
-
-def set_git_crypt(key="D97737F91189673C"):
-    """ """
-    print(f"Decrypting files with {key}...")
-    subprocess.run(args=["yadm", "crypt", "unlock"], check=True)
-    return None
-
-
-def set_github_repos(directory="repos", file=".gitrepos", gitlab=False, jobs=8):
-    """ """
-    print("Setting up GitHub repos...")
-    with open(file, "r") as f:
-        for repo in f.readlines():
-            owner, name = repo.strip().split("/")
-            if not os.path.isdir(f"{directory}/{name}"):
-                subprocess.run(
-                    args=[
-                        "git",
-                        "clone",
-                        f"git@github.com:{owner}/{name}.git",
-                        f"{directory}/{name}",
-                    ],
-                    check=True,
-                )
-            else:
-                subprocess.run(
-                    args=[
-                        "git",
-                        "-C",
-                        f"{directory}/{name}",
-                        "pull",
-                        "--jobs",
-                        str(jobs),
-                        "--recurse-submodules",
-                    ],
-                    check=True,
-                )
-            if gitlab:
-                subprocess.run(
-                    args=[
-                        "git",
-                        "-C",
-                        f"{directory}/{name}",
-                        "submodule",
-                        "update",
-                        "--init",
-                        "--recursive",
-                        "--jobs",
-                        str(jobs),
-                    ],
-                    check=True,
-                )
-    return None
-
-
-def set_gpg_agent():
-    """ """
-    print("Setting GPG agent...")
-    env = os.environ.copy()
-    os.environ["PATH"] = (
-        subprocess.run(
-            args=["/usr/libexec/path_helper"], capture_output=True, check=True
-        )
-        .stdout.decode(encoding="utf-8")
-        .strip()
-        .split(";")
-        .pop(0)
-        .split("=")
-        .pop()
-        .strip('"')
-    )
-    os.environ["GPG_TTY"] = (
-        subprocess.run(args=["tty"], capture_output=True, check=True)
-        .stdout.decode(encoding="utf-8")
-        .strip()
-    )
-    os.environ["SSH_AUTH_SOCK"] = (
-        subprocess.run(
-            args=["gpgconf", "--list-dirs", "agent-ssh-socket"],
-            capture_output=True,
-            check=True,
-        )
-        .stdout.decode(encoding="utf-8")
-        .strip()
-    )
-    subprocess.run(args=["gpgconf", "--launch", "gpg-agent"], check=True, env=env)
-    subprocess.run(
-        args=["gpg-connect-agent", "updatestartuptty", "/bye"], check=True, env=env
-    )
-    return None
-
-
-def set_iterm2():
-    """ """
-    print("Configuring iTerm2 profile...")
-    subprocess.run(
-        args=[
-            "defaults",
-            "write",
-            "com.googlecode.iterm2",
-            "PrefsCustomFolder",
-            f"{os.path.expanduser('~')}/.iterm2",
-        ],
-        check=True,
-    )
-    subprocess.run(
-        args=[
-            "defaults",
-            "write",
-            "com.googlecode.iterm2",
-            "LoadPrefsFromCustomFolder",
-            "-int",
-            "1",
-        ],
-        check=True,
-    )
-    return None
-
-
-def set_macos_defaults(file=".macos"):
-    """ """
-    print("Setting macOS defaults...")
-    subprocess.run(args=["sh", file], check=True)
-    return None
-
-
-def set_yadm_repo():
-    """ """
-    print("Changing remote url of yadm repo...")
-    reponame = (
-        subprocess.run(
-            args=["yadm", "remote", "get-url", "origin"],
-            capture_output=True,
-            check=True,
-        )
-        .stdout.decode(encoding="utf-8")
-        .strip()
-        .split("github.com/")
-        .pop()
-    )
-    subprocess.run(
-        args=["yadm", "remote", "set-url", "origin", f"git@github.com:{reponame}"],
-        check=True,
-    )
-    return None
-
-
-def check(key="D97737F91189673C"):
-    """ """
-    os.chdir(os.path.expanduser("~"))
-    complete = threading.Event()
-    sudo_thread = threading.Thread(args=(complete,), target=refresh_sudo)
+    # switch to home directory and initialize variables
+    home = os.path.expanduser("~")
+    os.chdir(home)
+    subargs = dict(capture_output=True, check=True, encoding="utf-8")
     tasks = []
-    names = []
-    for pref in "ComputerName", "HostName", "LocalHostName":
-        names.append(
-            subprocess.run(args=["scutil", "--get", pref], capture_output=True)
-            .stdout.decode(encoding="utf-8")
-            .strip()
-            .replace("-", " ")
+    task_args = {}
+
+    # assume the computer name is set if all three are the same
+    cmd = "scutil --get ComputerName"
+    name = subprocess.run(args=cmd.split(), **subargs).stdout.strip()
+    for pref in "HostName", "LocalHostName":
+        cmd = f"scutil --get {pref}"
+        if name != subprocess.run(args=cmd.split(), **subargs).stdout.strip():
+            tasks.append(computer_name)
+            break
+
+    # check if brew is installed and configured correctly (via type)
+    cmd = "type brew"
+    try:
+        subprocess.run(args=cmd.split(), **subargs)
+    except subprocess.CalledProcessError:
+        tasks.append(homebrew)
+        task_args[homebrew] = dict(
+            url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh",
+            zprofile=f"{home}/.zprofile",
         )
-    if names[0] != names[1] or names[0] != names[2]:
-        tasks.append(set_computer_name)
-    if subprocess.run(args=["type", "brew"], stdout=subprocess.DEVNULL).returncode != 0:
-        tasks.append(install_homebrew)
-    tasks.append(install_brew_packages)
-    tasks.append(install_pip_packages)
+
+    # always update brew packages and pip packages
+    tasks.append(brew_packages)
+    task_args[brew_packages] = dict(brewbundle=f"{home}/.brewbundle")
+    tasks.append(pip_packages)
+    task_args[pip_packages] = dict(pip=f"{home}/.pip")
+
+    # check if the public key is added to the keyring and set to ultimate trust
     try:
-        assert "ultimate" in subprocess.run(
-            args=["gpg", "-k", key], capture_output=True, check=True
-        ).stdout.decode(encoding="utf-8")
-    except:
-        tasks.append(set_public_key)
+        cmd = f"gpg -k {key}"
+        assert "ultimate" in subprocess.run(args=cmd.split(), **subargs).stdout
+    except (AssertionError, subprocess.CalledProcessError):
+        tasks.append(public_key)
+        task_args[public_key] = dict(key=key)
+
+    # check if yadm remote is set to ssh
     try:
-        assert (
-            subprocess.run(
-                args=["yadm", "remote", "get-url", "origin"],
-                capture_output=True,
-                check=True,
-            )
-            .stdout.decode(encoding="utf-8")
-            .startswith("http")
-        )
-    except:
-        tasks.append(set_yadm_repo)
-    if (
-        not subprocess.run(
-            args=["grep", "-qs", r"\x00GITCRYPT", ".gitrepos"]
-        ).returncode
-        != 0
-    ):
-        tasks.append(set_git_crypt)
-    if (
-        subprocess.run(args=["ssh-add", "-l"], stdout=subprocess.DEVNULL).returncode
-        != 0
-    ):
-        tasks.append(set_gpg_agent)
+        cmd = "yadm remote get-url origin"
+        assert subprocess.run(args=cmd.split(), **subargs).stdout.startswith("git")
+    except (AssertionError, subprocess.CalledProcessError):
+        tasks.append(yadm_repo)
+
+    # check if dotfiles repo is encrypted (with git-crypt)
     try:
-        assert subprocess.run(
-            args=["tailscale", "status"], stdout=subprocess.DEVNULL, timeout=2
-        ).returncode
-        gitlab = True
-    except:
-        gitlab = False
-    tasks.append(set_github_repos)
-    tasks.append(install_submodules)
-    tasks.append(install_vim_plugins)
-    tasks.append(set_iterm2)
-    tasks.append(set_macos_defaults)
-    sudo_thread.start()
+        cmd = "grep -qv \\x00GITCRYPT .gitrepos"
+        assert subprocess.run(args=cmd.split(), **subargs)
+    except (AssertionError, subprocess.CalledProcessError):
+        tasks.append(git_crypt)
+        task_args[git_crypt] = dict(key=key)
+
+    # check if gpg-agent is installed and configured correctly (via ssh-add)
+    try:
+        cmd = "ssh-add -l"
+        assert subprocess.run(args=cmd.split(), **subargs)
+    except (AssertionError, subprocess.CalledProcessError):
+        tasks.append(gpg_agent)
+
+    # check if tailscale is installed and configured as a system extension
+    try:
+        cmd = "tailscale status"
+        assert subprocess.run(args=cmd.split(), **subargs | dict(timeout=2))
+        task_args[git_repos] = dict(vpn=True)
+    except (AssertionError, subprocess.CalledProcessError):
+        task_args[git_repos] = dict(vpn=False)
+
+    # always update git repos, yadm submodules, helptags
+    tasks.append(git_repos)
+    task_args[git_repos] |= dict(directory=f"{home}/repos", repos=f"{home}.gitrepos")
+    tasks.append(yadm_submodules)
+    tasks.append(vim_plugins)
+
+    # check if iterm2 is configured correctly (via defaults read)
+    try:
+        cmd = "defaults read com.googlecode.iterm2 PrefsCustomFolder"
+        assert subprocess.run(args=cmd.split(), **subargs)
+    except (AssertionError, subprocess.CalledProcessError):
+        tasks.append(iterm2)
+        task_args[iterm2] = dict(iterm2=f"{home}/.iterm2")
+
+    # check if macOS defaults have been set (via last default write)
+    try:
+        with open(".macos", "r") as f:
+            last = f.readlines()[-2]
+        comment = last.index("#")
+        last = last[:comment].strip().strip("defaults write")
+        value = last[-1]
+        cmd = f"defaults read {' '.join(last.split()[:2])}"
+        assert subprocess.run(args=cmd.split(), **subargs).stdout.strip() == value
+    except (AssertionError, subprocess.CalledProcessError):
+        tasks.append(macos_defaults)
+        task_args[macos_defaults] = dict(macos=f"{home}/.macos")
+
+    # print status and run tasks
+    print("Running the following tasks:")
+    for idx, task in enumerate(tasks, start=1):
+        print(f"{idx}. {task.__name__}")
+    time.sleep(3)
     for task in tasks:
-        if task == set_github_repos:
-            task(gitlab=gitlab)
+        task(**dict(subargs=subargs) | task_args.get(task, {}))
+    return None
+
+
+def brew_packages(brewbundle, subargs):
+    """ """
+    print("\nInstalling brew packages...")
+    os.environ["HOMEBREW_BUNDLE_FILE"] = brewbundle
+    cmd = "brew bundle install --cleanup"
+    subprocess.run(args=cmd.split(), **subargs)
+    return None
+
+
+def computer_name(subargs):
+    """ """
+    print("\nEnter computer name:")
+    name = input()
+    cmd = "sudo scutil --set "
+    subprocess.run(args=f"{cmd} ComputerName {name}".split(), **subargs)
+    subprocess.run(args=f"{cmd} HostName {name}".split(), **subargs)
+    subprocess.run(args=f"{cmd} LocalHostName {name.strip()}".split(), **subargs)
+    return None
+
+
+def git_crypt(key, subargs):
+    """ """
+    print(f"\nDecrypting files with {key}...")
+    cmd = "yadm git-crypt unlock"
+    subprocess.run(args=cmd.split(), **subargs)
+    return None
+
+
+def git_repos(directory, repos, vpn):
+    """ """
+    print("\nUpdating git repos...")
+    with open(repos, "r") as f:
+        repos = f.readlines()
+    for repo in repos:
+        owner, name = repo.strip().split("/")
+
+        # clone or pull repo
+        if not os.path.isdir(f"{directory}/{name}"):
+            cmd = f"git clone git@github.com:{owner}/{name}.git {directory}/{name}"
+            subprocess.run(args=cmd.split(), check=True)
         else:
-            task()
-    complete.set()
-    sudo_thread.join()
+            cmd = f"git -C {directory}/{name} pull"
+            subprocess.run(args=cmd.split(), check=True)
+
+        # update submodules if vpn is active
+        if vpn:
+            print(f"\n Updating submodules for {name}...")
+            cmd = f"git -C {directory}/{name} submodule update --init --recursive"
+            subprocess.run(args=cmd.split(), check=True)
+    return None
+
+
+def gpg_agent(subargs):
+    """ """
+    print("\nConfiguring GPG agent...")
+
+    # update PATH
+    cmd = "/usr/libexec/path_helper"
+    paths = subprocess.run(args=cmd.split(), **subargs).stdout.strip().split(";").pop(0)
+    start = paths.index('"') + 1
+    end = paths.index('"', start)
+    os.environ["PATH"] = paths[start:end]
+
+    # set GPG_TTY
+    cmd = "tty"
+    os.environ["GPG_TTY"] = subprocess.run(args=cmd.split(), **subargs).stdout.strip()
+
+    # set SSH_AUTH_SOCK
+    cmd = "gpgconf --list-dirs agent-ssh-socket"
+    os.environ["SSH_AUTH_SOCK"] = subprocess.run(
+        args=cmd.split(), **subargs
+    ).stdout.strip()
+
+    # launch gpg-agent
+    cmd = "gpgconf --launch gpg-agent"
+    subprocess.run(args=cmd.split(), **subargs)
+    cmd = "gpg-connect-agent updatestartuptty /bye"
+    subprocess.run(args=cmd.split(), **subargs)
+    return None
+
+
+def homebrew(subargs, url, zprofile):
+    """ """
+    print("\nInstalling brew...")
+
+    # download installation script
+    script = url.split("/").pop()
+    cmd = f"curl -o /tmp/{script} -fssSL {url}"
+    subprocess.run(args=cmd.split(), **subargs)
+
+    # install brew (non-interactive)
+    cmd = f"/bin/bash /tmp/{script}"
+    os.environ["NONINTERACTIVE"] = "1"
+    subprocess.run(args=cmd.split(), **subargs)
+
+    # update environment variables on login
+    with open(zprofile, "a") as zprofile:
+        zprofile.write('\neval "$(/opt/homebrew/bin/brew shellenv)"\n')
+
+    # update PATH so we can use formulae immediately
+    cmd = "/opt/homebrew/bin/brew shellenv"
+    paths = subprocess.run(args=cmd.split(), **subargs).stdout
+    path = paths.split("\n").pop(3).split(";").pop(0).split("=").pop().strip('"')
+    os.environ["PATH"] = path
+    return None
+
+
+def iterm2(iterm2, subargs):
+    """ """
+    print("\nSetting iTerm2 profile...")
+
+    # set profile directory
+    cmd = f"defaults write com.googlecode.iterm2 PrefsCustomFolder -string {iterm2}"
+    subprocess.run(args=cmd.split(), **subargs)
+
+    # use dynamic profiles
+    cmd = "defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -int 1"
+    subprocess.run(args=cmd.split(), **subargs)
+    return None
+
+
+def macos_defaults(macos, subargs):
+    """ """
+    print("\nSetting macOS defaults...")
+    cmd = f"sh {macos}"
+    subprocess.run(args=cmd.split(), **subargs)
+    return None
+
+
+def pip_packages(pip, subargs):
+    """ """
+    print("\nInstalling python modules...")
+    cmd = f"pip3 install --upgrade --requirement {pip}"
+    os.environ["PIP_NO_INPUT"] = "1"
+    subprocess.run(args=cmd.split(), **subargs)
+    return None
+
+
+def public_key(key, subargs):
+    """ """
+    print(f"\nAdding {key} to keyring and setting trust to ulimate...")
+
+    # parse public key URL
+    cmd = "gpg --card-status"
+    status = subprocess.run(args=cmd.split(), **subargs).stdout
+    start = status.index("https://")
+    end = status.index("\n", start)
+    url = status[start:end]
+
+    # fetch public key
+    cmd = f"gpg --fetch-key {url}"
+    subprocess.run(args=cmd.split(), **subargs)
+
+    # set trust to ultimate
+    cmd = "gpg --import-ownertrust"
+    subprocess.run(args=cmd.split(), input=f"{key}:6\n", **subargs)
+    return None
+
+
+def vim_plugins(subargs):
+    """ """
+    print("\nInstalling vim plugins...")
+
+    # install copilot
+    cmd = "vim +Copilot setup +qall"
+    subprocess.run(args=cmd.split(), **subargs)
+
+    # update helptags
+    cmd = "vim .vimrc +helptags ALL +qall"
+    subprocess.run(args=cmd.split(), **subargs)
+    return None
+
+
+def yadm_repo(subargs):
+    """ """
+    print("\nChanging remote url of yadm repo...")
+
+    # get current repo name
+    cmd = "yadm remote get-url origin"
+    repo = subprocess.run(args=cmd.split(), **subargs).stdout.strip()
+    repo = repo.split("github.com/").pop()
+
+    # set remote url to ssh
+    cmd = f"yadm remote set-url origin git@github.com:{repo}"
+    subprocess.run(args=cmd.split(), **subargs)
+    return None
+
+
+def yadm_submodules(subargs):
+    """ """
+    print("\nUpdating yadm submodules...")
+    cmd = "yadm submodule update --init --recursive --remote --rebase"
+    subprocess.run(args=cmd.split(), **subargs)
     return None
 
 
 if __name__ == "__main__":
-    """
-    TODO
-    - Use text=True to avoid decoding stdout (standardize args)
-    - Don't run subtask *only if* main task check fails (if main task fails, who cares)
-    - Add environment variables to os.environ
-    - Prompt to give terminal full disk access
-    - Declare commands as strings and use split when passing to subprocess.run
-    """
-    check()
+    """ """
+    bootstrap()
     raise SystemExit(0)
