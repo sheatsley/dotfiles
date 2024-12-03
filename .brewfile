@@ -8,8 +8,6 @@ brew "git-crypt"
 brew "gnupg"
 # Update of iperf: measures TCP, UDP, and SCTP bandwidth
 brew "iperf3"
-# Compare and mark up LaTeX file differences
-brew "latexdiff"
 # Mac App Store command-line interface
 brew "mas"
 # Interpreted, interactive, object-oriented programming language
@@ -30,8 +28,6 @@ cask "firefox"
 cask "font-dejavu-sans-mono-nerd-font"
 # The successor to Hyperion aka Hyperion Next Generation
 cask "hyperion-ng"
-# Full TeX Live distribution without GUI applications
-cask "mactex-no-gui"
 # Provides updates to various Microsoft products
 cask "microsoft-auto-update"
 # Office suite
