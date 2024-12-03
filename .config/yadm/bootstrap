@@ -81,7 +81,7 @@ def bootstrap(key="D97737F91189673C"):
 
     # check if dotfiles repo is encrypted (with git-crypt)
     try:
-        cmd = "grep -qv \\x00GITCRYPT .gitrepos"
+        cmd = f"grep -qv \\x00GITCRYPT {home}/.gitrepos"
         assert subprocess.run(args=cmd.split(), **subargs)
     except (AssertionError, subprocess.CalledProcessError):
         tasks.append(git_crypt)
@@ -104,7 +104,7 @@ def bootstrap(key="D97737F91189673C"):
 
     # always update git repos, yadm submodules, helptags
     tasks.append(git_repos)
-    task_args[git_repos] |= dict(directory=f"{home}/repos", repos=f"{home}.gitrepos")
+    task_args[git_repos] |= dict(directory=f"{home}/repos", repos=f"{home}/.gitrepos")
     tasks.append(yadm_submodules)
     tasks.append(vim_plugins)
 
