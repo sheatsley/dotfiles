@@ -18,14 +18,13 @@ def bootstrap(key="D97737F91189673C"):
     tasks = []
     task_args = {}
 
-    # assume the computer name is set if all three are the same
-    cmd = "scutil --get ComputerName"
-    name = subprocess.run(args=cmd.split(), **subargs).stdout.strip()
-    for pref in "HostName", "LocalHostName":
-        cmd = f"scutil --get {pref}"
-        if name != subprocess.run(args=cmd.split(), **subargs).stdout.strip():
-            tasks.append(computer_name)
-            break
+    # check if the HostName is set
+    cmd = "scutil --get HostName"
+    try:
+        subprocess.run(args=cmd.split(), **subargs)
+        tasks.append(computer_name)
+    except subprocess.CalledProcessError:
+        tasks.append(computer_name)
 
     # check if brew is installed and configured correctly (via type)
     cmd = "type brew"
