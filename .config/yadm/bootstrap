@@ -47,7 +47,7 @@ def bootstrap(key="D97737F91189673C"):
     try:
         cmd = f"gpg -k {key}"
         assert "ultimate" in subprocess.run(args=cmd.split(), **subargs).stdout
-    except (AssertionError, subprocess.CalledProcessError):
+    except (AssertionError, FileNotFoundError):
         tasks.append(public_key)
         task_args[public_key] = dict(key=key)
 
@@ -55,7 +55,7 @@ def bootstrap(key="D97737F91189673C"):
     try:
         cmd = "yadm remote get-url origin"
         assert subprocess.run(args=cmd.split(), **subargs).stdout.startswith("git")
-    except (AssertionError, subprocess.CalledProcessError):
+    except (AssertionError, FileNotFoundError):
         tasks.append(yadm_repo)
 
     # check if dotfiles repo is encrypted (with git-crypt)
@@ -78,7 +78,7 @@ def bootstrap(key="D97737F91189673C"):
         cmd = "tailscale status"
         assert subprocess.run(args=cmd.split(), **subargs | dict(timeout=2))
         task_args[git_repos] = dict(vpn=True)
-    except (AssertionError, subprocess.CalledProcessError):
+    except (AssertionError, FileNotFoundError, subprocess.CalledProcessError):
         task_args[git_repos] = dict(vpn=False)
 
     # always update git repos, yadm submodules, helptags
