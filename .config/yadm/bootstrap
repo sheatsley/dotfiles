@@ -48,7 +48,7 @@ def bootstrap(key="D97737F91189673C"):
         tasks.append(computer_name)
 
     # check if brew is installed (and within PATH)
-    cmd = "brew"
+    cmd = "brew --version"
     try:
         subprocess.run(args=cmd.split(), **subargs)
     except FileNotFoundError:
@@ -154,7 +154,7 @@ def brew_packages(brewfile, subargs):
     """
     print("\nInstalling brew packages...")
     os.environ["HOMEBREW_BUNDLE_FILE"] = brewfile
-    cmd = "brew bundle install --cleanup"
+    cmd = "brew bundle install --cleanup --verbose"
     subprocess.run(args=cmd.split(), **subargs)
     return None
 
