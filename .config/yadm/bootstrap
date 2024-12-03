@@ -47,11 +47,11 @@ def bootstrap(key="D97737F91189673C"):
     except subprocess.CalledProcessError:
         tasks.append(computer_name)
 
-    # check if brew is installed and configured correctly (via type)
-    cmd = "type brew"
+    # check if brew is installed (and within PATH)
+    cmd = "brew"
     try:
         subprocess.run(args=cmd.split(), **subargs)
-    except subprocess.CalledProcessError:
+    except FileNotFoundError:
         tasks.append(homebrew)
         task_args[homebrew] = dict(
             url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh",
@@ -81,25 +81,25 @@ def bootstrap(key="D97737F91189673C"):
 
     # check if dotfiles repo is encrypted (with git-crypt)
     try:
-        cmd = f"grep -qv \\x00GITCRYPT {home}/.gitrepos"
-        assert subprocess.run(args=cmd.split(), **subargs)
-    except (AssertionError, subprocess.CalledProcessError):
+        cmd = f"head -c9 {home}/.gitrepos"
+        assert b"\x00GITCRYPT" == subprocess.run(args=cmd.split(), **subargs).stdout
+    except AssertionError:
         tasks.append(git_crypt)
         task_args[git_crypt] = dict(key=key)
 
     # check if gpg-agent is installed and configured correctly (via ssh-add)
     try:
         cmd = "ssh-add -l"
-        assert subprocess.run(args=cmd.split(), **subargs)
-    except (AssertionError, subprocess.CalledProcessError):
+        subprocess.run(args=cmd.split(), **subargs)
+    except subprocess.CalledProcessError:
         tasks.append(gpg_agent)
 
     # check if tailscale is installed and configured as a system extension
     try:
         cmd = "tailscale status"
-        assert subprocess.run(args=cmd.split(), **subargs | dict(timeout=2))
+        subprocess.run(args=cmd.split(), **subargs | dict(timeout=2))
         task_args[git_repos] = dict(vpn=True)
-    except (AssertionError, FileNotFoundError, subprocess.CalledProcessError):
+    except (FileNotFoundError, subprocess.CalledProcessError):
         task_args[git_repos] = dict(vpn=False)
 
     # always update git repos, yadm submodules, helptags
