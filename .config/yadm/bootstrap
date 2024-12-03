@@ -83,7 +83,7 @@ def bootstrap(key="D97737F91189673C"):
     try:
         cmd = f"head -c9 {home}/.gitrepos"
         byte = subprocess.run(args=cmd.split(), capture_output=True, check=True).stdout
-        assert byte == b"\x00GITCRYPT"
+        assert byte != b"\x00GITCRYPT"
     except AssertionError:
         tasks.append(git_crypt)
         task_args[git_crypt] = dict(key=key)
