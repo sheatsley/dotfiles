@@ -99,7 +99,7 @@ def bootstrap(key="D97737F91189673C"):
         cmd = "tailscale status"
         subprocess.run(args=cmd.split(), **subargs | dict(timeout=2))
         task_args[git_repos] = dict(vpn=True)
-    except (FileNotFoundError, subprocess.CalledProcessError):
+    except (FileNotFoundError, subprocess.TimeoutExpired):
         task_args[git_repos] = dict(vpn=False)
 
     # always update git repos, yadm submodules, helptags
