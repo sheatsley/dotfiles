@@ -9,7 +9,29 @@ import time
 
 
 def bootstrap(key="D97737F91189673C"):
-    """ """
+    """
+    This function runs a series of tasks to bootstrap a new macOS system. The
+    following tasks are performed (if necessary):
+
+         1. Set the computer name
+         2. Install Homebrew
+         3. Install/update brew packages
+         4. Install/update pip packages
+         5. Add a (public) key to gpg keyring (with ultimate trust)
+         6. Convert the yadm remote from https to ssh
+         7. Decrypt files with git-crypt (with the corresponding private key)
+         8. Configure gpg-agent for SSH
+         9. Clone/pull git repos (with submodules if tailscale is active)
+        10. Clone/pull yadm submodules
+        11. Install/update vim plugins
+        12. Set iTerm2 profile
+        13. Set macOS defaults
+
+    :param key: The key ID to add to the gpg keyring
+    :type key: str
+    :return: None
+    :rtype: NoneType
+    """
 
     # switch to home directory and initialize variables
     home = os.path.expanduser("~")
@@ -22,7 +44,6 @@ def bootstrap(key="D97737F91189673C"):
     cmd = "scutil --get HostName"
     try:
         subprocess.run(args=cmd.split(), **subargs)
-        tasks.append(computer_name)
     except subprocess.CalledProcessError:
         tasks.append(computer_name)
 
@@ -39,7 +60,7 @@ def bootstrap(key="D97737F91189673C"):
 
     # always update brew packages and pip packages
     tasks.append(brew_packages)
-    task_args[brew_packages] = dict(brewbundle=f"{home}/.brewbundle")
+    task_args[brew_packages] = dict(brewfile=f"{home}/.brewfile")
     tasks.append(pip_packages)
     task_args[pip_packages] = dict(pip=f"{home}/.pip")
 
@@ -119,10 +140,20 @@ def bootstrap(key="D97737F91189673C"):
     return None
 
 
-def brew_packages(brewbundle, subargs):
-    """ """
+def brew_packages(brewfile, subargs):
+    """
+    Via the Brewfile, this function installs new brew packages, updates
+    existing ones, and removes packages that are not found in the Brewfile.
+
+    :param brewfile: The path to the Brewfile
+    :type brewfile: str
+    :param subargs: The subprocess arguments
+    :type subargs: dict
+    :return: None
+    :rtype: NoneType
+    """
     print("\nInstalling brew packages...")
-    os.environ["HOMEBREW_BUNDLE_FILE"] = brewbundle
+    os.environ["HOMEBREW_BUNDLE_FILE"] = brewfile
     cmd = "brew bundle install --cleanup"
     subprocess.run(args=cmd.split(), **subargs)
     return None
@@ -274,8 +305,8 @@ def public_key(key, subargs):
     subprocess.run(args=cmd.split(), **subargs)
 
     # set trust to ultimate
-    cmd = "gpg --import-ownertrust"
-    subprocess.run(args=cmd.split(), input=f"{key}:6\n", **subargs)
+    cmd = f"gpg --command-fd 0 --edit-key {key} trust"
+    subprocess.run(args=cmd.split(), input="5\ny\n", **subargs)
     return None
 
 
