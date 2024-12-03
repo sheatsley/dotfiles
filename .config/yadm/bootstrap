@@ -14,7 +14,7 @@ def bootstrap(key="D97737F91189673C"):
     # switch to home directory and initialize variables
     home = os.path.expanduser("~")
     os.chdir(home)
-    subargs = dict(capture_output=True, check=True, encoding="utf-8")
+    subargs = dict(capture_output=True, check=True, encoding="utf-8", text=True)
     tasks = []
     task_args = {}
 
@@ -114,6 +114,7 @@ def bootstrap(key="D97737F91189673C"):
     for idx, task in enumerate(tasks, start=1):
         print(f"{idx}. {task.__name__}")
     time.sleep(3)
+    subargs = dict(check=True, encoding="utf-8", text=True)
     for task in tasks:
         task(**dict(subargs=subargs) | task_args.get(task, {}))
     return None
@@ -177,20 +178,21 @@ def gpg_agent(subargs):
 
     # update PATH
     cmd = "/usr/libexec/path_helper"
-    paths = subprocess.run(args=cmd.split(), **subargs).stdout.strip().split(";").pop(0)
-    start = paths.index('"') + 1
-    end = paths.index('"', start)
-    os.environ["PATH"] = paths[start:end]
+    path = subprocess.run(args=cmd.split(), capture_output=True, **subargs)
+    path = path.stdout.strip().split(";").pop(0)
+    start = path.index('"') + 1
+    end = path.index('"', start)
+    os.environ["PATH"] = path[start:end]
 
     # set GPG_TTY
     cmd = "tty"
-    os.environ["GPG_TTY"] = subprocess.run(args=cmd.split(), **subargs).stdout.strip()
+    gpg_tty = subprocess.run(args=cmd.split(), capture_output=True, **subargs)
+    os.environ["GPG_TTY"] = gpg_tty.stdout.strip()
 
     # set SSH_AUTH_SOCK
     cmd = "gpgconf --list-dirs agent-ssh-socket"
-    os.environ["SSH_AUTH_SOCK"] = subprocess.run(
-        args=cmd.split(), **subargs
-    ).stdout.strip()
+    ssh_auth_sock = subprocess.run(args=cmd.split(), capture_output=True, **subargs)
+    os.environ["SSH_AUTH_SOCK"] = ssh_auth_sock.stdout.strip()
 
     # launch gpg-agent
     cmd = "gpgconf --launch gpg-agent"
@@ -220,8 +222,8 @@ def homebrew(subargs, url, zprofile):
 
     # update PATH so we can use formulae immediately
     cmd = "/opt/homebrew/bin/brew shellenv"
-    paths = subprocess.run(args=cmd.split(), **subargs).stdout
-    path = paths.split("\n").pop(3).split(";").pop(0).split("=").pop().strip('"')
+    path = subprocess.run(args=cmd.split(), capture_output=True, **subargs).stdout
+    path = path.split("\n").pop(3).split(";").pop(0).split("=").pop().strip('"')
     os.environ["PATH"] = path
     return None
 
@@ -263,7 +265,7 @@ def public_key(key, subargs):
 
     # parse public key URL
     cmd = "gpg --card-status"
-    status = subprocess.run(args=cmd.split(), **subargs).stdout
+    status = subprocess.run(args=cmd.split(), capture_output=True, **subargs).stdout
     start = status.index("https://")
     end = status.index("\n", start)
     url = status[start:end]
@@ -298,8 +300,8 @@ def yadm_repo(subargs):
 
     # get current repo name
     cmd = "yadm remote get-url origin"
-    repo = subprocess.run(args=cmd.split(), **subargs).stdout.strip()
-    repo = repo.split("github.com/").pop()
+    repo = subprocess.run(args=cmd.split(), capture_output=True, **subargs).stdout
+    repo = repo.strip().split("github.com/").pop()
 
     # set remote url to ssh
     cmd = f"yadm remote set-url origin git@github.com:{repo}"
