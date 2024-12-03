@@ -178,7 +178,7 @@ def git_crypt(key, subargs):
     return None
 
 
-def git_repos(directory, repos, vpn):
+def git_repos(directory, repos, subargs, vpn):
     """ """
     print("\nUpdating git repos...")
     with open(repos, "r") as f:
@@ -189,16 +189,16 @@ def git_repos(directory, repos, vpn):
         # clone or pull repo
         if not os.path.isdir(f"{directory}/{name}"):
             cmd = f"git clone git@github.com:{owner}/{name}.git {directory}/{name}"
-            subprocess.run(args=cmd.split(), check=True)
+            subprocess.run(args=cmd.split(), **subargs)
         else:
             cmd = f"git -C {directory}/{name} pull"
-            subprocess.run(args=cmd.split(), check=True)
+            subprocess.run(args=cmd.split(), **subargs)
 
         # update submodules if vpn is active
         if vpn:
             print(f"\n Updating submodules for {name}...")
             cmd = f"git -C {directory}/{name} submodule update --init --recursive"
-            subprocess.run(args=cmd.split(), check=True)
+            subprocess.run(args=cmd.split(), **subargs)
     return None
 
 
