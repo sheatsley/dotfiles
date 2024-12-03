@@ -243,7 +243,6 @@ def homebrew(subargs, url, zprofile):
 
     # install brew (non-interactive)
     cmd = f"/bin/bash /tmp/{script}"
-    os.environ["NONINTERACTIVE"] = "1"
     subprocess.run(args=cmd.split(), **subargs)
 
     # update environment variables on login
