@@ -330,7 +330,7 @@ def yadm_repo(subargs):
     # get current repo name
     cmd = "yadm remote get-url origin"
     repo = subprocess.run(args=cmd.split(), capture_output=True, **subargs).stdout
-    repo = repo.strip().split("github.com/").pop()
+    repo = repo.strip().split("github.com").pop()[1:]
 
     # set remote url to ssh
     cmd = f"yadm remote set-url origin git@github.com:{repo}"
