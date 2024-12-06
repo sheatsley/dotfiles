@@ -1,0 +1,49 @@
+[submodule ".oh-my-zsh"]
+    branch = master
+	path = .oh-my-zsh
+	url = https://github.com/ohmyzsh/ohmyzsh
+[submodule ".vim/pack/plugins/start/vim-airline"]
+    branch = master
+	path = .vim/pack/plugins/start/vim-airline
+	url = https://github.com/vim-airline/vim-airline.git
+[submodule ".vim/pack/plugins/opt/onedark.vim"]
+    branch = main
+	path = .vim/pack/plugins/opt/onedark.vim
+	url = https://github.com/joshdick/onedark.vim.git
+[submodule ".vim/pack/plugins/start/vim-fugitive"]
+	path = .vim/pack/plugins/start/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive.git
+[submodule ".oh-my-plugins/plugins/zsh-autosuggestions"]
+	path = .oh-my-plugins/plugins/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions
+[submodule ".vim/pack/plugins/start/fzf"]
+	path = .vim/pack/plugins/start/fzf
+	url = https://github.com/junegunn/fzf.git
+[submodule ".vim/pack/plugins/start/fzf.vim"]
+	path = .vim/pack/plugins/start/fzf.vim
+	url = https://github.com/junegunn/fzf.vim.git
+[submodule ".vim/pack/plugins/start/vim-commentary"]
+	path = .vim/pack/plugins/start/vim-commentary
+	url = https://github.com/tpope/vim-commentary.git
+[submodule ".vim/pack/plugins/start/coc.nvim"]
+	path = .vim/pack/plugins/start/coc.nvim
+	url = https://github.com/neoclide/coc.nvim.git
+	branch = release
+[submodule ".vim/pack/plugins/start/vim-polyglot"]
+	path = .vim/pack/plugins/start/vim-polyglot
+	url = https://github.com/sheerun/vim-polyglot.git
+[submodule ".vim/pack/plugins/start/vim-devicons"]
+	path = .vim/pack/plugins/start/vim-devicons
+	url = https://github.com/ryanoasis/vim-devicons.git
+[submodule ".vim/pack/plugins/start/copilot.vim"]
+	path = .vim/pack/plugins/start/copilot.vim
+	url = https://github.com/github/copilot.vim.git
+[submodule ".vim/pack/plugins/start/vim-rsi"]
+	path = .vim/pack/plugins/start/vim-rsi
+	url = https://github.com/tpope/vim-rsi.git
+[submodule ".ohmyzsh/ohmyzsh"]
+	path = .ohmyzsh/ohmyzsh
+	url = https://github.com/ohmyzsh/ohmyzsh.git
+[submodule ".ohmyzsh/plugins/zsh-autosuggestions"]
+	path = .ohmyzsh/plugins/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions.git
