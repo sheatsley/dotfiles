@@ -1,2 +1,2 @@
-.gitrepos filter=git-crypt diff=git-crypt
+.config/git/repos filter=git-crypt diff=git-crypt
 .ssh/** filter=git-crypt diff=git-crypt
