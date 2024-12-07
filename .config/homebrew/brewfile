@@ -1,0 +1,53 @@
+tap "homebrew/bundle"
+tap "sheatsley/formulae"
+# Arduino command-line interface
+brew "arduino-cli"
+# Enable transparent encryption/decryption of files in a git repo
+brew "git-crypt"
+# GNU Pretty Good Privacy (PGP) package
+brew "gnupg"
+# Update of iperf: measures TCP, UDP, and SCTP bandwidth
+brew "iperf3"
+# Mac App Store command-line interface
+brew "mas"
+# Interpreted, interactive, object-oriented programming language
+brew "python"
+brew "leetup"
+brew "node"
+# Yet Another Dotfiles Manager
+brew "yadm"
+# Voice and text chat software
+cask "discord"
+# Terminal emulator as alternative to Apple's Terminal app
+cask "iterm2"
+# App to build and share containerised applications and microservices
+cask "docker"
+# Web browser
+cask "utm"
+cask "firefox"
+cask "font-dejavu-sans-mono-nerd-font"
+# The successor to Hyperion aka Hyperion Next Generation
+cask "hyperion-ng"
+# Provides updates to various Microsoft products
+cask "microsoft-auto-update"
+# Office suite
+cask "microsoft-office"
+# Meet, chat, call, and collaborate in just one place
+cask "microsoft-teams"
+# GameStream client
+cask "moonlight"
+# Instant messaging application focusing on security
+cask "signal"
+# Team communication and collaboration software
+cask "slack"
+# Music streaming service
+cask "spotify"
+# Keyboard configurator
+cask "via"
+# Pinentry for GPG on Mac
+brew "pinentry-mac"
+# Video communication and virtual meeting platform
+cask "zoom"
+cask "yubico-authenticator"
+cask "tailscale"
+cask "chatgpt"

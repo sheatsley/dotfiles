@@ -1,0 +1,47 @@
+defaults write com.apple.AppleMultitouchTrackpad Clicking -int 1                               # enable tap to click for trackpads
+defaults write com.apple.AppleMultitouchTrackpad FirstClickThreshold -int 0                    # low pressure for force click
+defaults write com.apple.AppleMultitouchTrackpad SecondClickThreshold -int 0                   # low pressure for second click
+defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -int 1                # enable three finger drag for trackpads
+defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerTapGesture -int 2          # enable look up with three fingers
+defaults write com.apple.airplay showInMenuBarIfPresent -int 0                                 # remove airplay from menubar
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -int 1                       # do not create .ds_store files on network volumes
+defaults write com.apple.dock expose-group-apps -int 1                                         # group windows by application in exposé
+defaults write com.apple.dock mru-spaces -int 0                                                # do not automatically rearrange spaces
+defaults write com.apple.dock orientation left                                                 # place dock on the left
+defaults write com.apple.dock persistent-apps -array                                           # clear the dock
+for APP in /Applications/{"iTerm","Moonlight"}                                                `# add iterm, moonlight...` \
+/System/Applications/Messages /Applications/Spotify                                           `# messages, spotify...` \
+/System/Applications/Mail /System/Cryptexes/App/System/Applications/Safari                    `# mail, safari...` \
+/Applications/{"Signal","Discord"} /System/Applications/Calendar                              `# signal, discord, calendar...` \
+/System/Applications/{"Notes","Reminders"} /Applications/Slack; do                            `# notes, reminders, & slack` \
+defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>'"$APP"'.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'; \
+done                                                                                           # ... to the dock
+defaults write com.apple.dock show-recents -int 0                                              # do not show recent apps in dock
+defaults write com.apple.dock size-immutable -int 1                                            # disable dock resizing
+defaults write com.apple.dock tilesize -int 31                                                 # set dock icons to 31 pixels
+defaults write com.apple.dock wvous-br-corner -int 0                                           # disable bottom-right hot corner
+defaults write com.apple.dock workspaces-auto-swoosh -int 0                                    # disable auto space switching
+defaults write com.apple.finder FXEnableExtensionChangeWarning -int 0                          # disable file extension change warning
+defaults write com.apple.finder FXPreferredViewStyle "Nlsv"                                    # set default view style in finder to list view
+defaults write com.apple.finder ShowPathbar -int 1                                             # show path in finder
+defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 0                             # disable dictation via keyboard shortcuts
+defaults write com.apple.menuextra.clock DateFormat "EEE MMM d  h:mm a"                        # show the day, month, date and time (am/pm) in the taskbar
+defaults write com.apple.Safari EnableNarrowTabs -int 1                                        # use compact tabs in safari
+defaults write com.apple.Safari HomePage "about:blank"                                         # set safari homepage to about:blank
+defaults write com.apple.Safari IncludeDevelopMenu -int 1                                      # include developer menu in safari
+defaults write com.apple.Safari ShowFullURLInSmartSearchField -int 1                           # show full url in safari address bar
+defaults write com.apple.Safari "WebKitPreferences.developerExtrasEnabled" -int 1              # enable inspector in safari
+defaults write com.apple.SoftwareUpdate AutomaticCheckEnabled -int 1                           # automatically update mas apps
+defaults write com.apple.SoftwareUpdate AutomaticDownload -int 1                               # automatically download os updates
+defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -int 1                        # do not use new hard drives as backup volumes
+defaults write NSGlobalDomain AppleShowAllExtensions -int 1                                    # show filename extensions in finder
+defaults write NSGlobalDomain AppleWindowTabbingMode "manual"                                  # set tabs when opening documents to manual
+defaults write NSGlobalDomain com.apple.trackpad.scaling -int 2                                # set faster tracking speed
+defaults write NSGlobalDomain InitialKeyRepeat -int 15                                         # use a very short delay before key repeat starts
+defaults write NSGlobalDomain KeyRepeat -int 2                                                 # use fast keyboard repeat rate
+defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -int 1                        # expand the save panel by default
+defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -int 1                        # expand the save panel by default, part 2
+defaults write NSGlobalDomain NSQuitAlwaysKeepsWindows -int 1                                  # restore windows when opening apps
+defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -int 1                           # expand the print menu by default
+defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -int 1                          # expand the print menu by default, part 2
+for APP in Dock Finder Safari SystemUIServer; do killall "${APP}"; done                        # kill affected applications...

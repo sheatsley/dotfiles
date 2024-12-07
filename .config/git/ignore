@@ -1,0 +1,44 @@
+# BibTeX bibliography
+*.bbl
+
+# BibTex log
+*.blg
+
+# LaTeX hyperref package metadata
+*.out
+
+# LaTeX metadata
+*.aux
+
+# Latexmk files read & written
+*.fls
+
+# Latexmk log file
+*.fdb_latexmk
+
+# macOS folder metadata
+.DS_Store
+
+# pdfTeX log file
+*.log
+
+# python byte-compiled
+__pycache__/
+
+# python type checking cache
+.mypy_cache
+
+# python build distribution
+dist/
+
+# python build metadata
+build/
+
+# python distribution bundle
+*.egg-info/
+
+# vim swapfiles
+[._]*.s[a-w][a-z]
+
+# microsoft office temporary files
+~$*

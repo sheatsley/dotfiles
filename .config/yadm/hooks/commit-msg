@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Path to the commit message file
+COMMIT_MSG_FILE=$1
+
+# Get the list of staged files, joined by commas
+STAGED_FILES=$(git diff --cached --name-only | tr '\n' ',' | sed 's/,$//')
+
+# If no files are staged, exit without modifying the commit message
+if [[ -z "$STAGED_FILES" ]]; then
+    echo "No files staged. Commit aborted."
+    exit 1
+fi
+
+# Prepend the staged file names to the commit message
+{
+    echo "$STAGED_FILES - $(cat $COMMIT_MSG_FILE)"
+} > "$COMMIT_MSG_FILE.tmp"
+
+# Replace the original commit message file
+mv "$COMMIT_MSG_FILE.tmp" "$COMMIT_MSG_FILE"
