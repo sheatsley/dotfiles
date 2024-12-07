@@ -81,7 +81,7 @@ def bootstrap(key="1A2405C9E6BFBE34"):
 
     # check if dotfiles repo is encrypted (with git-crypt)
     try:
-        cmd = f"head -c9 {home}/.gitrepos"
+        cmd = f"head -c9 {home}/.config/git/repos"
         byte = subprocess.run(args=cmd.split(), capture_output=True, check=True).stdout
         assert byte != b"\x00GITCRYPT"
     except AssertionError:
