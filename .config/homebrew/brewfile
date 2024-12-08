@@ -8,26 +8,31 @@ brew "git-crypt"
 brew "gnupg"
 # Update of iperf: measures TCP, UDP, and SCTP bandwidth
 brew "iperf3"
+# Command-line tool to solve Leetcode problems
+brew "leetup"
 # Mac App Store command-line interface
 brew "mas"
-# Interpreted, interactive, object-oriented programming language
-brew "python"
-brew "leetup"
+# Platform built on V8 to build network applications
 brew "node"
+# Pinentry for GPG on Mac
+brew "pinentry-mac"
+# Interpreted, interactive, object-oriented programming language
+brew "python@3.13"
 # Yet Another Dotfiles Manager
 brew "yadm"
+# OpenAI's official ChatGPT desktop app
+cask "chatgpt"
 # Voice and text chat software
 cask "discord"
-# Terminal emulator as alternative to Apple's Terminal app
-cask "iterm2"
 # App to build and share containerised applications and microservices
 cask "docker"
 # Web browser
-cask "utm"
 cask "firefox"
 cask "font-dejavu-sans-mono-nerd-font"
 # The successor to Hyperion aka Hyperion Next Generation
 cask "hyperion-ng"
+# Terminal emulator as alternative to Apple's Terminal app
+cask "iterm2"
 # Provides updates to various Microsoft products
 cask "microsoft-auto-update"
 # Office suite
@@ -42,12 +47,13 @@ cask "signal"
 cask "slack"
 # Music streaming service
 cask "spotify"
+# Mesh VPN based on WireGuard
+cask "tailscale"
+# Virtual machines UI using QEMU
+cask "utm"
 # Keyboard configurator
 cask "via"
-# Pinentry for GPG on Mac
-brew "pinentry-mac"
+# Application for generating TOTP and HOTP codes
+cask "yubico-authenticator"
 # Video communication and virtual meeting platform
 cask "zoom"
-cask "yubico-authenticator"
-cask "tailscale"
-cask "chatgpt"
