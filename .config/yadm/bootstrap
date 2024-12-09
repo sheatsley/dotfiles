@@ -222,6 +222,7 @@ def git_repos(directory, repos, subargs, vpn):
         owner, name = repo.strip().split("/")
 
         # clone or pull repo
+        print(f"Updating {name}...")
         if not os.path.isdir(f"{directory}/{name}"):
             cmd = f"git clone git@github.com:{owner}/{name}.git {directory}/{name}"
             subprocess.run(args=cmd.split(), **subargs)
@@ -231,7 +232,7 @@ def git_repos(directory, repos, subargs, vpn):
 
         # update submodules if vpn is active
         if vpn:
-            print(f"\n Updating submodules for {name}...")
+            print(f"Updating {name} submodules...")
             cmd = f"git -C {directory}/{name} submodule update --init --recursive"
             subprocess.run(args=cmd.split(), **subargs)
     return None
