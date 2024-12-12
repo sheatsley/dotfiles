@@ -363,6 +363,8 @@
 			<true/>
 			<key>ASCII Ligatures</key>
 			<false/>
+			<key>Allow modifyOtherKeys</key>
+			<false/>
 			<key>Ambiguous Double Width</key>
 			<false/>
 			<key>Ansi 0 Color</key>
@@ -717,6 +719,8 @@
 			</array>
 			<key>Keyboard Map</key>
 			<dict/>
+			<key>Left Option Key Changeable</key>
+			<true/>
 			<key>Link Color</key>
 			<dict>
 				<key>Alpha Component</key>
@@ -989,6 +993,8 @@
 			<integer>4</integer>
 			<key>Transparency</key>
 			<real>0.032265228426395939</real>
+			<key>Treat Option as Alt</key>
+			<true/>
 			<key>Unlimited Scrollback</key>
 			<true/>
 			<key>Use Bold Font</key>
