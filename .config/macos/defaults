@@ -12,7 +12,7 @@ defaults write com.apple.dock persistent-apps -array                            
 for APP in /Applications/{"iTerm","Moonlight"}                                                `# add iterm, moonlight...` \
 /System/Applications/Messages /Applications/Spotify                                           `# messages, spotify...` \
 /System/Applications/Mail /System/Cryptexes/App/System/Applications/Safari                    `# mail, safari...` \
-/Applications/{"Signal","Discord"} /System/Applications/Calendar                              `# signal, discord, calendar...` \
+/Applications/{"Signal","Discord"} /System/Applications/Calendar /Applications/ChatGPT        `# signal, discord, calendar, chatgpt...` \
 /System/Applications/{"Notes","Reminders"} /Applications/Slack; do                            `# notes, reminders, & slack` \
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>'"$APP"'.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'; \
 done                                                                                           # ... to the dock
