@@ -193,7 +193,7 @@ def git_crypt(key, subargs):
     :return: None
     :rtype: NoneType
     """
-    print(f"\nDecrypting files with {key}...")
+    print(f"\nDecrypting dotfiles with {key}...")
     cmd = "yadm git-crypt unlock"
     subprocess.run(args=cmd.split(), **subargs)
     return None
