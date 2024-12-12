@@ -135,7 +135,7 @@ def bootstrap(key="1A2405C9E6BFBE34"):
     # print status and run tasks
     print("Running the following tasks:")
     for idx, task in enumerate(tasks, start=1):
-        print(f"{idx}. {task.__name__}")
+        print(f"{idx}. {task.__name__} {task_args.get(task, {})}")
     time.sleep(3)
     subargs = dict(check=True, encoding="utf-8", text=True)
     for task in tasks:
