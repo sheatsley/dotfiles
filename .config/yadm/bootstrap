@@ -175,9 +175,9 @@ def computer_name(subargs):
     print("\nEnter computer name:")
     name = input()
     cmd = "sudo scutil --set "
-    subprocess.run(args=f"{cmd} ComputerName {name}".split(), **subargs)
-    subprocess.run(args=f"{cmd} HostName {name}".split(), **subargs)
-    subprocess.run(args=f"{cmd} LocalHostName {name.strip()}".split(), **subargs)
+    subprocess.run(args=f"{cmd} ComputerName".split() + [name], **subargs)
+    subprocess.run(args=f"{cmd} HostName".split() + [name], **subargs)
+    subprocess.run(args=f"{cmd} LocalHostName".split() + [name.strip()], **subargs)
     return None
 
 
