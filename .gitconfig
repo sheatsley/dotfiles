@@ -1,6 +1,6 @@
 [alias]
     mergehist = "!yadm diff .zsh_history | grep '^ \\-' | cut -d '-' -f2- >> .zsh_history && yadm add .zsh_history && yadm commit -m $(yadm hash-object .zsh_history)"
-    subcommit = "!if [ -d .git ]; then CMD=git; else CMD=yadm; fi; $CMD submodule status | while read REPO; do if [ ${REPO:0:1} = + ]; then $CMD add $(awk '{print $2;}' <<< $REPO); $CMD commit -m $(awk '{print substr($1,2);}' <<< $REPO); fi; $CMD push; done"
+    subcommit = "!if [ -d .git ]; then CMD=git; else CMD=yadm; fi; $CMD submodule status | while read REPO; do if [ ${REPO:0:1} = + ]; then $CMD add $(awk '{print $2;}' <<< $REPO); $CMD commit -m $(awk '{print substr($1,2);}' <<< $REPO); fi; done; $CMD push"
     subupdate = "!if [ -d .git ]; then CMD=git; else CMD=yadm; fi; $CMD submodule update --remote --rebase; $CMD submodule foreach git submodule update --recursive;"
 [commit]
   gpgSign = True
