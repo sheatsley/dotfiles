@@ -4,6 +4,7 @@ isort
 matplotlib
 more-itertools
 numpy
+openpyxl
 pandas
 pelican[markdown]
 pip
