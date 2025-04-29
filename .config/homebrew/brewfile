@@ -14,12 +14,16 @@ brew "leetup"
 brew "mas"
 # Platform built on V8 to build network applications
 brew "node"
+# 7-Zip (high compression file archiver) implementation
+brew "p7zip"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
 # Interpreted, interactive, object-oriented programming language
 brew "python@3.13"
 # Yet Another Dotfiles Manager
 brew "yadm"
+# Zstandard is a real-time compression algorithm
+brew "zstd"
 # OpenAI's official ChatGPT desktop app
 cask "chatgpt"
 # Voice and text chat software
