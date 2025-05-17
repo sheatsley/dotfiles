@@ -404,7 +404,8 @@ def public_key(key, subargs):
 
 def vim_plugins(subargs):
     """
-    This function installs vim plugins and updates helptags.
+    This function installs vim plugins, updates helptags, and updates CoC
+    plugins.
 
     :param subargs: The subprocess arguments
     :type subargs: dict
@@ -418,6 +419,9 @@ def vim_plugins(subargs):
 
     # update helptags
     subprocess.run(args=["vim", ".vimrc", "+helptags ALL", "+qall"], **subargs)
+
+    # update CoC plugins
+    subprocess.run(args=["vim", "+CocUpdateSync", "+qall"], **subargs)
     return None
 
 
