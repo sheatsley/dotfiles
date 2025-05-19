@@ -45,10 +45,6 @@ cask "microsoft-office"
 cask "microsoft-teams"
 # GameStream client
 cask "moonlight"
-# Instant messaging application focusing on security
-cask "signal"
-# Team communication and collaboration software
-cask "slack"
 # Music streaming service
 cask "spotify"
 # Mesh VPN based on WireGuard
