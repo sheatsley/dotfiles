@@ -51,8 +51,6 @@ cask "spotify"
 cask "tailscale"
 # Virtual machines UI using QEMU
 cask "utm"
-# Keyboard configurator
-cask "via"
 # Application for generating TOTP and HOTP codes
 cask "yubico-authenticator"
 # Video communication and virtual meeting platform
