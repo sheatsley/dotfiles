@@ -30,8 +30,6 @@ cask "airfoil"
 cask "chatgpt"
 # Voice and text chat software
 cask "discord"
-# App to build and share containerised applications and microservices
-cask "docker"
 # Web browser
 cask "firefox"
 cask "font-dejavu-sans-mono-nerd-font"
