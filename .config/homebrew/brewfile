@@ -12,6 +12,8 @@ brew "iperf3"
 brew "leetup"
 # Mac App Store command-line interface
 brew "mas"
+# Zstandard is a real-time compression algorithm
+brew "zstd"
 # Platform built on V8 to build network applications
 brew "node"
 # 7-Zip (high compression file archiver) implementation
@@ -22,8 +24,6 @@ brew "pinentry-mac"
 brew "python@3.13"
 # Yet Another Dotfiles Manager
 brew "yadm"
-# Zstandard is a real-time compression algorithm
-brew "zstd"
 # Sends audio from computer to outputs
 cask "airfoil"
 # OpenAI's official ChatGPT desktop app
@@ -50,7 +50,7 @@ cask "moonlight"
 # Music streaming service
 cask "spotify"
 # Mesh VPN based on WireGuard
-cask "tailscale"
+cask "tailscale-app"
 # Virtual machines UI using QEMU
 cask "utm"
 # Application for generating TOTP and HOTP codes
