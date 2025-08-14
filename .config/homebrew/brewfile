@@ -26,8 +26,6 @@ brew "python@3.13"
 brew "yadm"
 # Sends audio from computer to outputs
 cask "airfoil"
-# OpenAI's official ChatGPT desktop app
-cask "chatgpt"
 # Voice and text chat software
 cask "discord"
 # Web browser
