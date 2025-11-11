@@ -12,9 +12,6 @@
 	branch = release
 	path = .vim/pack/plugins/start/coc.nvim
 	url = https://github.com/neoclide/coc.nvim.git
-[submodule ".vim/pack/plugins/start/copilot.vim"]
-	path = .vim/pack/plugins/start/copilot.vim
-	url = https://github.com/github/copilot.vim.git
 [submodule ".vim/pack/plugins/start/fzf"]
 	path = .vim/pack/plugins/start/fzf
 	url = https://github.com/junegunn/fzf.git
