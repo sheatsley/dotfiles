@@ -414,9 +414,6 @@ def vim_plugins(subargs):
     """
     print("\nInstalling vim plugins...")
 
-    # install copilot
-    subprocess.run(args=["vim", "+Copilot setup", "+qall"], **subargs)
-
     # update helptags
     subprocess.run(args=["vim", ".vimrc", "+helptags ALL", "+qall"], **subargs)
 
