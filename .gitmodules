@@ -40,3 +40,6 @@
 [submodule ".vim/pack/plugins/start/vim-rsi"]
 	path = .vim/pack/plugins/start/vim-rsi
 	url = https://github.com/tpope/vim-rsi.git
+[submodule ".vim/pack/plugins/start/vimtex"]
+	path = .vim/pack/plugins/start/vimtex
+	url = https://github.com/lervag/vimtex.git
