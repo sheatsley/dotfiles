@@ -89,6 +89,9 @@ def bootstrap(key="1A2405C9E6BFBE34"):
     except (AssertionError, FileNotFoundError):
         tasks.append(yadm_repo)
 
+    # always run yadm alt to ensure symlinks are up to date
+    tasks.append(yadm_alt)
+
     # check if dotfiles repo is encrypted (with git-crypt)
     try:
         cmd = f"head -c9 {home}/.config/git/repos"
@@ -222,7 +225,7 @@ def git_repos(directory, repos, subargs):
     :rtype: NoneType
     """
     # Allow overriding the Gitea hostname via environment variable
-    gitea_host = os.environ.get("GITEA_HOST", "gitea.lan")
+    gitea_host = os.environ.get("GITEA_HOST", "gitea.example.com")
 
     remote_templates = {
         "github": "git@github.com:{path}.git",
@@ -435,6 +438,25 @@ def yadm_repo(subargs):
 
     # set remote url to ssh
     cmd = f"yadm remote set-url origin git@github.com:{repo}"
+    subprocess.run(args=cmd.split(), **subargs)
+    return None
+
+
+def yadm_alt(subargs):
+    """
+    This function runs "yadm alt" to process alternate files and create the
+    appropriate symlinks based on the current system's class, hostname, and OS.
+    This should always run so that symlinks stay current on every bootstrap,
+    and must run before brew/pip tasks that read config files those symlinks
+    may point to.
+
+    :param subargs: The subprocess arguments
+    :type subargs: dict
+    :return: None
+    :rtype: NoneType
+    """
+    log.info("Running yadm alt to update symlinks...")
+    cmd = "yadm alt"
     subprocess.run(args=cmd.split(), **subargs)
     return None
 
