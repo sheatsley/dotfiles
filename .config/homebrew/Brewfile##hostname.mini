@@ -1,5 +1,5 @@
 tap "homebrew/bundle"
-tap "sheatsley/formulae"
+mas "WireGuard", id: 1451685025
 # Arduino command-line interface
 brew "arduino-cli"
 # Zstandard is a real-time compression algorithm
@@ -8,20 +8,14 @@ brew "zstd"
 brew "git-crypt"
 # GNU Privacy Guard (OpenPGP)
 brew "gnupg"
-# Update of iperf: measures TCP, UDP, and SCTP bandwidth
-brew "iperf3"
-# Command-line tool to solve Leetcode problems
-brew "leetup"
 # Mac App Store command-line interface
 brew "mas"
-# Open-source, cross-platform JavaScript runtime environment
-brew "node"
 # 7-Zip (high compression file archiver) implementation
 brew "p7zip"
 # Pinentry for GPG on Mac
 brew "pinentry-mac"
 # Interpreted, interactive, object-oriented programming language
-brew "python@3.14"
+brew "python"
 # Yet Another Dotfiles Manager
 brew "yadm"
 # Sends audio from computer to outputs
@@ -30,15 +24,10 @@ cask "airfoil"
 cask "discord"
 # Web browser
 cask "firefox"
-cask "font-dejavu-sans-mono-nerd-font"
 # The successor to Hyperion aka Hyperion Next Generation
-cask "sheatsley/formulae/hyperion-ng"
-# Terminal emulator as alternative to Apple's Terminal app
-cask "iterm2"
+cask hyperion
 # Cable-free audio router
 cask "loopback"
-# Full TeX Live distribution with GUI applications
-cask "mactex"
 # Provides updates to various Microsoft products
 cask "microsoft-auto-update"
 # Office suite
@@ -47,10 +36,6 @@ cask "microsoft-office"
 cask "microsoft-teams"
 # GameStream client
 cask "moonlight"
-# Music streaming service
-cask "spotify"
-# Mesh VPN based on WireGuard
-cask "tailscale-app"
 # Virtual machines UI using QEMU
 cask "utm"
 # Full-featured companion app to the YubiKey
@@ -62,4 +47,3 @@ mas "iMovie", id: 408981434
 mas "Keynote", id: 409183694
 mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
-mas "WireGuard", id: 1451685025

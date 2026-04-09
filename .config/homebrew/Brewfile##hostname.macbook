@@ -1,0 +1,43 @@
+tap "homebrew/bundle"
+# Zstandard is a real-time compression algorithm
+brew "zstd"
+# Enable transparent encryption/decryption of files in a git repo
+brew "git-crypt"
+# GNU Privacy Guard (OpenPGP)
+brew "gnupg"
+# Mac App Store command-line interface
+brew "mas"
+# 7-Zip (high compression file archiver) implementation
+brew "p7zip"
+# Pinentry for GPG on Mac
+brew "pinentry-mac"
+# Interpreted, interactive, object-oriented programming language
+brew "python"
+# Yet Another Dotfiles Manager
+brew "yadm"
+# Voice and text chat software
+cask "discord"
+# Web browser
+cask "firefox"
+# Provides updates to various Microsoft products
+cask "microsoft-auto-update"
+# Office suite
+cask "microsoft-office"
+# Meet, chat, call, and collaborate in just one place
+cask "microsoft-teams"
+# GameStream client
+cask "moonlight"
+# Video game digital distribution service
+cask "steam"
+# Virtual machines UI using QEMU
+cask "utm"
+# Full-featured companion app to the YubiKey
+cask "yubico-authenticator"
+# Video communication and virtual meeting platform
+cask "zoom"
+mas "GarageBand", id: 682658836
+mas "iMovie", id: 408981434
+mas "Keynote", id: 409183694
+mas "Numbers", id: 409203825
+mas "Pages", id: 409201541
+mas "WireGuard", id: 1451685025
