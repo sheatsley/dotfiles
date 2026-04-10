@@ -25,6 +25,8 @@ def bootstrap(key="1A2405C9E6BFBE34"):
     This function runs a series of tasks to bootstrap a new macOS system. The
     following tasks are performed (if necessary):
 
+         0. Run yadm alt (immediately, before task list -- resolves symlinks
+            from dotfiles checked out by yadm clone --bootstrap)
          1. Set the computer name
          2. Install Homebrew
          3. Install/update brew packages
@@ -49,6 +51,12 @@ def bootstrap(key="1A2405C9E6BFBE34"):
     subargs = dict(capture_output=True, check=True, encoding="utf-8", text=True)
     tasks = []
     task_args = {}
+
+    # run yadm alt immediately -- yadm clone (which invokes this bootstrap) has
+    # already checked out dotfiles, so alternate file symlinks can be resolved
+    # right away. this must happen before anything else (especially homebrew)
+    # reads config files that those symlinks may point to.
+    yadm_alt(subargs=dict(check=True, encoding="utf-8", text=True))
 
     # check if the HostName is set
     cmd = "scutil --get HostName"
@@ -88,9 +96,6 @@ def bootstrap(key="1A2405C9E6BFBE34"):
         assert subprocess.run(args=cmd.split(), **subargs).stdout.startswith("git")
     except (AssertionError, FileNotFoundError):
         tasks.append(yadm_repo)
-
-    # always run yadm alt to ensure symlinks are up to date
-    tasks.append(yadm_alt)
 
     # check if dotfiles repo is encrypted (with git-crypt)
     try:
@@ -243,7 +248,9 @@ def git_repos(directory, repos, subargs):
 
         # parse "host:owner/name"
         if ":" not in line:
-            log.warning(f"Skipping malformed repo entry (missing host prefix): {line!r}")
+            log.warning(
+                f"Skipping malformed repo entry (missing host prefix): {line!r}"
+            )
             log.warning("  Expected format: github:owner/repo  or  gitea:owner/repo")
             continue
 
