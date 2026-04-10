@@ -78,7 +78,7 @@ def bootstrap(key="1A2405C9E6BFBE34"):
     try:
         cmd = f"gpg -k {key}"
         assert "ultimate" in subprocess.run(args=cmd.split(), **subargs).stdout
-    except (AssertionError, FileNotFoundError):
+    except (AssertionError, FileNotFoundError, subprocess.CalledProcessError):
         tasks.append(public_key)
         task_args[public_key] = dict(key=key)
 
@@ -225,7 +225,7 @@ def git_repos(directory, repos, subargs):
     :rtype: NoneType
     """
     # Allow overriding the Gitea hostname via environment variable
-    gitea_host = os.environ.get("GITEA_HOST", "gitea.example.com")
+    gitea_host = os.environ.get("GITEA_HOST", "gitea.lan")
 
     remote_templates = {
         "github": "git@github.com:{path}.git",
