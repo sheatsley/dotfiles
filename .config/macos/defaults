@@ -10,7 +10,7 @@ defaults write com.apple.dock mru-spaces -int 0                                 
 defaults write com.apple.dock orientation left                                                 # place dock on the left
 defaults write com.apple.dock persistent-apps -array                                           # clear the dock
 for APP in /System/Applications/Utilities/Terminal /Applications/Moonlight                    `# add terminal, moonlight...` \
-/System/Applications/{"Music", "Messages", "Mail}                                             `# messages, music, mail...` \
+/System/Applications/{"Music", "Messages", "Mail"}                                            `# messages, music, mail...` \
 /System/Cryptexes/App/System/Applications/Safari                                              `# safari...` \
 /Applications/Discord /System/Applications/Calendar                                           `# discord, calendar...` \
 /System/Applications/{"Notes","Reminders"}; do                                                `# notes, & reminders` \
