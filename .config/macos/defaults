@@ -13,7 +13,7 @@ for APP in /System/Applications/Utilities/Terminal /Applications/Moonlight      
 /System/Applications/{"Music", "Messages", "Mail"}                                            `# messages, music, mail...` \
 /System/Cryptexes/App/System/Applications/Safari                                              `# safari...` \
 /Applications/Discord /System/Applications/Calendar                                           `# discord, calendar...` \
-/System/Applications/{"Notes","Reminders"}; do                                                `# notes, & reminders` \
+/System/Applications/{"Notes","Reminders"} /Applications/"Visual Studio Code"; do             `# notes, reminders, visual studio code` \
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>'"$APP"'.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'; \
 done                                                                                           # ... to the dock
 defaults write com.apple.dock show-recents -int 0                                              # do not show recent apps in dock
