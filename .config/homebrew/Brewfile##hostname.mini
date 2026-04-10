@@ -1,5 +1,4 @@
 tap "homebrew/bundle"
-mas "WireGuard", id: 1451685025
 # Arduino command-line interface
 brew "arduino-cli"
 # Zstandard is a real-time compression algorithm
@@ -24,8 +23,6 @@ cask "airfoil"
 cask "discord"
 # Web browser
 cask "firefox"
-# The successor to Hyperion aka Hyperion Next Generation
-cask hyperion
 # Cable-free audio router
 cask "loopback"
 # Provides updates to various Microsoft products
@@ -42,8 +39,3 @@ cask "utm"
 cask "yubico-authenticator"
 # Video communication and virtual meeting platform
 cask "zoom"
-mas "GarageBand", id: 682658836
-mas "iMovie", id: 408981434
-mas "Keynote", id: 409183694
-mas "Numbers", id: 409203825
-mas "Pages", id: 409201541
