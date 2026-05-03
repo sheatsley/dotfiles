@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>Battery_state</key>
+	<false/>
 	<key>CPU_barChart_position</key>
 	<integer>3</integer>
 	<key>CPU_label_position</key>
@@ -52,6 +54,8 @@
 	<integer>7</integer>
 	<key>Disk_widget</key>
 	<string></string>
+	<key>LaunchAtLoginNext</key>
+	<true/>
 	<key>NSNavPanelExpandedSizeForSaveMode</key>
 	<string>{880, 448}</string>
 	<key>NSOSPLastRootDirectory</key>
@@ -71,8 +75,19 @@
 	AcAAANgAAAAAAAAAEcAAACAAAAAAAAAAEsAAAOgAAAAAAAAAAdAAANAAAAAAAAAAENAA
 	AAQAAAAAAAAA
 	</data>
+	<key>NSToolbar Configuration eu.exelban.Stats.Settings.Toolbar</key>
+	<dict>
+		<key>TB Display Mode</key>
+		<integer>1</integer>
+		<key>TB Icon Size Mode</key>
+		<integer>1</integer>
+		<key>TB Is Shown</key>
+		<true/>
+		<key>TB Size Mode</key>
+		<integer>1</integer>
+	</dict>
 	<key>NSWindow Frame eu.exelban.Stats.Settings.WindowFrame</key>
-	<string>1695 771 728 480 0 0 3840 1570 </string>
+	<string>1695 772 728 480 0 0 3840 1570 </string>
 	<key>Network_base</key>
 	<string>bit</string>
 	<key>Network_label_position</key>
@@ -123,13 +138,17 @@
 	<integer>7</integer>
 	<key>RAM_widget</key>
 	<string>mini,line_chart</string>
+	<key>remote_tokens_migrated_to_keychain</key>
+	<true/>
 	<key>runAtLoginInitialized</key>
 	<true/>
 	<key>setupProcess</key>
 	<true/>
+	<key>support_ts</key>
+	<integer>1777061632</integer>
 	<key>updater_check_ts</key>
-	<integer>1775829865</integer>
+	<integer>1777820957</integer>
 	<key>version</key>
-	<string>2.12.8</string>
+	<string>2.12.13</string>
 </dict>
 </plist>
