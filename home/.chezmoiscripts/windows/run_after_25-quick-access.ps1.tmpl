@@ -1,0 +1,82 @@
+{{ template "ps-prelude.ps1" . }}
+{{- $items := .windows.quick_access }}
+
+<#
+This script sets the pinned folders in File Explorer's Quick access, in the
+order given by quick_access in .chezmoidata/windows.yaml. Explorer keeps pins in
+the order they were made and offers no way to reorder them, so when the current
+pins differ from the wanted ones, this script unpins every pinned folder and
+pins the wanted ones again, in order. "Recent folders" are not pinned, so they
+are left alone (and the setting that shows them is not touched). This uses the
+shell's own pin and unpin verbs; the Unpin check below matches the English
+name of the verb. It is a per-user setting, so it does not require an elevated
+session.
+#>
+$want = @({{ range $i, $e := $items }}{{ if $i }}, {{ end }}{{ squote $e }}{{ end }})
+$quickAccess = 'shell:::{679f85cb-0220-4080-b29b-5540cc05aab6}'
+$shell = New-Object -ComObject Shell.Application
+
+function Get-Pinned {
+    <#
+    This function lists the folders pinned to Quick access, in order, by
+    checking which items offer the Unpin verb (frequent folders offer Remove).
+
+    :return: the pinned shell items
+    #>
+    $pinned = @()
+    foreach ($item in $shell.Namespace($quickAccess).Items()) {
+        $verbs = @($item.Verbs() | ForEach-Object { $_.Name -replace '&', '' })
+        if ($verbs -contains 'Unpin from Quick access') { $pinned += $item }
+    }
+    return $pinned
+}
+
+function Get-Key {
+    <#
+    This function normalizes a shell path so that two spellings of the same
+    folder compare equal.
+
+    :param Path: the path of a shell item
+    :return: the lowercase path without a trailing backslash
+    #>
+    param([string]$Path)
+    return $Path.TrimEnd('\').ToLower()
+}
+
+# resolve each wanted folder to its path
+$wantKeys = @()
+$wantFolders = @()
+foreach ($spec in $want) {
+    $folder = $shell.Namespace($spec)
+    if ($null -eq $folder) {
+        Write-Warning "Quick access: cannot resolve $spec; skipping it"
+        continue
+    }
+    $wantFolders += $folder
+    $wantKeys += Get-Key $folder.Self.Path
+}
+
+# leave the pins alone if they are already right
+$haveKeys = @(Get-Pinned | ForEach-Object { Get-Key $_.Path })
+if (($haveKeys -join '|') -eq ($wantKeys -join '|')) {
+    Write-Step 'ok   Quick access pins are in order'
+    return
+}
+
+# unpin everything that is pinned, then pin the wanted folders in order
+foreach ($item in @(Get-Pinned)) {
+    $item.InvokeVerb('unpinfromhome')
+    Start-Sleep -Milliseconds 300
+}
+foreach ($folder in $wantFolders) {
+    $folder.Self.InvokeVerb('pintohome')
+    Start-Sleep -Milliseconds 300
+}
+
+# check the result rather than trusting the verbs
+$haveKeys = @(Get-Pinned | ForEach-Object { Get-Key $_.Path })
+if (($haveKeys -join '|') -eq ($wantKeys -join '|')) {
+    Write-Step 'set  Quick access pins'
+} else {
+    Write-Warning ("Quick access did not end up as expected. Wanted: " + ($wantKeys -join ', ') + ". Got: " + ($haveKeys -join ', '))
+}

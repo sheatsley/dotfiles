@@ -1,0 +1,75 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script enables wake-on-LAN (item 4 on the initialization list). Windows
+only wakes from a magic packet if (1) Fast Startup is off (otherwise a "shut
+down" is really a hybrid hibernate, which most network cards are not armed to
+wake from), (2) the adapter's power management accepts magic packets and the
+adapter is allowed to wake the computer, and (3) the driver's own wake setting
+is on. Driver property names differ by vendor, so this script enables whichever
+properties from a known list an adapter exposes. The BIOS/UEFI option (often
+called "Wake on LAN" or "Power On By PCI-E") cannot be set from Windows and must
+be enabled by hand. It requires an elevated session.
+#>
+Assert-Admin
+
+# disable fast startup so that a shutdown is a real power-off state
+Set-RegValue 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' 'HiberbootEnabled' 0 | Out-Null
+
+# retrieve the physical ethernet adapters and the devices already armed to wake
+$adapters = @(Get-NetAdapter -Physical | Where-Object { $_.PhysicalMediaType -eq '802.3' })
+if ($adapters.Count -eq 0) {
+    # nothing to configure (e.g., a virtual machine); warn instead of failing so that the rest of the apply is clean
+    Write-Warning 'No physical Ethernet adapter found; skipping the adapter settings.'
+    return
+}
+$armed = @(powercfg /devicequery wake_armed)
+
+# driver properties that control wake-on-LAN (names vary by vendor)
+# changing a driver property can briefly bounce the adapter
+$driverProps = @(
+    'Wake on Magic Packet',
+    'Wake on magic packet from power off state',
+    'Shutdown Wake-On-Lan',
+    'Wake From Shutdown',
+    'Enable PME'
+)
+
+foreach ($a in $adapters) {
+    $n = $a.Name
+
+    # allow magic packets in the adapter's power management
+    $pm = Get-NetAdapterPowerManagement -Name $n
+    if ($pm.WakeOnMagicPacket -eq 'Enabled') {
+        Write-Step "ok   $n : WakeOnMagicPacket"
+    } elseif ($pm.WakeOnMagicPacket -eq 'Unsupported') {
+        Write-Warning "$n reports WakeOnMagicPacket as unsupported"
+    } else {
+        Set-NetAdapterPowerManagement -Name $n -WakeOnMagicPacket Enabled
+        Write-Step "set  $n : WakeOnMagicPacket"
+    }
+
+    # allow the adapter to wake the computer
+    if ($armed -contains $a.InterfaceDescription) {
+        Write-Step "ok   $n : allowed to wake the computer"
+    } else {
+        powercfg /deviceenablewake "$($a.InterfaceDescription)" | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Step "set  $n : allowed to wake the computer"
+        } else {
+            Write-Warning "powercfg could not arm '$($a.InterfaceDescription)' (exit $LASTEXITCODE); check Device Manager > Power Management"
+        }
+    }
+
+    # enable whichever driver wake properties this adapter exposes
+    foreach ($prop in $driverProps) {
+        $cur = Get-NetAdapterAdvancedProperty -Name $n -DisplayName $prop -ErrorAction SilentlyContinue
+        if ($null -eq $cur) { continue }
+        if ($cur.DisplayValue -eq 'Enabled') {
+            Write-Step "ok   $n : $prop"
+        } else {
+            Set-NetAdapterAdvancedProperty -Name $n -DisplayName $prop -DisplayValue 'Enabled'
+            Write-Step "set  $n : $prop"
+        }
+    }
+}

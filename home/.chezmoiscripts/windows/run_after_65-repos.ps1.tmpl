@@ -1,0 +1,44 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script clones the public repos listed under repos in
+.chezmoidata/windows.yaml into ~\repos and fast-forwards the ones that are
+already there. They are fetched anonymously over https, so the YubiKey is not
+needed, and git is told never to ask for credentials (a repo that has turned
+private fails instead of waiting for input). A failing repo does not stop the
+others; the script fails at the end so that a re-run retries it. It does not
+require an elevated session.
+#>
+$git = (Get-Command git.exe -ErrorAction SilentlyContinue).Source
+if (-not $git) { throw 'git not found. Run: winget install Git.Git' }
+
+$repos = @(
+{{- range .windows.repos }}
+    @{ Name = {{ .name | squote }}; Url = {{ .url | squote }} }
+{{- end }}
+)
+$env:GIT_TERMINAL_PROMPT = '0'
+
+$failed = @()
+foreach ($r in $repos) {
+    $dest = Join-Path (Join-Path $HOME 'repos') $r.Name
+    if (Test-Path -LiteralPath (Join-Path $dest '.git')) {
+        # fast-forward an existing clone
+        & $git -c credential.helper= -C $dest pull --ff-only
+        $what = 'pull'
+    } else {
+        New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+        & $git -c credential.helper= clone $r.Url $dest
+        $what = 'clone'
+    }
+    if ($LASTEXITCODE -eq 0) {
+        Write-Step "ok   $($r.Name) ($what)"
+    } else {
+        Write-Warning "git $what failed for $($r.Name) (exit $($LASTEXITCODE))"
+        $failed += $r.Name
+    }
+}
+
+if ($failed.Count -gt 0) {
+    throw ("Repos not updated: " + ($failed -join ', '))
+}

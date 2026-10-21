@@ -1,0 +1,49 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script makes the desktop plain: a solid black background with no picture,
+and none of the built-in icons (Recycle Bin, This PC, and so on). It does not
+remove the files on the desktop; 90-desktop-clean does that, after the
+installers have run. The background colour is only shown when no wallpaper
+picture is set, so the picture is cleared as well. The settings are stored in
+the registry and are also pushed into the running session. It is a per-user
+setting, so it does not require an elevated session.
+#>
+
+# black background colour, no wallpaper picture, and the solid colour type shown in Settings
+Set-RegValue 'HKCU:\Control Panel\Colors' 'Background' '0 0 0' 'String' | Out-Null
+Set-RegValue 'HKCU:\Control Panel\Desktop' 'Wallpaper' '' 'String' | Out-Null
+Set-RegValue 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers' 'BackgroundType' 1 | Out-Null
+
+# load the Windows calls that update the running session
+if (-not ('Win32.Wall' -as [type])) {
+    Add-Type -Namespace Win32 -Name Wall -MemberDefinition @'
+[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, string pvParam, uint fWinIni);
+[DllImport("user32.dll", SetLastError = true)]
+public static extern bool SetSysColors(int cElements, int[] lpaElements, int[] lpaRgbValues);
+'@
+}
+
+# clear the picture (SPI_SETDESKWALLPAPER, saved and broadcast) and set the background colour (COLOR_DESKTOP = 1)
+[void][Win32.Wall]::SystemParametersInfo(0x0014, 0, '', 0x03)
+[void][Win32.Wall]::SetSysColors(1, [int[]]@(1), [int[]]@(0))
+Write-Step 'wallpaper: solid black'
+
+# hide the built-in desktop icons (1 hides, 0 shows) in both the current and the classic start panel keys
+$icons = @{
+    '{645FF040-5081-101B-9F08-00AA002F954E}' = 'Recycle Bin'
+    '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' = 'This PC'
+    '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' = 'User files'
+    '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' = 'Network'
+    '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' = 'Control Panel'
+}
+$panels = @(
+    'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel',
+    'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu'
+)
+foreach ($panel in $panels) {
+    foreach ($id in $icons.Keys) {
+        Set-RegValue $panel $id 1 | Out-Null
+    }
+}

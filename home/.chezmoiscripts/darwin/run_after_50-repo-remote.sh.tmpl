@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+{{ template "sh-prelude.sh" . }}
+
+# This script changes the remote of this repo (~/repos/chezmoi) from https to
+# ssh (the yadm_repo task of the yadm bootstrap). setup.sh clones over https
+# because ssh is not set up yet on a new machine; afterwards, pushing needs ssh.
+# Nothing happens if the remote is already ssh.
+src="$HOME/repos/chezmoi"
+
+# skip on a machine without the YubiKey (e.g., a test VM)
+if [[ "${DOTFILES_NO_YUBIKEY:-}" == "1" ]]; then
+  log "ok   skipped (DOTFILES_NO_YUBIKEY=1)"
+  exit 0
+fi
+
+# skip if there is no clone here (e.g., chezmoi was pointed at another source directory)
+if [[ ! -d "$src/.git" ]]; then
+  log "ok   no clone at $src; nothing to do"
+  exit 0
+fi
+
+# convert a GitHub https remote to its ssh form (read the stored value, since
+# `git remote get-url` applies any url.<base>.insteadOf rewrite rules)
+url="$(git -C "$src" config --get remote.origin.url)"
+case "$url" in
+  https://github.com/*)
+    path="${url#https://github.com/}"
+    path="${path%.git}"
+    git -C "$src" remote set-url origin "git@github.com:${path}.git"
+    log "set  origin -> git@github.com:${path}.git"
+    ;;
+  *)
+    log "ok   origin is $url"
+    ;;
+esac

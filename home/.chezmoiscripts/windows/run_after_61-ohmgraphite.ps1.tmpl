@@ -1,0 +1,54 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script installs OhmGraphite, which is only published as a zip on GitHub
+(PawnIO, which it uses to read CPU sensors, is installed by 60-apps). It
+downloads the latest release, checks the SHA-256 digest GitHub publishes for
+the asset, and extracts it to the directory set under ohmgraphite in
+.chezmoidata/windows.yaml. If OhmGraphite.exe is already there, nothing is
+done, so a changed OhmGraphite.exe.config is never overwritten; to upgrade,
+delete the directory and apply again. Setting it up as a service is a
+separate step. It requires an elevated session.
+#>
+Assert-Admin
+
+$dir = {{ .windows.ohmgraphite.dir | squote }}
+if (Test-Path -LiteralPath (Join-Path $dir 'OhmGraphite.exe')) {
+    Write-Step "ok   OhmGraphite is installed in $dir"
+    return
+}
+
+# find the latest release (GitHub needs TLS 1.2 and a User-Agent header)
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$ProgressPreference = 'SilentlyContinue'
+$release = Invoke-RestMethod -UseBasicParsing -Headers @{ 'User-Agent' = 'dotfiles' } -Uri 'https://api.github.com/repos/nickbabcock/OhmGraphite/releases/latest'
+$asset = @($release.assets | Where-Object { $_.name -like 'OhmGraphite-*.zip' }) | Select-Object -First 1
+if (-not $asset) { throw 'The latest OhmGraphite release has no zip asset.' }
+
+# download, verify, and extract in a scratch directory, then copy into place
+$tmp = Join-Path ([IO.Path]::GetTempPath()) "ohmgraphite-$PID"
+New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+try {
+    $zip = Join-Path $tmp $asset.name
+    Write-Step "downloading $($asset.name)"
+    Invoke-WebRequest -UseBasicParsing -Uri $asset.browser_download_url -OutFile $zip
+
+    # compare against the digest GitHub reports for the asset, when it reports one
+    if ($asset.digest -and $asset.digest -like 'sha256:*') {
+        $want = $asset.digest.Substring(7)
+        $got = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
+        if ($got -ine $want) { throw "OhmGraphite download failed its checksum (expected $want, got $got)." }
+    } else {
+        Write-Warning 'GitHub reported no digest for this asset; the download was not verified.'
+    }
+
+    $out = Join-Path $tmp 'extracted'
+    Expand-Archive -LiteralPath $zip -DestinationPath $out -Force
+    $exe = Get-ChildItem -LiteralPath $out -Recurse -Filter 'OhmGraphite.exe' | Select-Object -First 1
+    if (-not $exe) { throw 'OhmGraphite.exe was not found in the download.' }
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    Copy-Item -Path (Join-Path $exe.DirectoryName '*') -Destination $dir -Recurse -Force
+} finally {
+    Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
+}
+Write-Step "set  OhmGraphite installed in $dir"

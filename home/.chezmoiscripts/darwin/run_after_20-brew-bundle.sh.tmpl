@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+{{ template "sh-prelude.sh" . }}
+
+# This script installs and updates the Homebrew packages (including Mac App
+# Store apps, through mas) listed in ~/.config/homebrew/Brewfile, which chezmoi
+# generates from .chezmoidata/packages.yaml (the brew_packages task of the yadm
+# bootstrap). It runs on every apply, and then removes packages that are not
+# listed (brew bundle cleanup; recent Homebrew versions dropped the --cleanup
+# switch of brew bundle install), so what the Brewfile says is exactly what is
+# installed. Mac App Store entries require being signed in to the App Store.
+load_brew
+
+# check that the Brewfile was generated
+brewfile="$HOME/.config/homebrew/Brewfile"
+[[ -f "$brewfile" ]] || die "missing $brewfile"
+
+# install and update, then remove what is not listed
+log "installing/updating brew packages and mas apps"
+brew bundle install --verbose --file "$brewfile"
+log "removing brew packages that are not listed"
+brew bundle cleanup --force --file "$brewfile"

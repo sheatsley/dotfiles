@@ -1,0 +1,126 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script sets the pinned apps on the taskbar, in the order given by taskbar
+in .chezmoidata/windows.yaml (Windows always puts the Start button first). It
+uses Microsoft's taskbar layout file: this script writes the layout to
+C:\ProgramData\dotfiles\TaskbarLayout.xml and points the Start layout policy at
+it, and Explorer applies it at the next sign-in. The layout replaces the default
+pins, so only the listed apps are pinned (apps you pin yourself later are kept).
+Each wanted app is found by looking for its Start menu shortcut (desktop apps)
+and then for a packaged app of that name (Store apps). An app that is not
+installed yet cannot be pinned, because Windows drops a pin it cannot resolve
+instead of leaving a placeholder; it is pinned in its place by the first apply
+after it is installed (and the next sign-in). Windows may honor this policy only
+on some editions. It requires an elevated session.
+#>
+Assert-Admin
+
+$items = @(
+{{- range .windows.taskbar }}
+    @{ Id = {{ with index . "id" }}{{ squote . }}{{ else }}''{{ end }}; Match = {{ with index . "match" }}{{ squote . }}{{ else }}''{{ end }} }
+{{- end }}
+)
+
+function Find-StartLink {
+    <#
+    This function looks for a Start menu shortcut by name. When several match
+    (for example a 32-bit and a 64-bit shortcut), a 64-bit one is preferred,
+    then the shortest name (so "Steam" wins over "Steam Support").
+
+    :param Pattern: a wildcard pattern for the shortcut name
+    :return: the full path of the shortcut, or nothing if there is none
+    #>
+    param([string]$Pattern)
+    $roots = @(
+        (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs'),
+        (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs')
+    )
+    $hit = foreach ($root in $roots) {
+        if (Test-Path -LiteralPath $root) {
+            Get-ChildItem -LiteralPath $root -Recurse -Filter '*.lnk' -File -ErrorAction SilentlyContinue |
+                Where-Object { $_.BaseName -like $Pattern -and $_.BaseName -notmatch 'uninstall' }
+        }
+    }
+    $best = $hit | Sort-Object { $_.BaseName -notmatch '64' }, { $_.BaseName.Length } | Select-Object -First 1
+    if ($best) { return $best.FullName }
+    return $null
+}
+
+function Find-PackagedApp {
+    <#
+    This function looks for a packaged (Store) app by its Start menu name.
+
+    :param Pattern: a wildcard pattern for the app name
+    :return: the app user model ID, or nothing if there is none
+    #>
+    param([string]$Pattern)
+    $hit = Get-StartApps | Where-Object { $_.Name -like $Pattern -and $_.AppID -like '*!*' } |
+        Sort-Object { $_.Name.Length } | Select-Object -First 1
+    if ($hit) { return $hit.AppID }
+    return $null
+}
+
+# build the list of pins, in order
+$pins = @()
+foreach ($item in $items) {
+    if ($item.Id) {
+        $pins += ('        <taskbar:DesktopApp DesktopApplicationID="{0}"/>' -f $item.Id)
+        continue
+    }
+    $link = Find-StartLink $item.Match
+    if ($link) {
+        $pins += ('        <taskbar:DesktopApp DesktopApplicationLinkPath="{0}"/>' -f [Security.SecurityElement]::Escape($link))
+        Write-Step "pin  $($item.Match) -> $link"
+        continue
+    }
+    $aumid = Find-PackagedApp $item.Match
+    if ($aumid) {
+        $pins += ('        <taskbar:UWA AppUserModelID="{0}"/>' -f [Security.SecurityElement]::Escape($aumid))
+        Write-Step "pin  $($item.Match) -> $aumid"
+        continue
+    }
+    Write-Warning "Not pinned yet: nothing installed matches '$($item.Match)'"
+}
+
+# assemble the layout file
+$xml = @'
+<?xml version="1.0" encoding="utf-8"?>
+<LayoutModificationTemplate
+    xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification"
+    xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout"
+    xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout"
+    xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout"
+    Version="1">
+  <CustomTaskbarLayoutCollection PinListPlacement="Replace">
+    <defaultlayout:TaskbarLayout>
+      <taskbar:TaskbarPinList>
+'@
+$xml = $xml + "`r`n" + ($pins -join "`r`n") + "`r`n" + @'
+      </taskbar:TaskbarPinList>
+    </defaultlayout:TaskbarLayout>
+  </CustomTaskbarLayoutCollection>
+</LayoutModificationTemplate>
+'@
+
+# write the file only when it changed
+$dir = Join-Path $env:ProgramData 'dotfiles'
+$file = Join-Path $dir 'TaskbarLayout.xml'
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+$current = $null
+if (Test-Path -LiteralPath $file) { $current = [IO.File]::ReadAllText($file) }
+$changed = ($current -ne $xml)
+if ($changed) {
+    [IO.File]::WriteAllText($file, $xml, (New-Object Text.UTF8Encoding($false)))
+    Write-Step "set  $file"
+} else {
+    Write-Step "ok   $file"
+}
+
+# point the Start layout policy at it
+$policy = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer'
+$moved = Set-RegValue $policy 'StartLayoutFile' $file 'ExpandString'
+Set-RegValue $policy 'LockedStartLayout' 1 | Out-Null
+if ($changed -or $moved) {
+    Write-Warning 'The taskbar changes at the next sign-in (sign out and back in).'
+}

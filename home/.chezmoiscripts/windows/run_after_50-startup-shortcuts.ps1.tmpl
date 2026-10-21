@@ -1,0 +1,51 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script manages startup scripts (item 5 on the initialization list). Files
+kept in the repo under home/dot_startup are copied by chezmoi to ~\.startup;
+this script then creates one shortcut per runnable file in shell:startup (the
+folder Windows launches at sign-in), exactly as you would by hand. Shortcuts
+that this script created for files that no longer exist are removed, while
+shortcuts made by hand are left alone (ours carry a marker in their
+description). It is a per-user setting, so it does not require an elevated
+session.
+#>
+$src      = Join-Path $HOME '.startup'
+$startup  = [Environment]::GetFolderPath('Startup')
+$marker   = 'managed-by-chezmoi'
+$runnable = @('.ps1', '.bat', '.cmd', '.exe', '.vbs')
+$shell    = New-Object -ComObject WScript.Shell
+$psExe    = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+
+# create or refresh a shortcut for every runnable file
+$wanted = @{}
+if (Test-Path -LiteralPath $src) {
+    $files = @(Get-ChildItem -LiteralPath $src -File | Where-Object { $runnable -contains $_.Extension.ToLower() })
+    foreach ($f in $files) {
+        # name the shortcut after the full file name so that a.ps1 and a.cmd cannot collide
+        $lnkPath = Join-Path $startup ($f.Name + '.lnk')
+        $lnk = $shell.CreateShortcut($lnkPath)
+
+        # a .ps1 does not run when double-clicked, so launch it through powershell.exe
+        if ($f.Extension -ieq '.ps1') {
+            $lnk.TargetPath = $psExe
+            $lnk.Arguments = '-NoLogo -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $f.FullName + '"'
+        } else {
+            $lnk.TargetPath = $f.FullName
+            $lnk.Arguments = ''
+        }
+        $lnk.WorkingDirectory = $src
+        $lnk.Description = $marker
+        $lnk.Save()
+        $wanted[$lnkPath] = $true
+        Write-Step "ok   startup shortcut: $($f.Name)"
+    }
+}
+
+# remove shortcuts created earlier for files that are gone
+foreach ($existing in @(Get-ChildItem -LiteralPath $startup -Filter '*.lnk' -File)) {
+    if (-not $wanted.ContainsKey($existing.FullName) -and $shell.CreateShortcut($existing.FullName).Description -eq $marker) {
+        Remove-Item -LiteralPath $existing.FullName
+        Write-Step "del  startup shortcut: $($existing.Name)"
+    }
+}

@@ -1,0 +1,27 @@
+{{- /*
+  This file generates ~/.config/homebrew/Brewfile from .chezmoidata/packages.yaml:
+  the taps, then the packages common to every Mac, then the packages for this
+  machine (.machine, chosen at `chezmoi init`). It replaces the
+  Brewfile##hostname.* alternates that yadm used.
+*/ -}}
+{{- $sets := list .packages.common (index .packages .machine) -}}
+{{- range .packages.taps -}}
+tap {{ . | quote }}
+{{ end -}}
+{{- range $sets -}}
+{{-   range .brews -}}
+# {{ .desc }}
+brew {{ .name | quote }}
+{{ end -}}
+{{- end -}}
+{{- range $sets -}}
+{{-   range .casks -}}
+# {{ .desc }}
+cask {{ .name | quote }}
+{{ end -}}
+{{- end -}}
+{{- range $sets -}}
+{{-   range .mas -}}
+mas {{ .name | quote }}, id: {{ .id }}
+{{ end -}}
+{{- end -}}

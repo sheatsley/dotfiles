@@ -1,0 +1,17 @@
+{{ template "ps-prelude.ps1" . }}
+{{- $hidden := 2 }}
+{{- if .windows.explorer.show_hidden }}{{ $hidden = 1 }}{{ end }}
+{{- $hideExt := 1 }}
+{{- if .windows.explorer.show_extensions }}{{ $hideExt = 0 }}{{ end }}
+
+<#
+This script configures File Explorer to show hidden files and folders and
+filename extensions (item 6 on the initialization list), as set in
+.chezmoidata/windows.yaml. In the registry, Hidden is 1 to show and 2 to hide,
+while HideFileExt is 0 to show extensions and 1 to hide them. Explorer windows
+that are already open pick the change up on refresh (F5). It is a per-user
+setting, so it does not require an elevated session.
+#>
+$key = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+Set-RegValue $key 'Hidden' {{ $hidden }} | Out-Null
+Set-RegValue $key 'HideFileExt' {{ $hideExt }} | Out-Null

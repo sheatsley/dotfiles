@@ -1,0 +1,97 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script installs the programs listed under apps in
+.chezmoidata/windows.yaml with winget, and reminds you about the ones listed
+under manual_apps, which winget cannot install. An app can set a location in
+the data file, which is passed to winget as --location (Battle.net's installer
+insists on being told where to install). A program that is already
+installed is skipped (winget would otherwise upgrade it on every apply), and a
+failing install does not stop the others; the script reports them at the end
+and fails so that a re-run retries them. It requires an elevated session.
+#>
+Assert-Admin
+
+$apps = @(
+{{- range .windows.apps }}
+    @{ Name = {{ .name | squote }}; Id = {{ .id | squote }}; Source = {{ .source | squote }}; Location = {{ with index . "location" }}{{ squote . }}{{ else }}''{{ end }} }
+{{- end }}
+)
+$manual = @(
+{{- range .windows.manual_apps }}
+    @{ Name = {{ .name | squote }}; Url = {{ .url | squote }}; Detect = {{ .detect | squote }} }
+{{- end }}
+)
+
+function Test-WingetInstalled {
+    <#
+    This function asks winget whether a package is installed. Windows
+    PowerShell 5.1 turns redirected native stderr into terminating errors, so
+    the error preference is relaxed while winget runs.
+
+    :param Id: the winget package identifier
+    :param Source: the winget source (winget or msstore)
+    :return: True if winget lists the package
+    #>
+    param([string]$Id, [string]$Source)
+    $old = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        winget list --id $Id --exact --source $Source --accept-source-agreements 2>&1 | Out-Null
+        return ($LASTEXITCODE -eq 0)
+    } finally {
+        $ErrorActionPreference = $old
+    }
+}
+
+function Test-ProgramInstalled {
+    <#
+    This function looks for an installed program by its display name in the
+    uninstall registry keys.
+
+    :param Pattern: a wildcard pattern for the display name
+    :return: True if a matching program is installed
+    #>
+    param([string]$Pattern)
+    $keys = @(
+        'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    )
+    $hit = Get-ItemProperty -Path $keys -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like $Pattern }
+    return [bool]$hit
+}
+
+# install what is missing
+$failed = @()
+foreach ($app in $apps) {
+    if (Test-WingetInstalled $app.Id $app.Source) {
+        Write-Step "ok   $($app.Name)"
+        continue
+    }
+    Write-Step "installing $($app.Name) ($($app.Id) from $($app.Source))"
+
+    # never wait for input; some installers ask for an install root, which Location answers
+    $install = @('install', '--id', $app.Id, '--exact', '--source', $app.Source, '--silent', '--disable-interactivity', '--accept-package-agreements', '--accept-source-agreements')
+    if ($app.Location) { $install += @('--location', $app.Location) }
+    winget @install
+    if ($LASTEXITCODE -eq 0) {
+        Write-Step "set  $($app.Name)"
+    } else {
+        Write-Warning "winget could not install $($app.Name) (exit $($LASTEXITCODE))"
+        $failed += $app.Name
+    }
+}
+
+# remind about the programs that need a manual install
+foreach ($m in $manual) {
+    if (Test-ProgramInstalled $m.Detect) {
+        Write-Step "ok   $($m.Name)"
+    } else {
+        Write-Warning "Install $($m.Name) manually: $($m.Url)"
+    }
+}
+
+if ($failed.Count -gt 0) {
+    throw ("Not installed: " + ($failed -join ', '))
+}

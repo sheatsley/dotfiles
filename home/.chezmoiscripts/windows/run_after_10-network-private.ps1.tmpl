@@ -1,0 +1,22 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script sets every connected network to the Private profile (item 1 on the
+initialization list). It runs on every apply, which is safe because it only
+changes networks that are currently Public. It requires an elevated session.
+#>
+Assert-Admin
+
+# retrieve the connected networks and make any public ones private
+$profiles = @(Get-NetConnectionProfile)
+if ($profiles.Count -eq 0) {
+    Write-Warning 'No connected network profile found; nothing to change.'
+}
+foreach ($p in $profiles) {
+    if ($p.NetworkCategory -eq 'Public') {
+        Set-NetConnectionProfile -InterfaceIndex $p.InterfaceIndex -NetworkCategory Private
+        Write-Step "set  network '$($p.Name)' -> Private"
+    } else {
+        Write-Step "ok   network '$($p.Name)' is $($p.NetworkCategory)"
+    }
+}

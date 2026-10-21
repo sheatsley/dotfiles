@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+{{ template "sh-prelude.sh" . }}
+
+# This script installs and updates the Python modules listed in
+# ~/.config/pip/packages (the pip_packages task of the yadm bootstrap). It
+# runs on every apply, using the pip3 that Homebrew's python provides (never
+# the older python that Apple's command line tools ship, which would put the
+# modules and their scripts somewhere that is not on PATH), and never prompts.
+# pip.conf (managed alongside the list) allows installing outside a virtual
+# environment.
+load_brew
+
+# refuse to fall back to Apple's python if the brew bundle step has not installed Homebrew's
+pip=/opt/homebrew/bin/pip3
+[[ -x "$pip" ]] || die "$pip is missing (the brew bundle step installs python; fix that first)"
+
+# install and update the modules, one at a time, so that a module that cannot be
+# installed (e.g., a brand-new Python without a wheel for it yet, which makes pip
+# compile it) does not stop the others; the script fails at the end and names them
+list="$HOME/.config/pip/packages"
+[[ -f "$list" ]] || die "missing $list"
+log "installing/updating Python modules"
+failed=()
+while IFS= read -r line || [[ -n "$line" ]]; do
+  module="${line%%#*}"
+  module="$(echo "$module" | xargs)"
+  [[ -n "$module" ]] || continue
+  PIP_NO_INPUT=1 "$pip" install --upgrade "$module" || failed+=("$module")
+done < "$list"
+if (( ${#failed[@]} > 0 )); then
+  die "could not install: ${failed[*]} (see the pip output above)"
+fi

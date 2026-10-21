@@ -1,0 +1,35 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script sets the computer name (item 7 on the initialization list) to the
+name given when chezmoi was initialized (see .chezmoi.toml.tmpl). A rename only
+takes effect after a reboot, so this script compares the name Windows is
+configured to use against the one it is currently running as, and warns when a
+restart is pending rather than renaming again. It requires an elevated session.
+#>
+Assert-Admin
+
+# validate the name (1-15 letters, digits, or hyphens, no leading or trailing hyphen, not all digits)
+$want = {{ .computerName | squote }}
+if ($want -notmatch '^(?!\d+$)[A-Za-z0-9]([A-Za-z0-9-]{0,13}[A-Za-z0-9])?$') {
+    throw "Invalid computer name '$want' (1-15 chars: letters, digits, hyphen; no leading or trailing hyphen; not all digits)."
+}
+
+# retrieve the configured (possibly pending) name and the name in use
+$cn = 'HKLM:\SYSTEM\CurrentControlSet\Control\ComputerName'
+$configured = (Get-ItemProperty -LiteralPath "$cn\ComputerName").ComputerName
+$active = (Get-ItemProperty -LiteralPath "$cn\ActiveComputerName").ComputerName
+
+# rename only if the configured name differs
+if ($configured -ine $want) {
+    Rename-Computer -NewName $want -Force
+    Write-Step "set  computer name -> $want"
+    $configured = $want
+} else {
+    Write-Step "ok   computer name is $want"
+}
+
+# flag a pending reboot instead of forcing one
+if ($active -ine $configured) {
+    Write-Warning "Reboot required: the computer is still running as '$active' until you restart."
+}

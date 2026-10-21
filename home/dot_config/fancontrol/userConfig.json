@@ -1,0 +1,649 @@
+{
+  "__VERSION__": "272",
+  "FanControl": {
+    "Controls": [
+      {
+        "NickName": "Fan #1",
+        "Identifier": "/lpc/nct6798d/control/0",
+        "IsHidden": false,
+        "Enable": false,
+        "SelectedFanCurve": {
+          "Name": "Flat"
+        },
+        "SelectedOffset": 0,
+        "PairedFanSensor": {
+          "Identifier": "/lpc/nct6798d/fan/0"
+        },
+        "SelectedStart": 16,
+        "SelectedStop": 7,
+        "MinimumPercent": 0,
+        "SelectedCommandStepUp": 8,
+        "SelectedCommandStepDown": 8,
+        "ManualControlValue": 50,
+        "ManualControl": false,
+        "ForceApply": false,
+        "Calibration": [
+          [
+            1,
+            0,
+            false
+          ],
+          [
+            10,
+            220,
+            false
+          ],
+          [
+            20,
+            479,
+            false
+          ],
+          [
+            30,
+            711,
+            false
+          ],
+          [
+            40,
+            923,
+            false
+          ],
+          [
+            50,
+            1127,
+            false
+          ],
+          [
+            60,
+            1319,
+            false
+          ],
+          [
+            70,
+            1489,
+            false
+          ],
+          [
+            80,
+            1656,
+            false
+          ],
+          [
+            90,
+            1815,
+            false
+          ],
+          [
+            100,
+            1982,
+            false
+          ]
+        ]
+      },
+      {
+        "NickName": "Fan #2",
+        "Identifier": "/lpc/nct6798d/control/1",
+        "IsHidden": false,
+        "Enable": false,
+        "SelectedFanCurve": {
+          "Name": "Flat"
+        },
+        "SelectedOffset": 0,
+        "PairedFanSensor": {
+          "Identifier": "/lpc/nct6798d/fan/1"
+        },
+        "SelectedStart": 16,
+        "SelectedStop": 7,
+        "MinimumPercent": 0,
+        "SelectedCommandStepUp": 8,
+        "SelectedCommandStepDown": 8,
+        "ManualControlValue": 50,
+        "ManualControl": false,
+        "ForceApply": false,
+        "Calibration": [
+          [
+            1,
+            0,
+            false
+          ],
+          [
+            10,
+            218,
+            false
+          ],
+          [
+            20,
+            475,
+            false
+          ],
+          [
+            30,
+            690,
+            false
+          ],
+          [
+            40,
+            914,
+            false
+          ],
+          [
+            50,
+            1124,
+            false
+          ],
+          [
+            60,
+            1318,
+            false
+          ],
+          [
+            70,
+            1486,
+            false
+          ],
+          [
+            80,
+            1657,
+            false
+          ],
+          [
+            90,
+            1825,
+            false
+          ],
+          [
+            100,
+            1985,
+            false
+          ]
+        ]
+      },
+      {
+        "NickName": "Fan #3",
+        "Identifier": "/lpc/nct6798d/control/2",
+        "IsHidden": true,
+        "Enable": false,
+        "SelectedFanCurve": null,
+        "SelectedOffset": 0,
+        "PairedFanSensor": null,
+        "SelectedStart": 0,
+        "SelectedStop": 0,
+        "MinimumPercent": 0,
+        "SelectedCommandStepUp": 8,
+        "SelectedCommandStepDown": 8,
+        "ManualControlValue": 50,
+        "ManualControl": false,
+        "ForceApply": false,
+        "Calibration": []
+      },
+      {
+        "NickName": "Fan #4",
+        "Identifier": "/lpc/nct6798d/control/3",
+        "IsHidden": true,
+        "Enable": false,
+        "SelectedFanCurve": null,
+        "SelectedOffset": 0,
+        "PairedFanSensor": null,
+        "SelectedStart": 0,
+        "SelectedStop": 0,
+        "MinimumPercent": 0,
+        "SelectedCommandStepUp": 8,
+        "SelectedCommandStepDown": 8,
+        "ManualControlValue": 50,
+        "ManualControl": false,
+        "ForceApply": false,
+        "Calibration": []
+      },
+      {
+        "NickName": "Fan #5",
+        "Identifier": "/lpc/nct6798d/control/4",
+        "IsHidden": false,
+        "Enable": false,
+        "SelectedFanCurve": {
+          "Name": "Flat"
+        },
+        "SelectedOffset": 0,
+        "PairedFanSensor": {
+          "Identifier": "/lpc/nct6798d/fan/4"
+        },
+        "SelectedStart": 16,
+        "SelectedStop": 7,
+        "MinimumPercent": 0,
+        "SelectedCommandStepUp": 8,
+        "SelectedCommandStepDown": 8,
+        "ManualControlValue": 50,
+        "ManualControl": false,
+        "ForceApply": false,
+        "Calibration": [
+          [
+            1,
+            0,
+            false
+          ],
+          [
+            10,
+            229,
+            false
+          ],
+          [
+            20,
+            487,
+            false
+          ],
+          [
+            30,
+            710,
+            false
+          ],
+          [
+            40,
+            933,
+            false
+          ],
+          [
+            50,
+            1145,
+            false
+          ],
+          [
+            60,
+            1335,
+            false
+          ],
+          [
+            70,
+            1516,
+            false
+          ],
+          [
+            80,
+            1697,
+            false
+          ],
+          [
+            90,
+            1870,
+            false
+          ],
+          [
+            100,
+            2067,
+            false
+          ]
+        ]
+      },
+      {
+        "NickName": "Fan #6",
+        "Identifier": "/lpc/nct6798d/control/5",
+        "IsHidden": true,
+        "Enable": false,
+        "SelectedFanCurve": null,
+        "SelectedOffset": 0,
+        "PairedFanSensor": null,
+        "SelectedStart": 0,
+        "SelectedStop": 0,
+        "MinimumPercent": 0,
+        "SelectedCommandStepUp": 8,
+        "SelectedCommandStepDown": 8,
+        "ManualControlValue": 50,
+        "ManualControl": false,
+        "ForceApply": false,
+        "Calibration": []
+      },
+      {
+        "NickName": "Fan #7",
+        "Identifier": "/lpc/nct6798d/control/6",
+        "IsHidden": false,
+        "Enable": false,
+        "SelectedFanCurve": {
+          "Name": "Auto"
+        },
+        "SelectedOffset": 0,
+        "PairedFanSensor": {
+          "Identifier": "/lpc/nct6798d/fan/6"
+        },
+        "SelectedStart": 0,
+        "SelectedStop": 0,
+        "MinimumPercent": 0,
+        "SelectedCommandStepUp": 8,
+        "SelectedCommandStepDown": 8,
+        "ManualControlValue": 50,
+        "ManualControl": false,
+        "ForceApply": false,
+        "Calibration": [
+          [
+            10,
+            889,
+            false
+          ],
+          [
+            20,
+            893,
+            false
+          ],
+          [
+            30,
+            1296,
+            false
+          ],
+          [
+            40,
+            1641,
+            false
+          ],
+          [
+            50,
+            1924,
+            false
+          ],
+          [
+            60,
+            2187,
+            false
+          ],
+          [
+            70,
+            2395,
+            false
+          ],
+          [
+            80,
+            2606,
+            false
+          ],
+          [
+            90,
+            2795,
+            false
+          ],
+          [
+            100,
+            2993,
+            false
+          ]
+        ]
+      },
+      {
+        "NickName": "Control 1 - NVIDIA GeForce RTX 4090",
+        "Identifier": "NVApiWrapper/0-AD102-A/control/0",
+        "IsHidden": false,
+        "Enable": false,
+        "SelectedFanCurve": {
+          "Name": "Flat"
+        },
+        "SelectedOffset": 0,
+        "PairedFanSensor": {
+          "Identifier": "NVApiWrapper/0-AD102-A/fan/0"
+        },
+        "SelectedStart": 0,
+        "SelectedStop": 0,
+        "MinimumPercent": 0,
+        "SelectedCommandStepUp": 8,
+        "SelectedCommandStepDown": 8,
+        "ManualControlValue": 50,
+        "ManualControl": false,
+        "ForceApply": false,
+        "Calibration": [
+          [
+            0,
+            1058,
+            false
+          ],
+          [
+            1,
+            1058,
+            false
+          ],
+          [
+            10,
+            1058,
+            false
+          ],
+          [
+            20,
+            1058,
+            false
+          ],
+          [
+            30,
+            1060,
+            false
+          ],
+          [
+            40,
+            1344,
+            false
+          ],
+          [
+            50,
+            1712,
+            false
+          ],
+          [
+            60,
+            2075,
+            false
+          ],
+          [
+            70,
+            2427,
+            false
+          ],
+          [
+            80,
+            2804,
+            false
+          ],
+          [
+            90,
+            3180,
+            false
+          ],
+          [
+            100,
+            3461,
+            false
+          ]
+        ]
+      },
+      {
+        "NickName": "Control 2 - NVIDIA GeForce RTX 4090",
+        "Identifier": "NVApiWrapper/0-AD102-A/control/1",
+        "IsHidden": false,
+        "Enable": false,
+        "SelectedFanCurve": {
+          "Name": "Flat"
+        },
+        "SelectedOffset": 0,
+        "PairedFanSensor": {
+          "Identifier": "NVApiWrapper/0-AD102-A/fan/1"
+        },
+        "SelectedStart": 0,
+        "SelectedStop": 0,
+        "MinimumPercent": 0,
+        "SelectedCommandStepUp": 8,
+        "SelectedCommandStepDown": 8,
+        "ManualControlValue": 50,
+        "ManualControl": false,
+        "ForceApply": false,
+        "Calibration": [
+          [
+            0,
+            1048,
+            false
+          ],
+          [
+            1,
+            1048,
+            false
+          ],
+          [
+            10,
+            1048,
+            false
+          ],
+          [
+            20,
+            1048,
+            false
+          ],
+          [
+            30,
+            1048,
+            false
+          ],
+          [
+            40,
+            1354,
+            false
+          ],
+          [
+            50,
+            1710,
+            false
+          ],
+          [
+            60,
+            2080,
+            false
+          ],
+          [
+            70,
+            2434,
+            false
+          ],
+          [
+            80,
+            2799,
+            false
+          ],
+          [
+            90,
+            3143,
+            false
+          ],
+          [
+            100,
+            3467,
+            false
+          ]
+        ]
+      }
+    ],
+    "CustomSensors": [],
+    "FanCurves": [
+      {
+        "Name": "Flat",
+        "IsHidden": false,
+        "CommandMode": 0,
+        "Percent": 100
+      },
+      {
+        "Name": "Auto",
+        "IsHidden": false,
+        "CommandMode": 0,
+        "SelectedTempSource": {
+          "Identifier": "NVApiWrapper/0-AD102-A/sensor/0"
+        },
+        "Step": 2,
+        "Deadband": 3,
+        "SelectedResponseTime": 2,
+        "IdleTemperature": 50,
+        "MinFanSpeed": 50,
+        "MaxFanSpeed": 100,
+        "LoadTemperature": 70
+      }
+    ],
+    "FanSensors": [
+      {
+        "Identifier": "/lpc/nct6798d/fan/0",
+        "IsHidden": false,
+        "NickName": "Fan #1"
+      },
+      {
+        "Identifier": "/lpc/nct6798d/fan/1",
+        "IsHidden": false,
+        "NickName": "Fan #2"
+      },
+      {
+        "Identifier": "/lpc/nct6798d/fan/2",
+        "IsHidden": false,
+        "NickName": "Fan #3"
+      },
+      {
+        "Identifier": "/lpc/nct6798d/fan/3",
+        "IsHidden": false,
+        "NickName": "Fan #4"
+      },
+      {
+        "Identifier": "/lpc/nct6798d/fan/4",
+        "IsHidden": false,
+        "NickName": "Fan #5"
+      },
+      {
+        "Identifier": "/lpc/nct6798d/fan/5",
+        "IsHidden": false,
+        "NickName": "Fan #6"
+      },
+      {
+        "Identifier": "/lpc/nct6798d/fan/6",
+        "IsHidden": false,
+        "NickName": "Fan #7"
+      },
+      {
+        "Identifier": "/lpc/ec/fan/0",
+        "IsHidden": false,
+        "NickName": "CPU Optional Fan"
+      },
+      {
+        "Identifier": "NVApiWrapper/0-AD102-A/fan/0",
+        "IsHidden": false,
+        "NickName": "Fan 1 - NVIDIA GeForce RTX 4090"
+      },
+      {
+        "Identifier": "NVApiWrapper/0-AD102-A/fan/1",
+        "IsHidden": false,
+        "NickName": "Fan 2 - NVIDIA GeForce RTX 4090"
+      }
+    ],
+    "TemperatureSensors": []
+  },
+  "Sensors": {
+    "AdlxWrapperSettings": {
+      "Enabled": true
+    },
+    "DisabledPlugins": [],
+    "DisableStorageSensors": true,
+    "LibreHardwareMonitorSettings": {
+      "Controller": false,
+      "CPU": true,
+      "EmbeddedEC": true,
+      "GPU": true,
+      "Memory": false,
+      "Motherboard": true,
+      "PowerMonitor": false,
+      "PSU": false,
+      "Storage": false,
+      "StorageUpdateInterval": "00:01:00",
+      "ZeroRPMOverride": true
+    },
+    "NvAPIWrapperSettings": {
+      "Enabled": true,
+      "ZeroRPMOverride": true
+    }
+  },
+  "MainWindow": {
+    "Fahrenheit": false,
+    "HideCalibration": false,
+    "HideFanSpeedCards": true,
+    "HorizontalUIOrientation": false,
+    "PrimaryColor": "#FF607D8B",
+    "SecondaryColor": "#FFC6FF00",
+    "SelectedTheme": "",
+    "ShowHiddenCards": false,
+    "SyncThemeWithWindows": true,
+    "SyncTrayIconColorWithWindows": true,
+    "TrayIconColor": null,
+    "TrayIcons": []
+  }
+}

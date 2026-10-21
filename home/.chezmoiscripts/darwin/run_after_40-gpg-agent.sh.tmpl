@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+{{ template "sh-prelude.sh" . }}
+
+# This script makes gpg-agent serve the YubiKey's authentication key to ssh (the
+# gpg_agent task of the yadm bootstrap), which the git clones over ssh in the
+# following scripts depend on. gpg-agent.conf is managed by chezmoi, but an
+# agent that is already running only reads it at startup, so if ssh cannot see
+# the key yet, the agent is restarted. The PATH fix from the yadm version is not
+# needed, since load_brew puts Homebrew on PATH. Nothing happens if ssh already
+# sees a key.
+load_brew
+
+# skip on a machine without the YubiKey (e.g., a test VM)
+if [[ "${DOTFILES_NO_YUBIKEY:-}" == "1" ]]; then
+  log "ok   skipped (DOTFILES_NO_YUBIKEY=1)"
+  exit 0
+fi
+
+# point ssh and pinentry at the agent
+GPG_TTY="$(tty 2>/dev/null || true)"
+SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+export GPG_TTY SSH_AUTH_SOCK
+
+# nothing to do if the agent already serves a key
+if ssh-add -l >/dev/null 2>&1; then
+  log "ok   ssh sees a key through gpg-agent"
+  exit 0
+fi
+
+# restart the agent so that it re-reads gpg-agent.conf, then attach it to this terminal
+log "restarting gpg-agent"
+gpgconf --kill gpg-agent
+gpgconf --launch gpg-agent
+gpg-connect-agent updatestartuptty /bye >/dev/null
+
+# verify the result rather than assuming it worked
+ssh-add -l >/dev/null 2>&1 || die "ssh sees no key through gpg-agent (is the YubiKey inserted?)"
+log "set  ssh sees a key through gpg-agent"

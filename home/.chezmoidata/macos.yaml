@@ -1,0 +1,17 @@
+# Data for the macOS defaults script (run_onchange_after_70-macos-defaults.sh.tmpl).
+#
+# dock_apps: the apps pinned to the Dock, in order (the Dock is cleared first). path is
+# the application bundle; the name is only used in the comment of the generated command.
+macos:
+  dock_apps:
+    - { name: "terminal",           path: "/System/Applications/Utilities/Terminal.app" }
+    - { name: "moonlight",          path: "/Applications/Moonlight.app" }
+    - { name: "music",              path: "/System/Applications/Music.app" }
+    - { name: "messages",           path: "/System/Applications/Messages.app" }
+    - { name: "mail",               path: "/System/Applications/Mail.app" }
+    - { name: "safari",             path: "/System/Cryptexes/App/System/Applications/Safari.app" }
+    - { name: "discord",            path: "/Applications/Discord.app" }
+    - { name: "calendar",           path: "/System/Applications/Calendar.app" }
+    - { name: "notes",              path: "/System/Applications/Notes.app" }
+    - { name: "reminders",          path: "/System/Applications/Reminders.app" }
+    - { name: "visual studio code", path: "/Applications/Visual Studio Code.app" }

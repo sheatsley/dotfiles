@@ -1,0 +1,52 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script copies the FanControl config from the repo into FanControl. The
+config is kept in the repo as home/dot_config/fancontrol/userConfig.json, which
+chezmoi puts at ~\.config\fancontrol\userConfig.json (add a new one with
+chezmoi add). FanControl reads userConfig.json from the Configurations folder
+inside its install directory. The copy is made only when the repo's file changes
+(its SHA-256 is remembered in C:\ProgramData\dotfiles), not on every apply, so
+changes you make in FanControl and have not saved to the repo yet are not
+overwritten. The file it replaces is first saved as userConfig.json.bak. FanControl
+reads its config at start, so a running FanControl has to be restarted to load
+it. It requires an elevated session (FanControl is installed under Program Files).
+#>
+Assert-Admin
+
+$source = Join-Path $HOME '.config\fancontrol\userConfig.json'
+if (-not (Test-Path -LiteralPath $source)) {
+    Write-Step 'ok   no FanControl config in the repo (see MAINTENANCE.md to add one)'
+    return
+}
+
+# find the FanControl install directory
+$dir = @("${env:ProgramFiles(x86)}\FanControl", "$env:ProgramFiles\FanControl") |
+    Where-Object { Test-Path -LiteralPath (Join-Path $_ 'FanControl.exe') } | Select-Object -First 1
+if (-not $dir) {
+    Write-Warning 'FanControl is not installed; skipping its config.'
+    return
+}
+
+# do nothing if this version of the file was already copied
+$state = Join-Path $env:ProgramData 'dotfiles'
+$marker = Join-Path $state 'fancontrol-config.sha256'
+$hash = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+$last = ''
+if (Test-Path -LiteralPath $marker) { $last = ([IO.File]::ReadAllText($marker)).Trim() }
+if ($hash -eq $last) {
+    Write-Step 'ok   FanControl config is up to date'
+    return
+}
+
+# keep the old config, then copy the new one
+$configs = Join-Path $dir 'Configurations'
+$dest = Join-Path $configs 'userConfig.json'
+New-Item -ItemType Directory -Force -Path $configs, $state | Out-Null
+if (Test-Path -LiteralPath $dest) { Copy-Item -LiteralPath $dest -Destination "$dest.bak" -Force }
+Copy-Item -LiteralPath $source -Destination $dest -Force
+[IO.File]::WriteAllText($marker, $hash)
+Write-Step "set  FanControl config copied to $dest"
+if (Get-Process -Name 'FanControl' -ErrorAction SilentlyContinue) {
+    Write-Warning 'FanControl is running; restart it to load the new config.'
+}

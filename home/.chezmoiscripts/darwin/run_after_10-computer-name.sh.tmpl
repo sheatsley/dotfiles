@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+{{ template "sh-prelude.sh" . }}
+
+# This script sets the computer name, hostname, and local hostname to the
+# machine chosen at `chezmoi init` (the computer_name task of the yadm
+# bootstrap, which asked for the name with input()). On the Macs the name is the
+# machine itself (macbook or mini), exactly as the Brewfile##hostname.*
+# alternates implied. Each of the three names is only set if it differs, so
+# repeating this script is harmless; setting one requires sudo.
+name={{ .machine | quote }}
+
+# set whichever of the three names differs
+for key in ComputerName HostName LocalHostName; do
+  current="$(scutil --get "$key" 2>/dev/null || true)"
+  if [[ "$current" == "$name" ]]; then
+    log "ok   $key is $name"
+  else
+    sudo scutil --set "$key" "$name"
+    log "set  $key -> $name (was: ${current:-unset})"
+  fi
+done

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+{{ template "sh-prelude.sh" . }}
+
+# This script turns on the macOS application firewall (System Settings >
+# Network > Firewall). The state is read first, so nothing happens (and no
+# password is asked for) once the firewall is on; turning it on requires sudo.
+# SOCKETFILTERFW names the tool and exists only so that the tests can replace it.
+fw="${SOCKETFILTERFW:-/usr/libexec/ApplicationFirewall/socketfilterfw}"
+
+# nothing to do if the firewall is already on ("disabled" does not contain "enabled")
+if "$fw" --getglobalstate | grep -qi "enabled"; then
+  log "ok   firewall is on"
+  exit 0
+fi
+
+# turn it on, then check rather than assume
+sudo "$fw" --setglobalstate on
+"$fw" --getglobalstate | grep -qi "enabled" || die "the firewall is still off after --setglobalstate on"
+log "set  firewall on"

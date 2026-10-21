@@ -1,0 +1,51 @@
+{{- /*
+  This file is rendered by `chezmoi init` into the per-machine chezmoi config
+  (~/.config/chezmoi/chezmoi.toml). Keys outside a table must come before the
+  first [table] header. Each OS asks one question, once, and remembers the
+  answer in the generated config: on Windows, the computer name (from the
+  COMPUTER_NAME environment variable if set, which setup.sh does); on macOS,
+  which Mac this is (from MACHINE if set), which selects the packages and sets
+  the hostname.
+*/ -}}
+{{- $computerName := "" -}}
+{{- $machine := "" -}}
+{{- if eq .chezmoi.os "windows" -}}
+{{-   $computerName = env "COMPUTER_NAME" -}}
+{{-   if not $computerName -}}
+{{-     $computerName = promptStringOnce . "computerName" "Computer name for this PC (max 15 chars, letters/digits/hyphen)" -}}
+{{-   end -}}
+{{- else if eq .chezmoi.os "darwin" -}}
+{{-   $machine = env "MACHINE" -}}
+{{-   if not $machine -}}
+{{-     $machine = promptChoiceOnce . "machine" "Which Mac is this" (list "macbook" "mini") -}}
+{{-   end -}}
+{{-   if not (has $machine (list "macbook" "mini")) -}}
+{{-     fail (printf "unknown machine %q (expected macbook or mini)" $machine) -}}
+{{-   end -}}
+{{- end -}}
+sourceDir = {{ printf "%s/repos/chezmoi" .chezmoi.homeDir | quote }}
+encryption = "gpg"
+
+[gpg]
+    recipient = "1A2405C9E6BFBE34"
+{{- if eq .chezmoi.os "windows" }}
+{{- /* use Gpg4win explicitly: Git for Windows bundles its own gpg, which may not reach the YubiKey */ -}}
+{{-   $gpg := "C:/Program Files (x86)/GnuPG/bin/gpg.exe" }}
+{{-   if not (stat $gpg) }}
+{{-     $gpg = "C:/Program Files/GnuPG/bin/gpg.exe" }}
+{{-   end }}
+    command = {{ $gpg | quote }}
+
+[data]
+    computerName = {{ $computerName | quote }}
+
+# run .ps1 scripts with Windows PowerShell 5.1 (the only PowerShell a fresh install has)
+# chezmoi appends the script path after these args, so -File must be last
+[interpreters.ps1]
+    command = "powershell.exe"
+    args = ["-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File"]
+{{- else if eq .chezmoi.os "darwin" }}
+
+[data]
+    machine = {{ $machine | quote }}
+{{- end }}

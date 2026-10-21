@@ -1,0 +1,41 @@
+{{- $n := .windows.nas -}}
+<#
+This script moves gameplay recordings to the NAS at sign-in, where another
+service compresses them. It moves the .mp4 files from the NVIDIA folder inside
+the Videos folder (where ShadowPlay saves them) to the upload folder in the
+NAS share, keeping the folder structure (one folder per game stays one folder per
+game). The files are moved, so they are deleted here once copied, and robocopy's
+/MOVE also removes the folders it has emptied. The NAS account only needs to be
+able to add files. It uses the share's UNC path, with
+the password that nas.ps1 saved in Windows Credential Manager. The script waits up to two minutes for
+the NAS to answer. Robocopy retries a locked file (for example, a recording in
+progress) twice, five seconds apart, and the file is picked up at the next
+sign-in.
+#>
+$nasHost = {{ $n.host | squote }}
+$source  = Join-Path ([Environment]::GetFolderPath('MyVideos')) 'NVIDIA'
+$dest    = '\\' + $nasHost + '\' + {{ $n.share | squote }} + '\' + {{ $n.upload_dir | squote }}
+
+# nothing to do if there is no recording folder yet
+if (-not (Test-Path -LiteralPath $source)) { exit 0 }
+
+# wait for the NAS (the network is often not ready yet at sign-in)
+$deadline = (Get-Date).AddMinutes(2)
+while ($true) {
+    $client = New-Object Net.Sockets.TcpClient
+    try {
+        $wait = $client.BeginConnect($nasHost, 445, $null, $null)
+        if ($wait.AsyncWaitHandle.WaitOne(2000) -and $client.Connected) { break }
+    } catch {
+        # not reachable yet
+    } finally {
+        $client.Close()
+    }
+    if ((Get-Date) -gt $deadline) { exit 1 }
+    Start-Sleep -Seconds 5
+}
+
+# move the recordings (robocopy exit codes below 8 mean success)
+robocopy $source $dest *.mp4 /S /MOVE /R:2 /W:5
+if ($LASTEXITCODE -ge 8) { exit $LASTEXITCODE }
+exit 0

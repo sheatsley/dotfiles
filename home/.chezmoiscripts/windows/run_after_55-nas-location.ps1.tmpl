@@ -1,0 +1,40 @@
+{{ template "ps-prelude.ps1" . }}
+{{- $n := .windows.nas }}
+
+<#
+This script adds the NAS share to File Explorer as a network location: a
+shortcut to \\host\share that appears under "Network locations" in This PC (what
+the "Add a network location" wizard makes), with no drive letter. A network
+location is a folder in %APPDATA%\Microsoft\Windows\Network Shortcuts that holds
+a desktop.ini marking it as a link and a target.lnk pointing at the share. It
+is a file in your profile, so unlike a mapped drive it is visible whether
+Explorer runs elevated or not. Opening it uses the NAS password that nas.ps1
+saved in Windows Credential Manager. The name of the location, the host, and the
+share come from nas in .chezmoidata/windows.yaml. It does not require an
+elevated session.
+#>
+$name = {{ $n.location | squote }}
+$unc = '\\' + {{ $n.host | squote }} + '\' + {{ $n.share | squote }}
+$dir = Join-Path $env:APPDATA ('Microsoft\Windows\Network Shortcuts\' + $name)
+$lnkPath = Join-Path $dir 'target.lnk'
+$ini = Join-Path $dir 'desktop.ini'
+$shell = New-Object -ComObject WScript.Shell
+
+# leave it alone if the location already points at the share
+if ((Test-Path -LiteralPath $lnkPath) -and (Test-Path -LiteralPath $ini) -and ($shell.CreateShortcut($lnkPath).TargetPath -eq $unc)) {
+    Write-Step "ok   network location '$name' -> $unc"
+    return
+}
+
+# create the folder and its two files (the folder is made read-only last, which Explorer needs to read the desktop.ini)
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+(Get-Item -LiteralPath $dir -Force).Attributes = 'Directory'
+if (Test-Path -LiteralPath $ini) { (Get-Item -LiteralPath $ini -Force).Attributes = 'Normal' }
+$content = "[.ShellClassInfo]`r`nCLSID2={0AFACED1-E828-11D1-9187-B532F1E9575D}`r`nFlags=2`r`n"
+[IO.File]::WriteAllText($ini, $content, [Text.Encoding]::ASCII)
+(Get-Item -LiteralPath $ini -Force).Attributes = 'Hidden, System'
+$lnk = $shell.CreateShortcut($lnkPath)
+$lnk.TargetPath = $unc
+$lnk.Save()
+(Get-Item -LiteralPath $dir -Force).Attributes = 'Directory, ReadOnly'
+Write-Step "set  network location '$name' -> $unc"

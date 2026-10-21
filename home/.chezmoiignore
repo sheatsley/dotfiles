@@ -1,0 +1,36 @@
+{{- /*
+  This file lists target paths (what would land in the home directory) that
+  chezmoi should skip on this machine. It is itself a template, so it can
+  depend on the OS: each OS's scripts and files are ignored on the other. Under
+  .config, the macOS directories are listed one by one (rather than ignoring all
+  of .config) so that Windows can keep its own, such as .config/fancontrol.
+*/ -}}
+{{- if ne .chezmoi.os "windows" }}
+.chezmoiscripts/windows/**
+.startup
+.startup/**
+.config/fancontrol
+.config/fancontrol/**
+{{- end }}
+{{- if ne .chezmoi.os "darwin" }}
+.chezmoiscripts/darwin/**
+.zprofile
+.zshrc
+.gitconfig
+.gnupg
+.gnupg/**
+.ssh
+.ssh/**
+.config/arduino
+.config/arduino/**
+.config/git
+.config/git/**
+.config/homebrew
+.config/homebrew/**
+.config/hyperion
+.config/hyperion/**
+.config/pip
+.config/pip/**
+.config/stats
+.config/stats/**
+{{- end }}

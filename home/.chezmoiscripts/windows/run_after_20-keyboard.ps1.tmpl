@@ -1,0 +1,32 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script sets the keyboard repeat rate and delay (item 2 on the
+initialization list) from the values in .chezmoidata/windows.yaml. The values
+are stored in the registry, which Windows only reads at sign-in, so they are
+also pushed into the running session. It is a per-user setting, so it does not
+require an elevated session.
+#>
+$speed = {{ .windows.keyboard.speed }}
+$delay = {{ .windows.keyboard.delay }}
+
+# write the values that persist across sign-ins
+$key = 'HKCU:\Control Panel\Keyboard'
+Set-RegValue $key 'KeyboardSpeed' "$speed" 'String' | Out-Null
+Set-RegValue $key 'KeyboardDelay' "$delay" 'String' | Out-Null
+
+# load the Windows call that updates the running session
+if (-not ('Win32.Spi' -as [type])) {
+    Add-Type -Namespace Win32 -Name Spi -MemberDefinition @'
+[DllImport("user32.dll", SetLastError = true)]
+public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
+'@
+}
+
+# apply the values now (SPIF_UPDATEINIFILE | SPIF_SENDCHANGE)
+$SPI_SETKEYBOARDSPEED = 0x000B
+$SPI_SETKEYBOARDDELAY = 0x0017
+$flags = 0x01 -bor 0x02
+[void][Win32.Spi]::SystemParametersInfo($SPI_SETKEYBOARDSPEED, [uint32]$speed, [IntPtr]::Zero, [uint32]$flags)
+[void][Win32.Spi]::SystemParametersInfo($SPI_SETKEYBOARDDELAY, [uint32]$delay, [IntPtr]::Zero, [uint32]$flags)
+Write-Step "keyboard repeat applied: speed=$speed delay=$delay"

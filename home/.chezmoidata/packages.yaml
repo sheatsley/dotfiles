@@ -1,0 +1,41 @@
+# this file holds the Homebrew packages for each Mac; the Brewfile is generated from it
+# (home/dot_config/homebrew/Brewfile.tmpl) as: taps, then common packages, then the packages for
+# the machine chosen at `chezmoi init` (.machine). it replaces the Brewfile##hostname.* files.
+# edit a list here and run `chezmoi apply`; packages that are not listed are removed by the
+# cleanup step of the brew bundle script.
+packages:
+  taps: []
+  common:
+    brews:
+      - { name: "zstd", desc: "Zstandard is a real-time compression algorithm" }
+      - { name: "gnupg", desc: "GNU Privacy Guard (OpenPGP)" }
+      - { name: "mas", desc: "Mac App Store command-line interface" }
+      - { name: "p7zip", desc: "7-Zip (high compression file archiver) implementation" }
+      - { name: "pinentry-mac", desc: "Pinentry for GPG on Mac" }
+      - { name: "python", desc: "Interpreted, interactive, object-oriented programming language" }
+      - { name: "chezmoi", desc: "Manage your dotfiles across multiple diverse machines, securely" }
+    casks:
+      - { name: "discord", desc: "Voice and text chat software" }
+      - { name: "firefox", desc: "Web browser" }
+      - { name: "microsoft-auto-update", desc: "Provides updates to various Microsoft products" }
+      - { name: "microsoft-office", desc: "Office suite" }
+      - { name: "microsoft-teams", desc: "Meet, chat, call, and collaborate in just one place" }
+      - { name: "moonlight", desc: "GameStream client" }
+      - { name: "utm", desc: "Virtual machines UI using QEMU" }
+      - { name: "visual-studio-code", desc: "Open-source code editor" }
+      - { name: "yubico-authenticator", desc: "Full-featured companion app to the YubiKey" }
+      - { name: "zoom", desc: "Video communication and virtual meeting platform" }
+    mas: []
+  macbook:
+    brews: []
+    casks:
+      - { name: "steam", desc: "Video game digital distribution service" }
+    mas:
+      - { name: "WireGuard", id: 1451685025 }
+  mini:
+    brews:
+      - { name: "arduino-cli", desc: "Arduino command-line interface" }
+    casks:
+      - { name: "airfoil", desc: "Sends audio from computer to outputs" }
+      - { name: "loopback", desc: "Cable-free audio router" }
+    mas: []

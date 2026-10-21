@@ -1,0 +1,68 @@
+{{ template "ps-prelude.ps1" . }}
+{{- $r := .windows.system_restore }}
+
+<#
+This script sets up System Restore, so that a bad driver or Windows update can
+be undone by returning to an earlier restore point. It does the following:
+1. Turns System Protection on for the drive
+2. Removes the limit of one restore point per 24 hours
+3. Creates a first restore point if there are none
+4. Caps the space the restore points may use (the oldest are deleted when the
+   cap is reached, so a lot of game updates can push older points out sooner)
+5. Registers a scheduled task that creates a restore point every day, running
+   in the background as SYSTEM; if the PC was off at that time, it runs at the
+   next start
+Restore points live on the same drive, so they do not protect against disk
+failure. They cover the registry, system files, drivers, and installed programs,
+not your games or documents. Before a risky change such as a graphics driver
+update, make one by hand (see MAINTENANCE.md). These are Windows PowerShell 5.1
+cmdlets. It requires an elevated session.
+#>
+Assert-Admin
+
+$drive = {{ $r.drive | squote }}
+$volume = $drive.TrimEnd('\')
+$maxSize = {{ $r.max_size | squote }}
+$at = {{ $r.daily_at | squote }}
+$taskName = 'dotfiles-restore-point'
+
+# turn System Protection on (harmless when it already is)
+Enable-ComputerRestore -Drive $drive
+Write-Step "ok   System Protection is on for $drive"
+
+# allow restore points more than once a day, so the manual and the daily ones do not block each other
+Set-RegValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore' 'SystemRestorePointCreationFrequency' 0 | Out-Null
+
+# create a first restore point (a clean baseline) if there are none, which also creates the storage
+$points = @(Get-ComputerRestorePoint -ErrorAction SilentlyContinue)
+if ($points.Count -eq 0) {
+    Checkpoint-Computer -Description 'dotfiles initial' -RestorePointType MODIFY_SETTINGS
+    Write-Step 'set  created the first restore point'
+}
+
+# cap the space they may use
+$out = vssadmin resize shadowstorage "/For=$volume" "/On=$volume" "/MaxSize=$maxSize" 2>&1
+if ($LASTEXITCODE -eq 0) {
+    Write-Step "ok   restore points may use up to $maxSize of $drive"
+} else {
+    Write-Warning ("Could not set the restore point size cap: " + ($out -join ' '))
+}
+
+# register the daily restore point (run as SYSTEM, hidden), unless the task is already right
+$command = "Checkpoint-Computer -Description 'dotfiles daily' -RestorePointType MODIFY_SETTINGS"
+$arguments = '-NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -Command "' + $command + '"'
+$existing = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+$same = $false
+if ($existing -and $existing.Actions.Count -eq 1 -and $existing.Triggers.Count -eq 1) {
+    $same = ($existing.Actions[0].Arguments -eq $arguments) -and (([datetime]$existing.Triggers[0].StartBoundary).ToString('HH:mm') -eq ([datetime]$at).ToString('HH:mm'))
+}
+if ($same) {
+    Write-Step "ok   scheduled task $taskName (daily at $at)"
+} else {
+    $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $arguments
+    $trigger = New-ScheduledTaskTrigger -Daily -At $at
+    $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
+    $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -ExecutionTimeLimit (New-TimeSpan -Hours 1)
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
+    Write-Step "set  scheduled task $taskName (daily at $at)"
+}

@@ -1,0 +1,26 @@
+{{ template "ps-prelude.ps1" . }}
+{{- $light := 1 }}
+{{- if eq .windows.theme "dark" }}{{ $light = 0 }}{{ end }}
+
+<#
+This script sets the Windows theme for apps and for the system (item 2 on the
+initialization list). The theme comes from .chezmoidata/windows.yaml and is
+stored as 0 for dark or 1 for light; this copy of the script was rendered with
+the value {{ $light }}. It is a per-user setting, so it does not require an
+elevated session.
+#>
+$key = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize'
+Set-RegValue $key 'AppsUseLightTheme' {{ $light }} | Out-Null
+Set-RegValue $key 'SystemUsesLightTheme' {{ $light }} | Out-Null
+
+# load the Windows call that notifies running apps of a setting change
+if (-not ('Win32.Broadcast' -as [type])) {
+    Add-Type -Namespace Win32 -Name Broadcast -MemberDefinition @'
+[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);
+'@
+}
+
+# tell running apps the theme changed (WM_SETTINGCHANGE for ImmersiveColorSet)
+$result = [UIntPtr]::Zero
+[void][Win32.Broadcast]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [UIntPtr]::Zero, 'ImmersiveColorSet', 2, 5000, [ref]$result)

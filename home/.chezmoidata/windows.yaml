@@ -1,0 +1,69 @@
+# this file holds the values the Windows scripts read as .windows.<key>
+# edit a value here and run `chezmoi apply` to change the machine
+windows:
+  keyboard:
+    speed: 31   # repeat rate from 0 (about 2/s) to 31 (about 30/s); macOS: KeyRepeat
+    delay: 0    # delay before repeat from 0 (250 ms) to 3 (1 s); macOS: InitialKeyRepeat
+  theme: dark   # dark or light
+  explorer:
+    show_hidden: true       # show hidden files and folders
+    show_extensions: true   # show filename extensions
+  nas:
+    host: unas              # hostname of the NAS (also NAS_HOST in setup.sh, which checks for its saved password)
+    share: media            # the shared drive this PC may use; \\unas\media
+    user: CX4200a           # the NAS account for this PC (it only has access to the media share)
+    location: 'media on unas'   # name of the network location (the shortcut in Explorer)
+    upload_dir: raw_videos  # folder in the share that move-videos.ps1 moves recordings into
+  quick_access:             # pinned in this order (shell: names that Explorer understands)
+    - 'shell:RecycleBinFolder'
+    - 'shell:Desktop'
+    - 'shell:Personal'      # Documents
+    - 'shell:Downloads'
+    - 'shell:My Video'      # Videos
+  taskbar:                  # pinned after Start, in this order; id is a fixed Windows app, match is a wildcard on the Start menu name
+    - {id: Microsoft.Windows.Explorer}
+    - {id: MSEdge}
+    - {match: 'AutoHotkey*'}
+    - {match: 'Airfoil Satellite*'}
+    - {match: 'Battle.net*'}
+    - {match: 'CrystalDiskMark*'}
+    - {match: 'FanControl*'}
+    - {match: 'Minecraft Launcher*'}
+    - {match: 'NVIDIA app*'}
+    - {match: 'Samsung Magician*'}
+    - {match: 'Steam*'}
+    - {match: 'WinDirStat*'}
+    - {match: 'Xbox*'}
+  repos:                    # public repos cloned to ~\repos\<name> (anonymous https, so no YubiKey)
+    - name: games
+      url: https://github.com/sheatsley/games.git
+  apps:                     # installed with winget when missing; source is winget or msstore; location (optional) is passed as --location
+    - {name: AutoHotkey,          id: AutoHotkey.AutoHotkey,            source: winget}
+    - {name: Battle.net,          id: Blizzard.BattleNet,               source: winget, location: 'C:\Program Files (x86)\Battle.net'}
+    - {name: CrystalDiskMark,     id: CrystalDewWorld.CrystalDiskMark,  source: winget}
+    - {name: FanControl,          id: Rem0o.FanControl,                 source: winget}
+    - {name: Minecraft Launcher,  id: Mojang.MinecraftLauncher,         source: winget}
+    - {name: NVIDIA App,          id: XP8CLZL93F5Z4P,                   source: msstore}
+    - {name: PawnIO,              id: namazso.PawnIO,                   source: winget}
+    - {name: Samsung Magician,    id: XPDDT99J9GKB5C,                   source: msstore}
+    - {name: Steam,               id: Valve.Steam,                      source: winget}
+    - {name: Sunshine,            id: LizardByte.Sunshine,              source: winget}
+    - {name: WinDirStat,          id: WinDirStat.WinDirStat,            source: winget}
+    - {name: Xbox,                id: 9MV0B5HZVK9Z,                     source: msstore}
+  manual_apps:              # not available through winget; the URL is printed until detect matches an installed program
+    - name: Airfoil Satellite
+      url: https://rogueamoeba.com/airfoil/satellite/windows/
+      detect: 'Airfoil*'
+  system_restore:           # restore points, so a bad driver or Windows update can be undone
+    drive: 'C:\'
+    max_size: 5%            # space the restore points may use, as a percent of the drive (or a size such as 100GB)
+    daily_at: '03:00'       # a restore point is created every day at this time (or at the next start if the PC was off)
+  ohmgraphite:
+    dir: 'C:\Apps\OhmGraphite'
+    token_var: OHMGRAPHITE_INFLUX_TOKEN   # machine-wide variable holding the token (also OHM_TOKEN_VAR in setup.sh)
+    type: influx2
+    interval: 5             # seconds between readings
+    influx2:
+      address: https://influxdb.lan:8086
+      org: sheatsley-systems
+      bucket: proxmox

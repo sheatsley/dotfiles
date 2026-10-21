@@ -1,0 +1,73 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script configures OhmGraphite and runs it as a Windows service (61 installs
+the program). It writes OhmGraphite.exe.config from the template in
+.chezmoitemplates/ohmgraphite.config and the values under ohmgraphite in
+.chezmoidata/windows.yaml, replacing whatever file is there, so the repo is the
+source of truth. The InfluxDB token is not in the file: the config refers to the
+machine-wide environment variable named by token_var, which
+ohmgraphite-token.ps1 sets (the service runs as LocalSystem, which cannot see
+per-user variables). Then the script installs the service if it is missing and
+sets it to start automatically. The service is only started once the token
+variable exists; until then it is left stopped, since it could not write
+anywhere. If the config changed while the service is running, it is restarted.
+It requires an elevated session.
+#>
+Assert-Admin
+
+$dir = {{ .windows.ohmgraphite.dir | squote }}
+$exe = Join-Path $dir 'OhmGraphite.exe'
+$tokenVar = {{ .windows.ohmgraphite.token_var | squote }}
+$name = 'OhmGraphite'
+if (-not (Test-Path -LiteralPath $exe)) { throw "OhmGraphite.exe is not in $dir; the install step did not finish." }
+
+# the config the repo wants
+$wanted = @'
+{{ template "ohmgraphite.config" . }}
+'@
+$wanted = ($wanted -replace "`r`n", "`n").TrimEnd() + "`n"
+
+# write the config only when it differs
+$file = Join-Path $dir 'OhmGraphite.exe.config'
+$current = $null
+if (Test-Path -LiteralPath $file) { $current = ([IO.File]::ReadAllText($file) -replace "`r`n", "`n").TrimEnd() + "`n" }
+$configChanged = ($current -ne $wanted)
+if ($configChanged) {
+    [IO.File]::WriteAllText($file, $wanted, (New-Object Text.UTF8Encoding($false)))
+    Write-Step "set  $file"
+} else {
+    Write-Step "ok   $file"
+}
+
+# install the service if it is missing, and make it start automatically
+$svc = Get-Service -Name $name -ErrorAction SilentlyContinue
+if (-not $svc) {
+    Push-Location $dir
+    try {
+        & $exe install
+        if ($LASTEXITCODE -ne 0) { throw "OhmGraphite.exe install failed (exit $LASTEXITCODE)." }
+    } finally {
+        Pop-Location
+    }
+    Write-Step "set  installed the $name service"
+    $svc = Get-Service -Name $name
+}
+if ($svc.StartType -ne 'Automatic') {
+    Set-Service -Name $name -StartupType Automatic
+    Write-Step "set  $name starts automatically"
+}
+
+# start it once the token exists; restart it to pick up a changed config
+$token = [Environment]::GetEnvironmentVariable($tokenVar, 'Machine')
+if (-not $token) {
+    Write-Warning "$tokenVar is not set, so $name was left stopped. Set it with ohmgraphite-token.ps1 (see MAINTENANCE.md)."
+} elseif ($svc.Status -ne 'Running') {
+    Start-Service -Name $name
+    Write-Step "set  started $name"
+} elseif ($configChanged) {
+    Restart-Service -Name $name
+    Write-Step "set  restarted $name"
+} else {
+    Write-Step "ok   $name is running"
+}

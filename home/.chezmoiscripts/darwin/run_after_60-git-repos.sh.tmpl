@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+{{ template "sh-prelude.sh" . }}
+
+# This script clones or pulls the git repos listed in ~/.config/git/repos (the
+# git_repos task of the yadm bootstrap) into ~/repos. The list is encrypted in
+# the source state and decrypted by chezmoi (it used to be a git-crypt file).
+# Each non-comment line is a host prefix and a repo path:
+#
+#     github:sheatsley/attacks
+#     gitea:sheatsley/private-project
+#
+# The prefixes map to github -> git@github.com:{path}.git and
+# gitea -> git@{GITEA_HOST}:{path}.git (GITEA_HOST defaults to gitea.lan).
+# Blank lines and lines starting with # are ignored. A repo that fails does not
+# stop the others; the script fails at the end if any did, so the next apply
+# retries. The list must not contain the dotfiles repo itself, which lives in
+# ~/repos/chezmoi.
+directory="$HOME/repos"
+repos="$HOME/.config/git/repos"
+gitea_host="${GITEA_HOST:-gitea.lan}"
+
+# skip (without failing) until the encrypted list has been added to the repo
+if [[ ! -f "$repos" ]]; then
+  log "WARNING: $repos does not exist; skipping (see README, 'Migrating from yadm')"
+  exit 0
+fi
+mkdir -p "$directory"
+
+failed=0
+while IFS= read -r line || [[ -n "$line" ]]; do
+  # trim surrounding whitespace and skip blank lines and comments
+  line="${line#"${line%%[![:space:]]*}"}"
+  line="${line%"${line##*[![:space:]]}"}"
+  if [[ -z "$line" || "$line" == \#* ]]; then
+    continue
+  fi
+
+  # parse "host:owner/name"
+  if [[ "$line" != *:* ]]; then
+    log "WARNING: skipping malformed entry (expected host:owner/repo): $line"
+    continue
+  fi
+  host="$(printf '%s' "${line%%:*}" | tr '[:upper:]' '[:lower:]')"
+  path="${line#*:}"
+  case "$host" in
+    github) remote="git@github.com:${path}.git" ;;
+    gitea) remote="git@${gitea_host}:${path}.git" ;;
+    *)
+      log "WARNING: skipping unknown host '$host' in entry: $line (known: github, gitea)"
+      continue
+      ;;
+  esac
+
+  # clone the repo, or pull it if it is already there
+  name="${path##*/}"
+  dest="$directory/$name"
+  if [[ -d "$dest" ]]; then
+    log "pulling $name"
+    git -C "$dest" pull || { log "ERROR: could not pull $name"; failed=1; }
+  else
+    log "cloning $name from $host"
+    git clone "$remote" "$dest" || { log "ERROR: could not clone $name"; failed=1; }
+  fi
+done < "$repos"
+
+[[ "$failed" -eq 0 ]] || die "one or more repos failed (see above)"

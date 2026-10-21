@@ -1,0 +1,36 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script empties the desktop on every apply (it runs after the installers,
+which like to leave shortcuts there): both the current user's Desktop folder and
+the shared Public Desktop are cleared of every file, shortcut, and folder. Files
+are deleted, not hidden. The desktop.ini files that Windows keeps in those
+folders are left alone, and a folder that is not named Desktop is never touched.
+If you want something on the desktop, it will be gone at the next apply. It
+requires an elevated session (for the Public Desktop).
+#>
+Assert-Admin
+
+$folders = @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('CommonDesktopDirectory'))
+foreach ($folder in $folders) {
+    # refuse to delete anything from a path that does not look like a desktop
+    if (-not $folder -or -not (Test-Path -LiteralPath $folder) -or (Split-Path $folder -Leaf) -ne 'Desktop') {
+        Write-Warning "Skipping '$folder': it is not an existing Desktop folder."
+        continue
+    }
+
+    # delete everything except the desktop.ini files
+    $items = @(Get-ChildItem -LiteralPath $folder -Force | Where-Object { $_.Name -ne 'desktop.ini' })
+    if ($items.Count -eq 0) {
+        Write-Step "ok   $folder is empty"
+        continue
+    }
+    foreach ($item in $items) {
+        try {
+            Remove-Item -LiteralPath $item.FullName -Recurse -Force
+            Write-Step "del  $($item.FullName)"
+        } catch {
+            Write-Warning "Could not delete $($item.FullName): $($_.Exception.Message)"
+        }
+    }
+}
