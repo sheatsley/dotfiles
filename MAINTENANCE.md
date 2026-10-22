@@ -50,6 +50,7 @@ a script, as OhmGraphite and FanControl have.
 | Change | Where | Then |
 |---|---|---|
 | Change the Dock apps | `home/.chezmoidata/macos.yaml` (`dock_apps`, in order; `path` is the `.app` bundle) | apply (the defaults script reruns when the list changes) |
+| Record Homebrew packages you installed by hand | `brew-sync` (run it from anywhere on a Mac) | adds every installed formula, cask, tap, and Mac App Store app that `packages.yaml` does not list to the end of `common`, with its description; `brew-sync --dry-run` shows the additions first. Move a line to `macbook` or `mini` to make it specific to one Mac, then apply |
 | Add a Homebrew formula, cask, tap, or Mac App Store app | `home/.chezmoidata/packages.yaml` (`common` for both Macs, `macbook` or `mini` for one) | apply (`brew bundle cleanup` also removes what you delete from the list) |
 | Add a pip package | `~/.config/pip/packages` (managed file) | `re-add`, apply |
 | Add a repo to clone into `~/repos` | `~/.config/git/repos` (encrypted) | `re-add` it (the YubiKey decrypts it), apply |
@@ -66,6 +67,7 @@ All the values are in `home/.chezmoidata/windows.yaml`; edit one and apply.
 | Install a program with winget | `apps` (`id`, `source` winget or msstore, optional `location`) | find the id with `winget search name`; a program that asks for an install root needs `location` |
 | A program winget cannot install | `manual_apps` (`url`, `detect`) | the URL is printed at each apply until a program matching `detect` is installed |
 | Taskbar order | `taskbar` | an id (fixed Windows app) or a `match` on the Start menu name; applies at the next sign-in |
+| Taskbar buttons (combining, search box, Task View, Widgets) | `taskbar_options` | `combine` is always, when_full, or never; `search` is hidden, icon, or box; `task_view` and `widgets` are true or false (`widgets: false` removes the Widgets package, which Windows blocks any other way); applies at the next sign-in |
 | Quick access pins | `quick_access` | `shell:` names, in order |
 | Repos to clone (public ones) | `repos` | cloned into `~/repos/<name>` anonymously, so no YubiKey |
 | The NAS share, user, or location name | `nas` | change `host` here and `NAS_HOST` in `setup.sh` together |
@@ -211,6 +213,13 @@ Set them on the command line for one run (`DOTFILES_SKIP_SYNC=1 DOTFILES_SKIP_VE
 in Git Bash or a Mac shell, or `$env:NAME = 'value'` in PowerShell, which lasts for that window).
 
 ## Troubleshooting
+
+- **"running scripts is disabled on this system" (Windows).** A fresh Windows install refuses scripts in a normal
+  PowerShell window. The `05-execution-policy` script fixes that on the next apply by setting the current user to
+  `RemoteSigned` (unless a policy is already set). To run one script right now without changing anything, use
+  `powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME\repos\chezmoi\autologin.ps1"`.
+
+- **Automatic sign-in fails on Windows ("Autologon did not enable autologin").** Autologon needs the account's password. For a Microsoft account that is the Microsoft account password, not the Windows Hello PIN. If the password is right and it still fails, turn off Settings > Accounts > Sign-in options > "For improved security, only allow Windows Hello sign-in for Microsoft accounts on this device" (the registry value `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device\DevicePasswordLessBuildVersion` is 2 when it is on and 0 when it is off), sign out and back in, then run `$env:DOTFILES_FORCE_AUTOLOGON='1'; & ~\repos\chezmoi\autologin.ps1` from an elevated PowerShell.
 
 - **A Python module fails to build (macOS).** Homebrew's `python` moves to a new version each October, and a module
   without a prebuilt wheel for it is compiled from source, which needs a working Xcode command line tools install.

@@ -1,0 +1,51 @@
+{{ template "ps-prelude.ps1" . }}
+{{- $glom := 0 }}
+{{- if eq .windows.taskbar_options.combine "when_full" }}{{ $glom = 1 }}{{ else if eq .windows.taskbar_options.combine "never" }}{{ $glom = 2 }}{{ end }}
+{{- $search := 0 }}
+{{- if eq .windows.taskbar_options.search "icon" }}{{ $search = 1 }}{{ else if eq .windows.taskbar_options.search "box" }}{{ $search = 2 }}{{ end }}
+
+<#
+This script sets what the taskbar shows, as set under taskbar_options in
+.chezmoidata/windows.yaml: whether buttons are combined (and their labels
+hidden), the search box, the Task View button, and the Widgets button (the
+weather). The first three are documented per-user values (TaskbarGlomLevel is
+0 to always combine, 1 to combine when the taskbar is full, and 2 to never;
+SearchboxTaskbarMode is 0 for hidden, 1 for an icon, and 2 for a box;
+ShowTaskViewButton is 0 to hide). Recent builds of Windows 11 refuse writes to
+the Widgets button's own value and to its policy key, even from an elevated
+session, so when widgets are turned off this script removes the package that
+provides them (MicrosoftWindows.Client.WebExperience). That is permanent until
+the package is reinstalled from the Microsoft Store, and a Windows feature
+update may bring it back, in which case the next apply removes it again. When
+widgets are turned on the script leaves the package alone. Explorer applies the
+changes when it restarts, so sign out and back in.
+#>
+Assert-Admin
+
+$advanced = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+$changed = $false
+
+# combine taskbar buttons and hide labels: {{ .windows.taskbar_options.combine }}
+if (Set-RegValue $advanced 'TaskbarGlomLevel' {{ $glom }}) { $changed = $true }
+
+# search box: {{ .windows.taskbar_options.search }}
+if (Set-RegValue 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search' 'SearchboxTaskbarMode' {{ $search }}) { $changed = $true }
+
+# task view button
+if (Set-RegValue $advanced 'ShowTaskViewButton' {{ if .windows.taskbar_options.task_view }}1{{ else }}0{{ end }}) { $changed = $true }
+
+# widgets button (the weather): remove the package that provides it
+{{- if not .windows.taskbar_options.widgets }}
+$widgets = Get-AppxPackage -AllUsers -Name 'MicrosoftWindows.Client.WebExperience' -ErrorAction SilentlyContinue
+if ($widgets) {
+    $widgets | Remove-AppxPackage -AllUsers
+    Write-Step 'set  removed the Widgets package'
+    $changed = $true
+} else {
+    Write-Step 'ok   the Widgets package is not installed'
+}
+{{- end }}
+
+if ($changed) {
+    Write-Warning 'The taskbar changes after Explorer restarts (sign out and back in).'
+}

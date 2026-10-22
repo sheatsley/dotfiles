@@ -1,0 +1,26 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script lets PowerShell run local scripts, such as the autologin.ps1,
+nas.ps1, and ohmgraphite-token.ps1 files in the repo, from a normal PowerShell
+window. A fresh Windows install refuses all scripts (the Restricted policy);
+the scripts that chezmoi and setup.sh start get around that on their own, so
+only a script run by hand is affected. If neither the current user nor the
+machine sets a policy, the current user is set to RemoteSigned, which runs
+local scripts and requires a signature only on scripts downloaded from the
+internet. A policy set by an administrator (Group Policy) or already chosen by
+you is left alone. This is Windows PowerShell 5.1's policy; PowerShell 7 has
+its own.
+#>
+$user    = Get-ExecutionPolicy -Scope CurrentUser
+$machine = Get-ExecutionPolicy -Scope LocalMachine
+
+# a policy set at either level (other than Restricted) is respected as it is
+if ($user -notin @('Undefined', 'Restricted')) {
+    Write-Step "ok   execution policy for this user is $user"
+} elseif ($machine -notin @('Undefined', 'Restricted')) {
+    Write-Step "ok   execution policy for this machine is $machine"
+} else {
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    Write-Step 'set  execution policy for this user -> RemoteSigned'
+}

@@ -101,7 +101,7 @@ if (-not $force -and $cur.AutoAdminLogon -eq '1' -and $cur.DefaultUserName -eq $
 }
 
 # read the password (an empty one skips this step)
-$pw = Read-Password "Windows password for $user (leave empty to skip automatic sign-in)"
+$pw = Read-Password "Windows password for $user (a Microsoft account's password, not the PIN; leave empty to skip)"
 if (-not $pw) {
     Write-Warning 'No password supplied; automatic sign-in was not configured.'
     return
@@ -127,6 +127,6 @@ Remove-Variable -Name argList
 # verify the result in the registry rather than trusting the exit code
 $after = Get-ItemProperty -LiteralPath $wl
 if ($after.AutoAdminLogon -ne '1' -or $after.DefaultUserName -ne $user) {
-    throw "Autologon did not enable autologin (exit $($proc.ExitCode))."
+    throw "Autologon did not enable autologin (exit $($proc.ExitCode)). Autologon needs the account's password; for a Microsoft account that is its password, not the Windows Hello PIN. If the password is right and this still fails, turn off Settings > Accounts > Sign-in options > 'For improved security, only allow Windows Hello sign-in for Microsoft accounts on this device', sign out and back in, and run this again with DOTFILES_FORCE_AUTOLOGON=1."
 }
 Write-Host "[autologin] set  enabled for $user"

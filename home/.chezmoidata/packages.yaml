@@ -25,7 +25,9 @@ packages:
       - { name: "visual-studio-code", desc: "Open-source code editor" }
       - { name: "yubico-authenticator", desc: "Full-featured companion app to the YubiKey" }
       - { name: "zoom", desc: "Video communication and virtual meeting platform" }
-    mas: []
+      - { name: "stats", desc: "System monitor for the menu bar" }
+    mas:
+      - { name: "Hush", id: 1544743900 }
   macbook:
     brews: []
     casks:

@@ -34,6 +34,11 @@ windows:
     - {match: 'Steam*'}
     - {match: 'WinDirStat*'}
     - {match: 'Xbox*'}
+  taskbar_options:
+    combine: when_full      # "Combine taskbar buttons and hide labels": always, when_full, or never
+    search: hidden          # the search box: hidden, icon, or box
+    task_view: false        # show the Task View button (the multiple desktops icon)
+    widgets: false          # show the Widgets button (weather and news)
   repos:                    # public repos cloned to ~\repos\<name> (anonymous https, so no YubiKey)
     - name: games
       url: https://github.com/sheatsley/games.git
@@ -54,6 +59,9 @@ windows:
     - name: Airfoil Satellite
       url: https://rogueamoeba.com/airfoil/satellite/windows/
       detect: 'Airfoil*'
+    - name: VB-Audio Virtual Cable
+      url: https://vb-audio.com/Cable/
+      detect: 'VBCABLE*'
   system_restore:           # restore points, so a bad driver or Windows update can be undone
     drive: 'C:\'
     max_size: 5%            # space the restore points may use, as a percent of the drive (or a size such as 100GB)

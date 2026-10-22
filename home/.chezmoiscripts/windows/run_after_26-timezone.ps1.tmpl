@@ -1,0 +1,31 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script turns on "Set time zone automatically". Windows installs with it
+off, and puts the computer in whatever zone the installer picked (here,
+Central). The setting has two parts: the time zone auto update service
+(tzautoupdate) must not be disabled (a Start value of 3 enables it and 4
+disables it), and location access must be allowed machine-wide, because the
+zone comes from the computer's location. It requires an elevated session.
+#>
+Assert-Admin
+
+$changed = $false
+
+# let the service run when Windows asks for it
+if (Set-RegValue 'HKLM:\SYSTEM\CurrentControlSet\Services\tzautoupdate' 'Start' 3) { $changed = $true }
+
+# allow location access, which the zone is taken from
+$consent = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location'
+if (Set-RegValue $consent 'Value' 'Allow' 'String') { $changed = $true }
+
+# ask the service to update the zone now
+try {
+    Start-Service -Name 'tzautoupdate' -ErrorAction Stop
+} catch {
+    Write-Step 'ok   the time zone service will start when Windows needs it'
+}
+
+if ($changed) {
+    Write-Warning 'The time zone updates once location services have a fix (sign out and back in if it still shows Central).'
+}

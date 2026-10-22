@@ -1,0 +1,28 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script turns off "Enhance pointer precision" (mouse acceleration). The
+setting is three per-user strings under Control Panel\Mouse: MouseSpeed is 0
+with acceleration off (1 or 2 with it on), and MouseThreshold1 and
+MouseThreshold2 are 0 with it off. Windows reads them at sign-in, so the script
+also applies them to the current session with SystemParametersInfo
+(SPI_SETMOUSE, 0x0004), and the pointer changes at once. It is a per-user
+setting, so it does not require an elevated session.
+#>
+$mouse = 'HKCU:\Control Panel\Mouse'
+$changed = $false
+foreach ($name in 'MouseSpeed', 'MouseThreshold1', 'MouseThreshold2') {
+    if (Set-RegValue $mouse $name '0' 'String') { $changed = $true }
+}
+
+# apply it to the running session
+if (-not ('Win32.Mouse' -as [type])) {
+    Add-Type -Namespace Win32 -Name Mouse -MemberDefinition @'
+[DllImport("user32.dll", SetLastError = true)]
+public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, int[] pvParam, uint fWinIni);
+'@
+}
+if ($changed) {
+    # 0x03 saves the setting to the profile and tells running apps
+    [void][Win32.Mouse]::SystemParametersInfo(0x0004, 0, [int[]](0, 0, 0), 0x03)
+}

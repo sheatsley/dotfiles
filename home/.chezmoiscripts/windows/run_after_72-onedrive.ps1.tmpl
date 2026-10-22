@@ -1,0 +1,66 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script turns OneDrive off and removes it. Signing in with a Microsoft
+account is what switches it on, so the script does four things: it sets the
+policy that disables OneDrive file sync (DisableFileSyncNGSC = 1) and the one
+that stops Windows from moving Desktop, Documents, and Pictures into OneDrive
+(KFMBlockOptIn = 1); it stops the running client and runs its own uninstaller;
+it removes the sign-in entry that starts it; and it removes its folder from the
+Explorer navigation pane. The policy holds even if a Windows update puts the
+installer back. The script never moves files: if Desktop or Documents already
+live inside a OneDrive folder, it only warns, since moving them is a decision
+about your data. It requires an elevated session (for the policy).
+#>
+Assert-Admin
+
+$policy = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive'
+$changed = $false
+
+# keep OneDrive from syncing, and from taking over the known folders
+if (Set-RegValue $policy 'DisableFileSyncNGSC' 1) { $changed = $true }
+if (Set-RegValue $policy 'KFMBlockOptIn' 1) { $changed = $true }
+
+# stop the client, then run its uninstaller if one is present
+$setup = @(
+    "$env:SystemRoot\SysWOW64\OneDriveSetup.exe",
+    "$env:SystemRoot\System32\OneDriveSetup.exe"
+) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+$installed = @(
+    "$env:LOCALAPPDATA\Microsoft\OneDrive\OneDrive.exe",
+    "$env:ProgramFiles\Microsoft OneDrive\OneDrive.exe",
+    "${env:ProgramFiles(x86)}\Microsoft OneDrive\OneDrive.exe"
+) | Where-Object { Test-Path -LiteralPath $_ }
+if ($setup -and $installed) {
+    Get-Process -Name 'OneDrive' -ErrorAction SilentlyContinue | Stop-Process -Force
+    Start-Process -FilePath $setup -ArgumentList '/uninstall' -Wait
+    Write-Step 'set  uninstalled OneDrive'
+    $changed = $true
+} elseif ($installed) {
+    Write-Warning 'OneDrive is installed but its uninstaller was not found; the policy still disables it.'
+} else {
+    Write-Step 'ok   OneDrive is not installed'
+}
+
+# remove the entry that starts it at sign-in
+$run = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+if ($null -ne (Get-ItemProperty -LiteralPath $run -Name 'OneDrive' -ErrorAction SilentlyContinue)) {
+    Remove-ItemProperty -LiteralPath $run -Name 'OneDrive' -Force
+    Write-Step 'set  removed the OneDrive sign-in entry'
+    $changed = $true
+}
+
+# remove its folder from the Explorer navigation pane
+if (Set-RegValue 'HKCU:\SOFTWARE\Classes\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}' 'System.IsPinnedToNameSpaceTree' 0) { $changed = $true }
+
+# warn (never move) if the known folders were already redirected
+foreach ($folder in 'Desktop', 'MyDocuments', 'MyPictures') {
+    $path = [Environment]::GetFolderPath($folder)
+    if ($path -like '*OneDrive*') {
+        Write-Warning "$folder is still inside OneDrive ($path). Restore it from its Properties > Location tab, then move your files back."
+    }
+}
+
+if ($changed) {
+    Write-Warning 'The OneDrive folder disappears from Explorer after you sign out and back in.'
+}

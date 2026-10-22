@@ -330,7 +330,7 @@ setup_windows() {
   local login_pw="" nas_pw="" ohm_token="" prompted=0
   if [[ -t 0 ]]; then
     if [[ "${DOTFILES_FORCE_AUTOLOGON:-}" == "1" ]] || ! autologin_enabled; then
-      read -r -s -p "Windows password for automatic sign-in as ${USERNAME:-this user} (empty to skip): " login_pw
+      read -r -s -p "Windows password for automatic sign-in as ${USERNAME:-this user} (a Microsoft account's password, not the PIN; empty to skip): " login_pw
       echo
       prompted=1
     fi

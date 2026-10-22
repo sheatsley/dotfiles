@@ -12,6 +12,7 @@ Machine configuration for two Macs (macbook, mini) and a Windows gaming PC, mana
     autologin.ps1, nas.ps1, ohmgraphite-token.ps1
                              (Windows) enable automatic sign-in, save the NAS password, set the OhmGraphite
                              token; each reads a line of stdin
+    brew-sync                adds the Homebrew packages installed on a Mac to .chezmoidata/packages.yaml (alias in .zshrc)
     MAINTENANCE.md           how to change things: which file to edit and which command to run
     .gitattributes           pins LF line endings (Git for Windows would otherwise convert to CRLF)
     home/                    everything chezmoi manages
@@ -72,10 +73,13 @@ Re-run any time: every step probes first, so finished steps are skipped and fail
 
 | Script | What it does |
 |---|---|
+| `05-execution-policy` | lets PowerShell run local scripts (sets the current user to RemoteSigned if nothing sets a policy) |
 | `10-network-private` | sets connected networks to Private |
 | `20-keyboard`, `21-dark-mode`, `22-explorer` | keyboard repeat, dark theme, show hidden files and extensions |
 | `23-desktop` | solid black background, hides the built-in desktop icons |
 | `25-quick-access` | pins Recycle Bin, Desktop, Documents, Downloads, Videos, in that order |
+| `26-timezone` | turns on "Set time zone automatically" (and the location access it needs) |
+| `27-mouse` | turns off "Enhance pointer precision" (mouse acceleration) |
 | `30-wake-on-lan` | wake-on-LAN (warns and skips when there is no physical Ethernet adapter) |
 | `40-computer-name` | sets the computer name |
 | `50-startup-shortcuts` | a shortcut in `shell:startup` for each script in `~/.startup` |
@@ -85,6 +89,8 @@ Re-run any time: every step probes first, so finished steps are skipped and fail
 | `62-ohmgraphite-service` | writes its config from the template, installs the service, starts it once the token is set |
 | `65-repos` | clones/pulls the public repos in `windows.yaml` (e.g. `games`) into `~/repos` |
 | `70-taskbar` | pins the taskbar apps in order (a layout file plus the Start layout policy; applies at the next sign-in) |
+| `71-taskbar-options` | taskbar buttons: combine when full, hide search, Task View, and Widgets (removed with its package; applies at the next sign-in) |
+| `72-onedrive` | disables OneDrive by policy, uninstalls it, and removes its sign-in entry and Explorer folder |
 | `75-fancontrol` | copies `~/.config/fancontrol/userConfig.json` into FanControl when the repo's copy changes |
 | `80-system-restore` | turns on System Restore, caps its space, and creates a restore point every day (a scheduled task) |
 | `90-desktop-clean` | deletes everything on your Desktop and the Public Desktop, on every apply |

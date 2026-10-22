@@ -1,0 +1,199 @@
+#!/usr/bin/env python3
+"""
+This script adds the Homebrew packages installed on this Mac, but missing from
+home/.chezmoidata/packages.yaml, to the common lists in that file. It replaces
+running `brew bundle dump` by hand: the dump goes to a temporary
+file (never over the generated ~/.config/homebrew/Brewfile, which
+`chezmoi apply` owns), and each package it lists that the file does not know
+about, under any machine, is appended to the end of the matching common list
+(brews, casks, or mas), with its description. To make a package specific to one
+Mac, move its line to that machine's list afterwards. Existing lines and
+comments are never touched, and packages are never removed: that is what the
+cleanup step of `chezmoi apply` is for. Only the Python standard library is
+used, so the Python that ships with macOS is enough.
+
+usage: brew-sync [--dry-run]
+"""
+
+import argparse
+import os
+import pathlib
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+YAML = pathlib.Path(__file__).resolve().parent / "home/.chezmoidata/packages.yaml"
+ENTRY = re.compile(r'^(brew|cask|tap|mas)\s+"([^"]+)"(.*)$')
+
+
+def brew_path():
+    """
+    This function finds the brew executable, on the PATH or at its usual
+    location on Apple silicon.
+
+    :return: the path to brew
+    """
+    found = shutil.which("brew") or "/opt/homebrew/bin/brew"
+    if not pathlib.Path(found).exists():
+        sys.exit("ERROR: brew was not found")
+    return found
+
+
+def dump_packages():
+    """
+    This function asks Homebrew for the installed packages and their
+    descriptions (a dump includes them by default; the --describe switch was
+    removed), through a temporary Brewfile.
+
+    :return: a list of (kind, name, description, mas id) tuples, where kind is
+    brew, cask, tap, or mas
+    """
+    # descriptions are the default now; this variable would turn them off
+    env = {k: v for k, v in os.environ.items() if k != "HOMEBREW_BUNDLE_NO_DESCRIBE"}
+    with tempfile.TemporaryDirectory() as tmp:
+        dump = pathlib.Path(tmp) / "Brewfile"
+        subprocess.run(
+            [brew_path(), "bundle", "dump", "--force", f"--file={dump}"],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            env=env,
+        )
+        lines = dump.read_text().splitlines()
+
+    # a description is the comment on the line before its package
+    found = []
+    desc = ""
+    for line in lines:
+        if line.startswith("# "):
+            desc = line[2:].strip()
+            continue
+        entry = ENTRY.match(line.strip())
+        if entry:
+            kind, name, rest = entry.groups()
+            mas_id = re.search(r"id:\s*(\d+)", rest)
+            found.append((kind, name, desc, mas_id.group(1) if mas_id else None))
+        desc = ""
+    return found
+
+
+def known_names(text):
+    """
+    This function collects every package name already in packages.yaml, for any
+    machine. A name that includes a tap (user/tap/formula) also counts as its
+    last part, so either spelling matches.
+
+    :param text: the contents of packages.yaml
+    :return: a set of lowercase names
+    """
+    names = set(re.findall(r'name:\s*"([^"]+)"', text))
+    names |= set(re.findall(r'^\s+-\s+"([^"]+)"\s*$', text, re.M))
+    return {n.lower() for n in names} | {n.lower().rsplit("/", 1)[-1] for n in names}
+
+
+def quote(value):
+    """
+    This function quotes a string for YAML.
+
+    :param value: the text to quote
+    :return: the text in double quotes, with backslashes and quotes escaped
+    """
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def add_to_list(lines, block, key, entries, indent):
+    """
+    This function appends entries to a list inside a section of packages.yaml,
+    turning an empty list (`key: []`) into a block list first.
+
+    :param lines: the lines of the file, changed in place
+    :param block: the section holding the list (e.g., common)
+    :param key: the list to extend (e.g., casks)
+    :param entries: the lines to add, without indentation
+    :param indent: the indentation of the list items
+    """
+    start = next(i for i, l in enumerate(lines) if l.rstrip() == f"  {block}:")
+    end = next(
+        (i for i in range(start + 1, len(lines)) if re.match(r"^  \w", lines[i])),
+        len(lines),
+    )
+    head = next(
+        i for i in range(start, end) if re.match(rf"^\s+{key}:(\s*\[\])?\s*(#.*)?$", lines[i])
+    )
+    new = [indent + e for e in entries]
+    if "[]" in lines[head]:
+        lines[head] = re.sub(r"\s*\[\]", "", lines[head])
+        lines[head + 1 : head + 1] = new
+        return
+
+    # the end of the list is its last item, before the next key
+    last = head
+    for i in range(head + 1, end):
+        if re.match(r"^\s+-\s", lines[i]):
+            last = i
+        elif re.match(r"^\s+\w", lines[i]) and not lines[i].lstrip().startswith("#"):
+            break
+    lines[last + 1 : last + 1] = new
+
+
+def main():
+    parser = argparse.ArgumentParser(description="add installed Homebrew packages to packages.yaml")
+    parser.add_argument("--dry-run", action="store_true", help="show what would be added without writing")
+    args = parser.parse_args()
+
+    text = YAML.read_text()
+    have = known_names(text)
+    lines = text.splitlines()
+
+    # tap packages are skipped: the homebrew/* taps are built in or deprecated
+    new = {"brew": [], "cask": [], "mas": [], "tap": []}
+    for kind, name, desc, mas_id in dump_packages():
+        short = name.lower().rsplit("/", 1)[-1]
+        if name.lower() in have or short in have:
+            continue
+
+        # a versioned formula (python@3.15) is what an unversioned one in the
+        # file (python) installs, so it is already listed
+        if kind == "brew" and "@" in short and short.split("@")[0] in have:
+            print(f"skip brew: {name} (already listed as {short.split('@')[0]})")
+            continue
+        if kind == "tap" and name.lower().startswith("homebrew/"):
+            continue
+        if kind == "mas":
+            new[kind].append(f"- {{ name: {quote(name)}, id: {mas_id} }}")
+        elif kind == "tap":
+            new[kind].append(f"- {quote(name)}")
+        else:
+            new[kind].append(f"- {{ name: {quote(name)}, desc: {quote(desc)} }}")
+
+    if not any(new.values()):
+        print("ok   packages.yaml already lists everything installed")
+        return
+
+    # taps live under packages, the rest under packages.common
+    if new["tap"]:
+        head = next(i for i, l in enumerate(lines) if re.match(r"^  taps:", l))
+        if "[]" in lines[head]:
+            lines[head] = "  taps:"
+            lines[head + 1 : head + 1] = ["    " + e for e in new["tap"]]
+        else:
+            last = max(i for i in range(head, len(lines)) if i == head or re.match(r"^    -\s", lines[i]))
+            lines[last + 1 : last + 1] = ["    " + e for e in new["tap"]]
+    for kind, key in (("brew", "brews"), ("cask", "casks"), ("mas", "mas")):
+        if new[kind]:
+            add_to_list(lines, "common", key, new[kind], "      ")
+
+    for kind in new:
+        for entry in new[kind]:
+            print(f"add  {kind}: {entry[2:]}")
+    if args.dry_run:
+        print("(dry run: packages.yaml was not changed)")
+        return
+    YAML.write_text("\n".join(lines) + "\n")
+    print(f"set  updated {YAML}")
+    print("next: move any machine-specific line to that machine's list, then `chezmoi apply`")
+
+
+if __name__ == "__main__":
+    main()
