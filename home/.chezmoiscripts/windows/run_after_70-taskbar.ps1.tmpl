@@ -16,7 +16,9 @@ icon when a running app's windows do not carry the same app user model ID
 program than the shortcut points to (Battle.net does). For those apps,
 rebuild: true in windows.yaml pins a fresh copy of the shortcut, made here in
 C:\ProgramData\dotfiles\Pins, that has no ID unless aumid gives one and points
-at target if that is given (found with diagnose-taskbar.ps1). An app that is not
+at target if that is given (found with diagnose-taskbar.ps1). An app with no Start
+menu shortcut at all (Airfoil Satellite) is listed by name and path instead,
+and its shortcut is made the same way. An app that is not
 installed yet cannot be pinned, because Windows drops a pin it cannot resolve
 instead of leaving a placeholder; it is pinned in its place by the first apply
 after it is installed (and the next sign-in). Windows may honor this policy only
@@ -26,7 +28,7 @@ Assert-Admin
 
 $items = @(
 {{- range .windows.taskbar }}
-    @{ Id = {{ with index . "id" }}{{ squote . }}{{ else }}''{{ end }}; Match = {{ with index . "match" }}{{ squote . }}{{ else }}''{{ end }}; Rebuild = {{ if index . "rebuild" }}$true{{ else }}$false{{ end }}; Aumid = {{ with index . "aumid" }}{{ squote . }}{{ else }}''{{ end }}; Target = {{ with index . "target" }}{{ squote . }}{{ else }}''{{ end }} }
+    @{ Id = {{ with index . "id" }}{{ squote . }}{{ else }}''{{ end }}; Match = {{ with index . "match" }}{{ squote . }}{{ else }}''{{ end }}; Rebuild = {{ if index . "rebuild" }}$true{{ else }}$false{{ end }}; Aumid = {{ with index . "aumid" }}{{ squote . }}{{ else }}''{{ end }}; Target = {{ with index . "target" }}{{ squote . }}{{ else }}''{{ end }}; Name = {{ with index . "name" }}{{ squote . }}{{ else }}''{{ end }}; Path = {{ with index . "path" }}{{ squote . }}{{ else }}''{{ end }} }
 {{- end }}
 )
 
@@ -123,17 +125,29 @@ function New-PinShortcut {
     optionally pointing at another program. Starting from a new file matters,
     because a shortcut keeps the app ID it already has.
 
-    :param Source: the Start menu shortcut to copy
+    :param Source: the Start menu shortcut to copy (empty when Exe is given)
     :param Aumid: the app ID to put on the copy (empty for none)
     :param TargetGlob: a wildcard path to point the copy at (empty to keep the original program)
+    :param Exe: a program to make a shortcut to, for apps with no Start menu shortcut
+    :param Name: the shortcut's name when Exe is given
     :return: the full path of the new shortcut
     #>
-    param([string]$Source, [string]$Aumid, [string]$TargetGlob)
+    param([string]$Source, [string]$Aumid, [string]$TargetGlob, [string]$Exe, [string]$Name)
     $wsh = New-Object -ComObject WScript.Shell
-    $from = $wsh.CreateShortcut($Source)
-    $target = $from.TargetPath
-    $folder = $from.WorkingDirectory
-    $icon = $from.IconLocation
+    if ($Exe) {
+        $target = $Exe
+        $folder = Split-Path -Parent $Exe
+        $icon = ''
+        $arguments = ''
+        $leaf = "$Name.lnk"
+    } else {
+        $from = $wsh.CreateShortcut($Source)
+        $target = $from.TargetPath
+        $folder = $from.WorkingDirectory
+        $icon = $from.IconLocation
+        $arguments = $from.Arguments
+        $leaf = Split-Path -Leaf $Source
+    }
     if ($TargetGlob) {
         $found = Get-ChildItem -Path $TargetGlob -File -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1
@@ -149,11 +163,11 @@ function New-PinShortcut {
 
     $dir = Join-Path $env:ProgramData 'dotfiles\Pins'
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
-    $path = Join-Path $dir (Split-Path -Leaf $Source)
+    $path = Join-Path $dir $leaf
     if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force }
     $to = $wsh.CreateShortcut($path)
     $to.TargetPath = $target
-    $to.Arguments = $from.Arguments
+    $to.Arguments = $arguments
     $to.WorkingDirectory = $folder
     $to.IconLocation = $icon
     $to.Save()
@@ -180,6 +194,16 @@ $pins = @()
 foreach ($item in $items) {
     if ($item.Id) {
         $pins += ('        <taskbar:DesktopApp DesktopApplicationID="{0}"/>' -f $item.Id)
+        continue
+    }
+    if ($item.Path) {
+        if (Test-Path -LiteralPath $item.Path) {
+            $link = New-PinShortcut -Exe $item.Path -Name $item.Name -Aumid $item.Aumid
+            $pins += ('        <taskbar:DesktopApp DesktopApplicationLinkPath="{0}"/>' -f [Security.SecurityElement]::Escape($link))
+            Write-Step "pin  $($item.Name) -> $($item.Path)"
+        } else {
+            Write-Warning "Not pinned yet: $($item.Path) does not exist ($($item.Name) is not installed)"
+        }
         continue
     }
     $link = Find-StartLink $item.Match

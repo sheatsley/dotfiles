@@ -19,7 +19,7 @@ $apps = @(
 )
 $manual = @(
 {{- range .windows.manual_apps }}
-    @{ Name = {{ .name | squote }}; Url = {{ .url | squote }}; Detect = {{ .detect | squote }} }
+    @{ Name = {{ .name | squote }}; Url = {{ .url | squote }}; Detect = {{ .detect | squote }}; Path = {{ with index . "path" }}{{ squote . }}{{ else }}''{{ end }} }
 {{- end }}
 )
 
@@ -102,7 +102,7 @@ foreach ($app in $apps) {
 
 # remind about the programs that need a manual install
 foreach ($m in $manual) {
-    if (Test-ProgramInstalled $m.Detect) {
+    if ((Test-ProgramInstalled $m.Detect) -or ($m.Path -and (Test-Path -LiteralPath $m.Path))) {
         Write-Step "ok   $($m.Name)"
     } else {
         Write-Warning "Install $($m.Name) manually: $($m.Url)"

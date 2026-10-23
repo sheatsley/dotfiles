@@ -25,10 +25,11 @@ windows:
                             # rebuild: true pins a fresh copy of the Start shortcut with no app ID, for apps whose windows carry none
                             # (otherwise Windows shows a second icon when the app runs); aumid adds the app ID the app's windows use,
                             # and target points the copy at another program (a wildcard path; the newest file wins)
+                            # name and path pin a program that has no Start menu shortcut
     - {id: Microsoft.Windows.Explorer}
     - {id: MSEdge}
     - {match: 'AutoHotkey*'}
-    - {match: 'Airfoil Satellite*'}
+    - {name: 'Airfoil Satellite', path: 'C:\Program Files (x86)\AirfoilSatellite\AirfoilSatellite.exe'}
     - {match: 'Battle.net*', rebuild: true, target: 'C:\Program Files (x86)\Battle.net\Battle.net.exe'}
     - {match: 'CrystalDiskMark*'}
     - {match: 'FanControl*'}
@@ -63,6 +64,7 @@ windows:
     - name: Airfoil Satellite
       url: https://rogueamoeba.com/airfoil/satellite/windows/
       detect: 'Airfoil*'
+      path: 'C:\Program Files (x86)\AirfoilSatellite\AirfoilSatellite.exe'   # also counts as installed when this file exists
     - name: VB-Audio Virtual Cable
       url: https://vb-audio.com/Cable/
       detect: 'VBCABLE*'

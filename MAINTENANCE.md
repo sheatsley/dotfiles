@@ -65,7 +65,7 @@ All the values are in `home/.chezmoidata/windows.yaml`; edit one and apply.
 |---|---|---|
 | Keyboard repeat, theme, hidden files and extensions | `keyboard`, `theme`, `explorer` | applied now; some need a sign-out |
 | Install a program with winget | `apps` (`id`, `source` winget or msstore, optional `location`) | find the id with `winget search name`; a program that asks for an install root needs `location` |
-| A program winget cannot install | `manual_apps` (`url`, `detect`) | the URL is printed at each apply until a program matching `detect` is installed |
+| A program winget cannot install | `manual_apps` (`url`, `detect`, optional `path`) | the URL is printed at each apply until a program matching `detect` (an installed-programs or Start menu name) is installed, or the file at `path` exists |
 | Taskbar order | `taskbar` | an id (fixed Windows app) or a `match` on the Start menu name; applies at the next sign-in. If an app shows a second icon when it runs, run `diagnose-taskbar.ps1` with the app open and add `rebuild: true` (plus `aumid` or `target`) to its entry |
 | Taskbar buttons (combining, search box, Task View, Widgets) | `taskbar_options` | `combine` is always, when_full, or never; `search` is hidden, icon, or box; `task_view` and `widgets` are true or false (`widgets: false` removes the Widgets package, which Windows blocks any other way); applies at the next sign-in |
 | SSH access to the Windows PC (keys, passwords, shell) | `ssh_server` | `authorized_keys` takes public keys, one per entry (get yours from `ssh-add -L`); `password_login` is false for keys only; `shell` is powershell or cmd |
