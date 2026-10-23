@@ -1,0 +1,110 @@
+{{ template "ps-prelude.ps1" . }}
+{{- $ssh := .windows.ssh_server }}
+
+<#
+This script sets up the OpenSSH server so that you can sign in from another
+computer, and so that VS Code (Remote - SSH) can edit files on this one. It
+installs the Windows OpenSSH Server feature, starts the sshd service at every
+boot, opens port 22 only to the local network (the Private profile and the local
+subnet), and starts sessions in {{ $ssh.shell }}. Who may sign in comes from
+ssh_server in .chezmoidata/windows.yaml: the public keys listed there are
+written to C:\ProgramData\ssh\administrators_authorized_keys, the file sshd reads
+for members of the Administrators group (it must be readable only by SYSTEM and
+Administrators, or sshd ignores it). Passwords are refused unless password_login
+is true. If no keys are listed, nobody can sign in with a key and the script
+warns. It requires an elevated session, and the first run downloads the feature
+from Windows Update.
+#>
+Assert-Admin
+
+# install the OpenSSH server feature
+$feature = Get-WindowsCapability -Online -Name 'OpenSSH.Server*' | Select-Object -First 1
+if ($feature.State -eq 'Installed') {
+    Write-Step 'ok   OpenSSH Server is installed'
+} else {
+    Write-Step 'set  installing OpenSSH Server (this downloads from Windows Update)'
+    Add-WindowsCapability -Online -Name $feature.Name | Out-Null
+}
+
+# start sshd at every boot (the first start creates the host keys and sshd_config)
+Set-Service -Name 'sshd' -StartupType Automatic
+if ((Get-Service -Name 'sshd').Status -ne 'Running') {
+    Start-Service -Name 'sshd'
+    Write-Step 'set  started sshd'
+} else {
+    Write-Step 'ok   sshd is running'
+}
+
+# allow port 22 from the local network only
+$rule = 'OpenSSH-Server-In-TCP'
+if ($null -eq (Get-NetFirewallRule -Name $rule -ErrorAction SilentlyContinue)) {
+    New-NetFirewallRule -Name $rule -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound `
+        -Protocol TCP -Action Allow -LocalPort 22 -Profile Private -RemoteAddress LocalSubnet | Out-Null
+    Write-Step 'set  firewall rule for port 22 (Private networks, local subnet)'
+} else {
+    $address = (Get-NetFirewallRule -Name $rule | Get-NetFirewallAddressFilter).RemoteAddress
+    $profile = (Get-NetFirewallRule -Name $rule).Profile
+    if ($address -ne 'LocalSubnet' -or $profile -ne 'Private') {
+        Set-NetFirewallRule -Name $rule -Enabled True -Profile Private -RemoteAddress LocalSubnet
+        Write-Step 'set  firewall rule limited to Private networks and the local subnet'
+    } else {
+        Write-Step 'ok   firewall rule for port 22'
+    }
+}
+
+# start sessions in the chosen shell
+{{- if eq $ssh.shell "cmd" }}
+$shell = "$env:SystemRoot\System32\cmd.exe"
+{{- else }}
+$shell = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+{{- end }}
+if (Set-RegValue 'HKLM:\SOFTWARE\OpenSSH' 'DefaultShell' $shell 'String') {
+    Write-Step "set  ssh sessions start in $shell"
+} else {
+    Write-Step 'ok   ssh default shell'
+}
+
+# write the allowed keys, readable only by SYSTEM and Administrators
+$keys = @()
+{{- range $ssh.authorized_keys }}
+$keys += {{ . | squote }}
+{{- end }}
+$file = Join-Path $env:ProgramData 'ssh\administrators_authorized_keys'
+if ($keys.Count -eq 0) {
+    Write-Warning 'No public keys are listed under ssh_server.authorized_keys in windows.yaml, so nobody can sign in with a key.'
+} else {
+    $text = ($keys -join "`n") + "`n"
+    $current = $null
+    if (Test-Path -LiteralPath $file) { $current = [IO.File]::ReadAllText($file) }
+    if ($current -eq $text) {
+        Write-Step 'ok   authorized keys'
+    } else {
+        [IO.File]::WriteAllText($file, $text, (New-Object Text.UTF8Encoding $false))
+        icacls.exe $file /inheritance:r /grant 'SYSTEM:(F)' /grant 'BUILTIN\Administrators:(F)' | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "icacls could not restrict $file (exit $LASTEXITCODE)" }
+        Write-Step "set  wrote $($keys.Count) authorized key(s)"
+    }
+}
+
+# passwords: refuse them unless windows.yaml says otherwise (a global option, so it must come before any Match block)
+$config = Join-Path $env:ProgramData 'ssh\sshd_config'
+$want = 'PasswordAuthentication {{ if $ssh.password_login }}yes{{ else }}no{{ end }}'
+$text = [IO.File]::ReadAllText($config)
+if ($text -match "(?m)^$([regex]::Escape($want))\s*$") {
+    Write-Step 'ok   sshd_config password setting'
+} else {
+    Copy-Item -LiteralPath $config -Destination "$config.bak" -Force
+    if ($text -match '(?m)^\s*#?\s*PasswordAuthentication\s+\w+\s*$') {
+        $text = [regex]::Replace($text, '(?m)^\s*#?\s*PasswordAuthentication\s+\w+\s*$', $want, 1)
+    } else {
+        $text = "$want`r`n" + $text
+    }
+    [IO.File]::WriteAllText($config, $text, (New-Object Text.UTF8Encoding $false))
+    & "$env:SystemRoot\System32\OpenSSH\sshd.exe" -t
+    if ($LASTEXITCODE -ne 0) {
+        Copy-Item -LiteralPath "$config.bak" -Destination $config -Force
+        throw 'sshd rejected the new sshd_config; the old one was restored.'
+    }
+    Restart-Service -Name 'sshd'
+    Write-Step "set  $want"
+}
