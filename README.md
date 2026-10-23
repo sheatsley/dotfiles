@@ -13,6 +13,7 @@ Machine configuration for two Macs (macbook, mini) and a Windows gaming PC, mana
                              (Windows) enable automatic sign-in, save the NAS password, set the OhmGraphite
                              token; each reads a line of stdin
     brew-sync                adds the Homebrew packages installed on a Mac to .chezmoidata/packages.yaml (alias in .zshrc)
+    diagnose-taskbar.ps1     prints the app IDs of pinned shortcuts and running windows (to debug duplicated taskbar icons; not part of apply)
     MAINTENANCE.md           how to change things: which file to edit and which command to run
     .gitattributes           pins LF line endings (Git for Windows would otherwise convert to CRLF)
     home/                    everything chezmoi manages
@@ -80,7 +81,9 @@ Re-run any time: every step probes first, so finished steps are skipped and fail
 | `25-quick-access` | pins Recycle Bin, Desktop, Documents, Downloads, Videos, in that order |
 | `26-timezone` | turns on "Set time zone automatically" (and the location access it needs) |
 | `27-mouse` | turns off "Enhance pointer precision" (mouse acceleration) |
-| `30-wake-on-lan` | wake-on-LAN (warns and skips when there is no physical Ethernet adapter) |
+| `30-wake-on-lan` | wake-on-LAN: Fast Startup off, magic packets only, Energy Efficient Ethernet off (warns and skips when there is no physical Ethernet adapter) |
+| `31-sleep` | stops the computer from sleeping or hibernating when idle (`sleep_after_minutes`) |
+| `35-ssh-server` | installs the OpenSSH server, opens port 22 to the local network, and allows the keys listed under `ssh_server` (for VS Code Remote - SSH) |
 | `40-computer-name` | sets the computer name |
 | `50-startup-shortcuts` | a shortcut in `shell:startup` for each script in `~/.startup` |
 | `55-nas-location` | adds `\\unas\media` to Explorer as a network location (a shortcut, not a drive letter) |
@@ -135,8 +138,8 @@ once they exist the scripts exit without asking. Ways to supply the passwords:
 
 ## Secrets
 
-Two files are stored encrypted (`encrypted_*` in the source state): `~/.config/git/repos` and
-`~/.ssh/known_hosts`. The ssh public key `~/.ssh/1A2405C9E6BFBE34.pub` is stored as a plain file, since it is
+Three files are stored encrypted (`encrypted_*` in the source state): `~/.config/git/repos`,
+`~/.ssh/known_hosts`, and `~/.ssh/config`. The ssh public key `~/.ssh/1A2405C9E6BFBE34.pub` is stored as a plain file, since it is
 public. chezmoi decrypts them on every `apply`, so
 expect the YubiKey to ask for its PIN (and a touch, depending on how the key is set up). Add or update one with
 
@@ -166,7 +169,7 @@ files are readable in your home directory).
    public key, plain, from the live files:
 
         chezmoi -S ~/repos/chezmoi init
-        chezmoi add --encrypt ~/.config/git/repos ~/.ssh/known_hosts
+        chezmoi add --encrypt ~/.config/git/repos ~/.ssh/known_hosts ~/.ssh/config
         chezmoi add ~/.ssh/1A2405C9E6BFBE34.pub
 
 4. Remove what yadm generated, so chezmoi can write its own versions:

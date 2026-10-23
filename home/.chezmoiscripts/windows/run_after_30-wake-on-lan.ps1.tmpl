@@ -6,8 +6,13 @@ only wakes from a magic packet if (1) Fast Startup is off (otherwise a "shut
 down" is really a hybrid hibernate, which most network cards are not armed to
 wake from), (2) the adapter's power management accepts magic packets and the
 adapter is allowed to wake the computer, and (3) the driver's own wake setting
-is on. Driver property names differ by vendor, so this script enables whichever
-properties from a known list an adapter exposes. The BIOS/UEFI option (often
+is on. Two more settings keep the card listening while the computer is off: the
+adapter must accept only magic packets (not any traffic matching a wake
+pattern, which wakes the computer for no reason), and Energy Efficient Ethernet
+must be off, because in its low-power idle state some cards miss the magic
+packet. Driver property names differ by vendor, so this script enables whichever
+wake properties from a known list an adapter exposes, and finds Energy
+Efficient Ethernet by its standard keyword (*EEE). The BIOS/UEFI option (often
 called "Wake on LAN" or "Power On By PCI-E") cannot be set from Windows and must
 be enabled by hand. It requires an elevated session.
 #>
@@ -47,6 +52,28 @@ foreach ($a in $adapters) {
     } else {
         Set-NetAdapterPowerManagement -Name $n -WakeOnMagicPacket Enabled
         Write-Step "set  $n : WakeOnMagicPacket"
+    }
+
+    # accept only magic packets (the checkbox "Only allow a magic packet to wake the computer")
+    $pm = Get-NetAdapterPowerManagement -Name $n
+    if ($pm.WakeOnPattern -eq 'Disabled') {
+        Write-Step "ok   $n : only magic packets wake the computer"
+    } elseif ($pm.WakeOnPattern -eq 'Unsupported') {
+        Write-Warning "$n reports WakeOnPattern as unsupported"
+    } else {
+        Set-NetAdapterPowerManagement -Name $n -WakeOnPattern Disabled
+        Write-Step "set  $n : only magic packets wake the computer"
+    }
+
+    # turn Energy Efficient Ethernet off (the display name varies, but the keyword is standard)
+    $eee = Get-NetAdapterAdvancedProperty -Name $n -RegistryKeyword '*EEE' -ErrorAction SilentlyContinue
+    if ($null -eq $eee) {
+        Write-Step "ok   $n : no Energy Efficient Ethernet setting"
+    } elseif (@($eee.RegistryValue) -contains '0') {
+        Write-Step "ok   $n : Energy Efficient Ethernet is off"
+    } else {
+        Set-NetAdapterAdvancedProperty -Name $n -RegistryKeyword '*EEE' -RegistryValue 0
+        Write-Step "set  $n : Energy Efficient Ethernet off"
     }
 
     # allow the adapter to wake the computer

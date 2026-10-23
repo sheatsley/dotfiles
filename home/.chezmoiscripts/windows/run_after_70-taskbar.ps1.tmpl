@@ -8,7 +8,15 @@ C:\ProgramData\dotfiles\TaskbarLayout.xml and points the Start layout policy at
 it, and Explorer applies it at the next sign-in. The layout replaces the default
 pins, so only the listed apps are pinned (apps you pin yourself later are kept).
 Each wanted app is found by looking for its Start menu shortcut (desktop apps)
-and then for a packaged app of that name (Store apps). An app that is not
+and then for a packaged app of that name (Store apps). Windows shows a second
+icon when a running app's windows do not carry the same app user model ID
+(AUMID) as the pinned shortcut: an app can declare its own ID on its windows
+(Steam does, as Valve.Steam.Client), a shortcut can carry an ID the windows lack
+(the NVIDIA app's Start shortcut does), and a launcher can start a different
+program than the shortcut points to (Battle.net does). For those apps,
+rebuild: true in windows.yaml pins a fresh copy of the shortcut, made here in
+C:\ProgramData\dotfiles\Pins, that has no ID unless aumid gives one and points
+at target if that is given (found with diagnose-taskbar.ps1). An app that is not
 installed yet cannot be pinned, because Windows drops a pin it cannot resolve
 instead of leaving a placeholder; it is pinned in its place by the first apply
 after it is installed (and the next sign-in). Windows may honor this policy only
@@ -18,7 +26,7 @@ Assert-Admin
 
 $items = @(
 {{- range .windows.taskbar }}
-    @{ Id = {{ with index . "id" }}{{ squote . }}{{ else }}''{{ end }}; Match = {{ with index . "match" }}{{ squote . }}{{ else }}''{{ end }} }
+    @{ Id = {{ with index . "id" }}{{ squote . }}{{ else }}''{{ end }}; Match = {{ with index . "match" }}{{ squote . }}{{ else }}''{{ end }}; Rebuild = {{ if index . "rebuild" }}$true{{ else }}$false{{ end }}; Aumid = {{ with index . "aumid" }}{{ squote . }}{{ else }}''{{ end }}; Target = {{ with index . "target" }}{{ squote . }}{{ else }}''{{ end }} }
 {{- end }}
 )
 
@@ -47,6 +55,112 @@ function Find-StartLink {
     return $null
 }
 
+if (-not ('PinAumid' -as [type])) {
+    Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+
+public static class PinAumid
+{
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct PROPERTYKEY
+    {
+        public Guid fmtid;
+        public uint pid;
+    }
+
+    [ComImport, Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IPropertyStore
+    {
+        int GetCount(out uint count);
+        int GetAt(uint index, out PROPERTYKEY key);
+        int GetValue(ref PROPERTYKEY key, IntPtr value);
+        int SetValue(ref PROPERTYKEY key, IntPtr value);
+        int Commit();
+    }
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    static extern int SHGetPropertyStoreFromParsingName(string path, IntPtr bindContext, int flags, ref Guid riid, out IPropertyStore store);
+    [DllImport("ole32.dll")]
+    static extern int PropVariantClear(IntPtr value);
+
+    // writes System.AppUserModel.ID (the app user model ID) onto a shortcut file
+    public static void Set(string path, string aumid)
+    {
+        Guid iid = new Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99");
+        IPropertyStore store;
+        int hr = SHGetPropertyStoreFromParsingName(path, IntPtr.Zero, 2, ref iid, out store);
+        if (hr != 0) { throw new InvalidOperationException("could not open " + path + " (0x" + hr.ToString("X") + ")"); }
+        PROPERTYKEY key = new PROPERTYKEY();
+        key.fmtid = new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3");
+        key.pid = 5;
+        IntPtr value = Marshal.AllocCoTaskMem(24);
+        try
+        {
+            for (int i = 0; i < 24; i++) { Marshal.WriteByte(value, i, 0); }
+            // 31 is VT_LPWSTR; the string pointer sits after the 8-byte header
+            Marshal.WriteInt16(value, 31);
+            Marshal.WriteIntPtr(value, 8, Marshal.StringToCoTaskMemUni(aumid));
+            hr = store.SetValue(ref key, value);
+            if (hr != 0) { throw new InvalidOperationException("could not set the app ID (0x" + hr.ToString("X") + ")"); }
+            hr = store.Commit();
+            if (hr != 0) { throw new InvalidOperationException("could not save the app ID (0x" + hr.ToString("X") + ")"); }
+            PropVariantClear(value);
+        }
+        finally
+        {
+            Marshal.FreeCoTaskMem(value);
+        }
+    }
+}
+'@
+}
+
+function New-PinShortcut {
+    <#
+    This function makes a fresh copy of a Start menu shortcut to pin: same
+    program, arguments, and icon, but with no app ID unless one is given, and
+    optionally pointing at another program. Starting from a new file matters,
+    because a shortcut keeps the app ID it already has.
+
+    :param Source: the Start menu shortcut to copy
+    :param Aumid: the app ID to put on the copy (empty for none)
+    :param TargetGlob: a wildcard path to point the copy at (empty to keep the original program)
+    :return: the full path of the new shortcut
+    #>
+    param([string]$Source, [string]$Aumid, [string]$TargetGlob)
+    $wsh = New-Object -ComObject WScript.Shell
+    $from = $wsh.CreateShortcut($Source)
+    $target = $from.TargetPath
+    $folder = $from.WorkingDirectory
+    $icon = $from.IconLocation
+    if ($TargetGlob) {
+        $found = Get-ChildItem -Path $TargetGlob -File -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if ($found) {
+            $target = $found.FullName
+            $folder = $found.DirectoryName
+            $icon = ''
+        } else {
+            Write-Warning "Nothing matches '$TargetGlob'; the copy keeps pointing at $target"
+        }
+    }
+    if (-not $icon -or $icon -match '^,') { $icon = "$target,0" }
+
+    $dir = Join-Path $env:ProgramData 'dotfiles\Pins'
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    $path = Join-Path $dir (Split-Path -Leaf $Source)
+    if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force }
+    $to = $wsh.CreateShortcut($path)
+    $to.TargetPath = $target
+    $to.Arguments = $from.Arguments
+    $to.WorkingDirectory = $folder
+    $to.IconLocation = $icon
+    $to.Save()
+    if ($Aumid) { [PinAumid]::Set($path, $Aumid) }
+    return $path
+}
+
 function Find-PackagedApp {
     <#
     This function looks for a packaged (Store) app by its Start menu name.
@@ -69,6 +183,9 @@ foreach ($item in $items) {
         continue
     }
     $link = Find-StartLink $item.Match
+    if ($link -and $item.Rebuild) {
+        $link = New-PinShortcut $link $item.Aumid $item.Target
+    }
     if ($link) {
         $pins += ('        <taskbar:DesktopApp DesktopApplicationLinkPath="{0}"/>' -f [Security.SecurityElement]::Escape($link))
         Write-Step "pin  $($item.Match) -> $link"

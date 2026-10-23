@@ -1,0 +1,53 @@
+{{ template "ps-prelude.ps1" . }}
+{{- $minutes := .windows.sleep_after_minutes }}
+
+<#
+This script sets how long the computer idles before it sleeps, as set under
+sleep_after_minutes in .chezmoidata/windows.yaml (0 means never; this copy of
+the script was rendered with the value {{ $minutes }}).
+It changes the active power plan, for both mains power and battery, and also
+sets the idle time before hibernating to match when sleep is off, since a
+computer that hibernates after a while is still asleep. The display still turns
+off on its own timer, which this script leaves alone. It reads the current value
+first so that a rerun changes nothing. It requires an elevated session.
+#>
+Assert-Admin
+
+$minutes = {{ $minutes }}
+
+function Get-IdleTimeout {
+    <#
+    This function reads an idle timeout of the active power plan from powercfg.
+
+    :param Setting: the setting's alias (STANDBYIDLE for sleep, HIBERNATEIDLE for hibernate)
+    :param Column: the power source to read (AC or DC)
+    :return: the timeout in minutes, or nothing if powercfg's output could not be read
+    #>
+    param([string]$Setting, [string]$Column)
+    $out = powercfg /query SCHEME_CURRENT SUB_SLEEP $Setting | Out-String
+    if ($out -match "Current $Column Power Setting Index:\s*0x([0-9a-fA-F]+)") {
+        return [Convert]::ToInt32($Matches[1], 16) / 60
+    }
+    return $null
+}
+
+# the powercfg names for each timeout: sleep, then hibernate (hibernate only when sleep is never)
+$targets = @(
+    @{ Setting = 'STANDBYIDLE';   Change = 'standby-timeout';   Value = $minutes; Label = 'sleep' }
+)
+if ($minutes -eq 0) {
+    $targets += @{ Setting = 'HIBERNATEIDLE'; Change = 'hibernate-timeout'; Value = 0; Label = 'hibernate' }
+}
+
+foreach ($t in $targets) {
+    foreach ($column in 'AC', 'DC') {
+        $current = Get-IdleTimeout $t.Setting $column
+        if ($current -eq $t.Value) {
+            Write-Step "ok   $($t.Label) after $($t.Value) minutes ($column)"
+            continue
+        }
+        powercfg /change "$($t.Change)-$($column.ToLower())" $t.Value
+        if ($LASTEXITCODE -ne 0) { throw "powercfg could not set $($t.Label) ($column)" }
+        Write-Step "set  $($t.Label) after $($t.Value) minutes ($column)"
+    }
+}

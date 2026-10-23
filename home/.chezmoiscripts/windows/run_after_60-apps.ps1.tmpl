@@ -47,7 +47,8 @@ function Test-WingetInstalled {
 function Test-ProgramInstalled {
     <#
     This function looks for an installed program by its display name in the
-    uninstall registry keys.
+    uninstall registry keys, and then by its name in the Start menu (the indexed
+    apps, then the shortcut files).
 
     :param Pattern: a wildcard pattern for the display name
     :return: True if a matching program is installed
@@ -59,7 +60,23 @@ function Test-ProgramInstalled {
         'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
     )
     $hit = Get-ItemProperty -Path $keys -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like $Pattern }
-    return [bool]$hit
+    if ($hit) { return $true }
+
+    # some installers register no uninstall entry (or a different name), so the Start menu counts too:
+    # first its indexed apps, then the shortcut files themselves (the index does not list every shortcut)
+    $start = Get-StartApps -ErrorAction SilentlyContinue | Where-Object { $_.Name -like $Pattern }
+    if ($start) { return $true }
+    $roots = @(
+        (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs'),
+        (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs')
+    )
+    foreach ($root in $roots) {
+        if (-not (Test-Path -LiteralPath $root)) { continue }
+        $link = Get-ChildItem -LiteralPath $root -Recurse -Filter '*.lnk' -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.BaseName -like $Pattern -and $_.BaseName -notmatch 'uninstall' } | Select-Object -First 1
+        if ($link) { return $true }
+    }
+    return $false
 }
 
 # install what is missing

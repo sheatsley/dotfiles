@@ -5,6 +5,7 @@ windows:
     speed: 31   # repeat rate from 0 (about 2/s) to 31 (about 30/s); macOS: KeyRepeat
     delay: 0    # delay before repeat from 0 (250 ms) to 3 (1 s); macOS: InitialKeyRepeat
   theme: dark   # dark or light
+  sleep_after_minutes: 0    # idle time before the computer sleeps; 0 means never
   explorer:
     show_hidden: true       # show hidden files and folders
     show_extensions: true   # show filename extensions
@@ -21,17 +22,20 @@ windows:
     - 'shell:Downloads'
     - 'shell:My Video'      # Videos
   taskbar:                  # pinned after Start, in this order; id is a fixed Windows app, match is a wildcard on the Start menu name
+                            # rebuild: true pins a fresh copy of the Start shortcut with no app ID, for apps whose windows carry none
+                            # (otherwise Windows shows a second icon when the app runs); aumid adds the app ID the app's windows use,
+                            # and target points the copy at another program (a wildcard path; the newest file wins)
     - {id: Microsoft.Windows.Explorer}
     - {id: MSEdge}
     - {match: 'AutoHotkey*'}
     - {match: 'Airfoil Satellite*'}
-    - {match: 'Battle.net*'}
+    - {match: 'Battle.net*', rebuild: true, target: 'C:\Program Files (x86)\Battle.net\Battle.net.exe'}
     - {match: 'CrystalDiskMark*'}
     - {match: 'FanControl*'}
     - {match: 'Minecraft Launcher*'}
-    - {match: 'NVIDIA app*'}
+    - {match: 'NVIDIA app*', rebuild: true}
     - {match: 'Samsung Magician*'}
-    - {match: 'Steam*'}
+    - {match: 'Steam*', rebuild: true, aumid: 'Valve.Steam.Client'}
     - {match: 'WinDirStat*'}
     - {match: 'Xbox*'}
   taskbar_options:
@@ -62,6 +66,12 @@ windows:
     - name: VB-Audio Virtual Cable
       url: https://vb-audio.com/Cable/
       detect: 'VBCABLE*'
+  ssh_server:               # OpenSSH server, so VS Code (Remote - SSH) and ssh can reach this PC from the LAN
+    authorized_keys:        # public keys allowed to sign in (one per entry, from `ssh-add -L`); an empty list means nobody can
+      - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDdTSx3NEEvTY6QZYGJ0xjPW4MC7ZzNsH8OCN9VpSFRge4VJE23JiRlj0AnQHlkeAKLBY48IeLgQ/1JMBfBnpSaFtb172ckexrUVpmSA6ujsNIV4RECVgwCyJMY1IJCeu7KkWcJ+7mwkiBb0mS7qW/aDpNqxgmeHZ3uiNOiJqz0NsKbW1jJpVzuJ3gB4LaJNIgmXeOwTEfCYmDPVvpyQHu4fAPmZPkwOTOdaFSN0LJjTisV24aYHATfdIw26+H4rbaLa/e3p/1KQZRjEprGb/Xzm3EKALnIu8BwJHDLIT8kt1kDINFQEK4mfp/gs+mxGUbLuDngSbNdt8CaUZlB/bqyaO4rsxqq4a8DdiL5NVZluCwp/8u+TWJjAuP1b+qZPZvSbEiQuvXrJnr+WfsefzQNHju+I8JzRorpDTkALlPwzpiN/EtI+2G9RzvOePgXt7fJMDDxMzPxQy0MYFqwYtCr4FM5Q5ofNbZ/yeiUq7UTAno/qNRULXCpnWCdDWZMp/QvSsY2OmLb8NTCJwu1BFnXJacavgqFhoR1oYss52kIDpg0+uP6hyePWAAk5/a02UhEJqiSvODdtkhRVcx59Y0PYkQC0vptfwbsamscGimFwZCGIKVA7zuIqUOVQN5eK5876cphIecT3o3A4VZtVV2+6aw2lqGoMjwTGnTJqAhlnw== yubikey-rsa'
+      - 'ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJapCIOO+1t2wAHhMU2GZs42WYJFEKvFZT8oxvNzWls8xsj8Wbw/7gJ6dVVe/C00FOazMKyeOvrddWlRID+G0So= yubikey-ecdsa'
+    password_login: false   # allow passwords as well; false means keys only
+    shell: powershell       # what a session starts: powershell or cmd
   system_restore:           # restore points, so a bad driver or Windows update can be undone
     drive: 'C:\'
     max_size: 5%            # space the restore points may use, as a percent of the drive (or a size such as 100GB)

@@ -66,8 +66,11 @@ All the values are in `home/.chezmoidata/windows.yaml`; edit one and apply.
 | Keyboard repeat, theme, hidden files and extensions | `keyboard`, `theme`, `explorer` | applied now; some need a sign-out |
 | Install a program with winget | `apps` (`id`, `source` winget or msstore, optional `location`) | find the id with `winget search name`; a program that asks for an install root needs `location` |
 | A program winget cannot install | `manual_apps` (`url`, `detect`) | the URL is printed at each apply until a program matching `detect` is installed |
-| Taskbar order | `taskbar` | an id (fixed Windows app) or a `match` on the Start menu name; applies at the next sign-in |
+| Taskbar order | `taskbar` | an id (fixed Windows app) or a `match` on the Start menu name; applies at the next sign-in. If an app shows a second icon when it runs, run `diagnose-taskbar.ps1` with the app open and add `rebuild: true` (plus `aumid` or `target`) to its entry |
 | Taskbar buttons (combining, search box, Task View, Widgets) | `taskbar_options` | `combine` is always, when_full, or never; `search` is hidden, icon, or box; `task_view` and `widgets` are true or false (`widgets: false` removes the Widgets package, which Windows blocks any other way); applies at the next sign-in |
+| SSH access to the Windows PC (keys, passwords, shell) | `ssh_server` | `authorized_keys` takes public keys, one per entry (get yours from `ssh-add -L`); `password_login` is false for keys only; `shell` is powershell or cmd |
+| An ssh host (name, user) for the Mac | `~/.ssh/config` (stored encrypted) | add a `Host` block to the file, then `chezmoi re-add ~/.ssh/config`; VS Code's Remote - SSH lists these. If `~/.ssh/known_hosts` changes after a first connection, run `chezmoi re-add ~/.ssh/known_hosts` |
+| How long the PC idles before it sleeps | `sleep_after_minutes` | minutes; 0 means never |
 | Quick access pins | `quick_access` | `shell:` names, in order |
 | Repos to clone (public ones) | `repos` | cloned into `~/repos/<name>` anonymously, so no YubiKey |
 | The NAS share, user, or location name | `nas` | change `host` here and `NAS_HOST` in `setup.sh` together |
@@ -154,7 +157,7 @@ Notes:
   machine-wide on that PC can be read by its local administrators.
 - **Unattended reformat.** All three can be piped in: `printf '%s\n%s\n%s\n' "$WINPW" "$NASPW" "$TOKEN" | COMPUTER_NAME=CX4200A bash <(curl -L sheatsley.me/setup.sh)`
   (an empty line skips one).
-- **Mac secrets** are the encrypted files (`~/.config/git/repos` and `~/.ssh/known_hosts`; the ssh public key is stored plain). Edit
+- **Mac secrets** are the encrypted files (`~/.config/git/repos`, `~/.ssh/known_hosts`, and `~/.ssh/config`; the ssh public key is stored plain). Edit
   the file, then `chezmoi re-add <file>`; the YubiKey is needed to decrypt and encrypt.
 - **A new GPG key.** Change `FINGERPRINT` in `setup.sh` (`KEY_ID` is derived from it), `$KeyId` in `setup.ps1`, republish `public.asc` and `setup.sh`, and the `recipient` in
   `home/.chezmoi.toml.tmpl`, re-encrypt the Mac secrets (`re-add` each one), and sign the commit with the new key.
