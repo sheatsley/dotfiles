@@ -68,7 +68,9 @@ All the values are in `home/.chezmoidata/windows.yaml`; edit one and apply.
 | A program winget cannot install | `manual_apps` (`url`, `detect`, optional `path`) | the URL is printed at each apply until a program matching `detect` (an installed-programs or Start menu name) is installed, or the file at `path` exists |
 | Taskbar order | `taskbar` | an id (fixed Windows app) or a `match` on the Start menu name; applies at the next sign-in. If an app shows a second icon when it runs, run `diagnose-taskbar.ps1` with the app open and add `rebuild: true` (plus `aumid` or `target`) to its entry |
 | Taskbar buttons (combining, search box, Task View, Widgets) | `taskbar_options` | `combine` is always, when_full, or never; `search` is hidden, icon, or box; `task_view` and `widgets` are true or false (`widgets: false` removes the Widgets package, which Windows blocks any other way); applies at the next sign-in |
+| Sunshine's certificate (name, CA, root fingerprint, lifetime) | `sunshine_cert` | see "Sunshine's certificate"; an empty `root_fingerprint` turns it off |
 | SSH access to the Windows PC (keys, passwords, shell) | `ssh_server` | `authorized_keys` takes public keys, one per entry (get yours from `ssh-add -L`); `password_login` is false for keys only; `shell` is powershell or cmd |
+| The homelab root certificate (Mac) | `~/.config/homelab/root_ca.crt` (stored encrypted; the homelab tooling writes it) | `chezmoi add --encrypt ~/.config/homelab/root_ca.crt`, then apply; `85-homelab-root` trusts it. After a root rotation, delete the old root in Keychain Access when the apply warns about it |
 | An ssh host (name, user) for the Mac | `~/.ssh/config` (stored encrypted) | add a `Host` block to the file, then `chezmoi re-add ~/.ssh/config`; VS Code's Remote - SSH lists these. If `~/.ssh/known_hosts` changes after a first connection, run `chezmoi re-add ~/.ssh/known_hosts` |
 | How long the PC idles before it sleeps | `sleep_after_minutes` | minutes; 0 means never |
 | Quick access pins | `quick_access` | `shell:` names, in order |
@@ -136,6 +138,41 @@ chezmoi's scripts run elevated. To run something un-elevated, put it in `home/do
 without elevation, as `move-videos.ps1` does) or, from an elevated prompt,
 `runas /trustlevel:0x20000 "powershell.exe -NoProfile -NoExit -File C:\path\x.ps1"`.
 
+### Sunshine's certificate
+
+Sunshine has one certificate for two jobs: it secures the web UI, and Moonlight remembers it when you pair. So the
+script that manages it (`63-sunshine-cert`) treats it differently from every other homelab certificate. It comes
+from step-ca like the rest, but through its own `sunshine` provisioner, which allows a long lifetime for
+`cx4200a.lan` only: 820 days, just under the 825 days Apple accepts for any server certificate. A longer one would
+bring back the Safari warning the certificate exists to remove. It must have an RSA 2048-bit key, since Sunshine
+accepts nothing else. The key is made on this PC and never leaves it.
+
+A new certificate unpairs every Moonlight client, so the script never replaces it on its own while it still works.
+From 60 days before the end (`warn_days`), each apply prints the date. Renew when it suits you, in an elevated
+PowerShell:
+
+    $env:DOTFILES_RENEW_SUNSHINE = '1'; chezmoi apply --keep-going; Remove-Item Env:DOTFILES_RENEW_SUNSHINE
+
+Then re-pair each Moonlight client (the Macs, and anything else you stream to): open Moonlight, select the PC, and
+enter the PIN that Sunshine's web UI asks for under PIN. Expect to do this about every two years. The date that
+counts is the earliest in the chain: the certificate stops working when the step-ca intermediate that signed it
+expires, so one issued in the intermediate's last months is cut short, and the warning shows that earlier date.
+An expired certificate is replaced at the next apply without the variable, since there is nothing left to keep;
+re-pair afterwards.
+
+Windows learns which root to trust from `root_fingerprint` in `windows.yaml`, because it cannot decrypt the copy in
+this repo. The fingerprint is not secret (it is a hash of a public certificate), but it must be right: setup's
+signature check on the repo is what stops anyone from substituting their own. After a root rotation, put the new
+root's fingerprint there (`step certificate fingerprint root_ca.crt`, or the SHA-256 that `openssl x509 -noout
+-fingerprint -sha256` prints, with or without colons); the next apply sees that the certificate no longer chains to
+the root, requests a new one, and you re-pair.
+
+To request a certificate, step-ca checks over ACME that this PC answers for `cx4200a.lan` on port 80, so the
+script opens port 80 to the local network for the request only. Each apply also checks the live web UI against the
+root, the way a browser would, and warns if the chain is incomplete. Sunshine's own certificate stays in its
+`credentials` folder: to go back to it, delete the `cert` and `pkey` lines from
+`C:\Program Files\Sunshine\config\sunshine.conf`, set `root_fingerprint` to empty, and restart Sunshine (then re-pair).
+
 ## Rotating passwords and tokens
 
 None of these is in the repo, so rotating one never touches git. Each is a one-time setting that `setup.sh` skips
@@ -157,7 +194,7 @@ Notes:
   machine-wide on that PC can be read by its local administrators.
 - **Unattended reformat.** All three can be piped in: `printf '%s\n%s\n%s\n' "$WINPW" "$NASPW" "$TOKEN" | COMPUTER_NAME=CX4200A bash <(curl -L sheatsley.me/setup.sh)`
   (an empty line skips one).
-- **Mac secrets** are the encrypted files (`~/.config/git/repos`, `~/.ssh/known_hosts`, and `~/.ssh/config`; the ssh public key is stored plain). Edit
+- **Mac secrets** are the encrypted files (`~/.config/git/repos`, `~/.ssh/known_hosts`, `~/.ssh/config`, and `~/.config/homelab/root_ca.crt`; the ssh public key is stored plain). Edit
   the file, then `chezmoi re-add <file>`; the YubiKey is needed to decrypt and encrypt.
 - **A new GPG key.** Change `FINGERPRINT` in `setup.sh` (`KEY_ID` is derived from it), `$KeyId` in `setup.ps1`, republish `public.asc` and `setup.sh`, and the `recipient` in
   `home/.chezmoi.toml.tmpl`, re-encrypt the Mac secrets (`re-add` each one), and sign the commit with the new key.
@@ -206,6 +243,7 @@ Test the card steps on the real Mac, with the old setup still available as a fal
 | `KEY_URL` | both | testing: where `setup.sh` downloads the public key from (default `https://sheatsley.me/public.asc`); the key must still match the pinned `FINGERPRINT` |
 | `DOTFILES_NO_YUBIKEY=1` | macOS | testing on a machine that cannot see the YubiKey (e.g., a macOS VM): leaves out the encrypted files and skips `run_after_40-gpg-agent` and `run_after_50-repo-remote`; `run_after_60-git-repos` then skips itself because its list is encrypted. Not for real use |
 | `DOTFILES_FORCE_AUTOLOGON=1` | Windows | redo automatic sign-in even if it is already enabled (asks for the password again) |
+| `DOTFILES_RENEW_SUNSHINE=1` | Windows | request a new Sunshine certificate even though the current one still works (then re-pair Moonlight); see "Sunshine's certificate" |
 | `DOTFILES_FORCE_NAS=1` | Windows | replace the saved NAS password |
 | `DOTFILES_FORCE_INFLUX=1` | Windows | replace the OhmGraphite token |
 | `NAS_HOST` | Windows | NAS whose saved password `setup.sh` looks for (default `unas`); keep equal to `nas.host` in `windows.yaml` |

@@ -50,6 +50,7 @@ Machine configuration for two Macs (macbook, mini) and a Windows gaming PC, mana
    | `run_after_60-git-repos` | clones/pulls the repos in `~/.config/git/repos` into `~/repos` (`git_repos`) |
    | `run_onchange_after_70-macos-defaults` | the `defaults write` commands (`macos_defaults`) |
    | `run_after_80-firewall` | turns on the application firewall (asks for sudo only if it is off) |
+   | `run_after_85-homelab-root` | trusts the homelab root (`~/.config/homelab/root_ca.crt`) in the System keychain, and reports older roots of the same name |
 
 Not ported because chezmoi makes them unnecessary: `yadm alt` (replaced by the template and data files),
 `git-crypt unlock` (replaced by chezmoi's gpg encryption), the public-key task (done by `setup.sh`).
@@ -90,6 +91,7 @@ Re-run any time: every step probes first, so finished steps are skipped and fail
 | `60-apps` | winget installs from `apps` in `windows.yaml`; prints URLs for `manual_apps` |
 | `61-ohmgraphite` | downloads OhmGraphite to `C:\Apps\OhmGraphite` |
 | `62-ohmgraphite-service` | writes its config from the template, installs the service, starts it once the token is set |
+| `63-sunshine-cert` | gives Sunshine a long-lived certificate from the homelab CA and warns before it runs out (`sunshine_cert`) |
 | `65-repos` | clones/pulls the public repos in `windows.yaml` (e.g. `games`) into `~/repos` |
 | `70-taskbar` | pins the taskbar apps in order (a layout file plus the Start layout policy; applies at the next sign-in) |
 | `71-taskbar-options` | taskbar buttons: combine when full, hide search, Task View, and Widgets (removed with its package; applies at the next sign-in) |
@@ -138,8 +140,8 @@ once they exist the scripts exit without asking. Ways to supply the passwords:
 
 ## Secrets
 
-Three files are stored encrypted (`encrypted_*` in the source state): `~/.config/git/repos`,
-`~/.ssh/known_hosts`, and `~/.ssh/config`. The ssh public key `~/.ssh/1A2405C9E6BFBE34.pub` is stored as a plain file, since it is
+Four files are stored encrypted (`encrypted_*` in the source state): `~/.config/git/repos`,
+`~/.ssh/known_hosts`, `~/.ssh/config`, and the homelab root certificate `~/.config/homelab/root_ca.crt`. The ssh public key `~/.ssh/1A2405C9E6BFBE34.pub` is stored as a plain file, since it is
 public. chezmoi decrypts them on every `apply`, so
 expect the YubiKey to ask for its PIN (and a touch, depending on how the key is set up). Add or update one with
 

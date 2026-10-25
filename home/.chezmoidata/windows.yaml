@@ -58,6 +58,7 @@ windows:
     - {name: Samsung Magician,    id: XPDDT99J9GKB5C,                   source: msstore}
     - {name: Steam,               id: Valve.Steam,                      source: winget}
     - {name: Sunshine,            id: LizardByte.Sunshine,              source: winget}
+    - {name: step,                id: Smallstep.step,                   source: winget}
     - {name: WinDirStat,          id: WinDirStat.WinDirStat,            source: winget}
     - {name: Xbox,                id: 9MV0B5HZVK9Z,                     source: msstore}
   manual_apps:              # not available through winget; the URL is printed until detect matches an installed program
@@ -68,6 +69,13 @@ windows:
     - name: VB-Audio Virtual Cable
       url: https://vb-audio.com/Cable/
       detect: 'VBCABLE*'
+  sunshine_cert:            # Sunshine's certificate from the homelab CA (see "Sunshine's certificate" in MAINTENANCE.md)
+    name: cx4200a.lan       # the name it is for: this PC on the LAN
+    ca_url: https://step-ca.lan:9000
+    root_fingerprint: ''    # SHA-256 of the homelab root (`step certificate fingerprint root_ca.crt`); empty skips the certificate
+    provisioner: sunshine   # the step-ca ACME provisioner that allows long-lived certificates for this name only
+    lifetime: 19680h        # 820 days; Apple refuses server certificates valid for more than 825
+    warn_days: 60           # each apply warns once fewer days than this remain
   ssh_server:               # OpenSSH server, so VS Code (Remote - SSH) and ssh can reach this PC from the LAN
     authorized_keys:        # public keys allowed to sign in (one per entry, from `ssh-add -L`); an empty list means nobody can
       - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDdTSx3NEEvTY6QZYGJ0xjPW4MC7ZzNsH8OCN9VpSFRge4VJE23JiRlj0AnQHlkeAKLBY48IeLgQ/1JMBfBnpSaFtb172ckexrUVpmSA6ujsNIV4RECVgwCyJMY1IJCeu7KkWcJ+7mwkiBb0mS7qW/aDpNqxgmeHZ3uiNOiJqz0NsKbW1jJpVzuJ3gB4LaJNIgmXeOwTEfCYmDPVvpyQHu4fAPmZPkwOTOdaFSN0LJjTisV24aYHATfdIw26+H4rbaLa/e3p/1KQZRjEprGb/Xzm3EKALnIu8BwJHDLIT8kt1kDINFQEK4mfp/gs+mxGUbLuDngSbNdt8CaUZlB/bqyaO4rsxqq4a8DdiL5NVZluCwp/8u+TWJjAuP1b+qZPZvSbEiQuvXrJnr+WfsefzQNHju+I8JzRorpDTkALlPwzpiN/EtI+2G9RzvOePgXt7fJMDDxMzPxQy0MYFqwYtCr4FM5Q5ofNbZ/yeiUq7UTAno/qNRULXCpnWCdDWZMp/QvSsY2OmLb8NTCJwu1BFnXJacavgqFhoR1oYss52kIDpg0+uP6hyePWAAk5/a02UhEJqiSvODdtkhRVcx59Y0PYkQC0vptfwbsamscGimFwZCGIKVA7zuIqUOVQN5eK5876cphIecT3o3A4VZtVV2+6aw2lqGoMjwTGnTJqAhlnw== yubikey-rsa'

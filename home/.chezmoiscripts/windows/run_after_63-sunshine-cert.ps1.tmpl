@@ -1,0 +1,262 @@
+{{ template "ps-prelude.ps1" . }}
+{{- $c := .windows.sunshine_cert }}
+
+<#
+This script gives Sunshine a certificate from the homelab CA (step-ca), so that
+Safari on the Macs, which trust the homelab root, opens Sunshine's web UI
+without a warning. Sunshine uses one certificate for both its web UI and
+Moonlight pairing, it must have an RSA 2048-bit key, it reads it only when it
+starts, and every new certificate unpairs the Moonlight clients. So the
+certificate is long-lived ({{ $c.lifetime }}, just under the 825 days that Apple
+accepts for any server certificate) and is never replaced silently: each apply
+checks it and warns once fewer than {{ $c.warn_days }} days remain, and a new one
+is requested only when there is none, when it has expired (or no longer
+matches the name or the root), or when DOTFILES_RENEW_SUNSHINE=1 is set. The
+date that counts is the earliest in the chain, since the certificate stops
+working when the step-ca intermediate that signed it expires.
+
+A request goes like this: the root is downloaded from step-ca and checked
+against the fingerprint in windows.yaml (Windows cannot decrypt the copy in
+this repo); a new key is made on this PC and never leaves it (readable only by
+SYSTEM, which Sunshine runs as, and Administrators); step-ca's {{ $c.provisioner }}
+provisioner checks over ACME that this PC answers for {{ $c.name }} on port 80,
+which is opened to the local network only for the request; and Sunshine is
+pointed at the new files and restarted. Its own certificate stays in its
+credentials folder as a fallback. Every apply then checks the live web UI with
+step, which also proves Sunshine sends the intermediate along. With no
+fingerprint set, the script does nothing. It requires an elevated session.
+#>
+Assert-Admin
+
+$name = {{ squote $c.name }}
+$caUrl = {{ squote $c.ca_url }}
+$fingerprint = ({{ squote $c.root_fingerprint }} -replace '[:\s]', '').ToLower()
+$provisioner = {{ squote $c.provisioner }}
+$lifetime = {{ squote $c.lifetime }}
+$warnDays = {{ $c.warn_days }}
+$webPort = 47990   # Sunshine's web UI (its base port + 1)
+
+$dir = Join-Path $env:ProgramData 'dotfiles\sunshine'
+$crt = Join-Path $dir 'sunshine.crt'
+$key = Join-Path $dir 'sunshine.key'
+$root = Join-Path $dir 'root_ca.crt'
+$conf = Join-Path $env:ProgramFiles 'Sunshine\config\sunshine.conf'
+
+if (-not $fingerprint) {
+    Write-Step 'ok   no homelab root fingerprint in windows.yaml; skipped'
+    return
+}
+
+function Find-Step {
+    <#
+    This function finds step.exe, which winget may have installed during this
+    same apply (so it is not necessarily on this session's PATH yet).
+
+    :return: the path to step.exe, or nothing if it is not installed
+    #>
+    $cmd = Get-Command 'step.exe' -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+    $candidates = @(
+        (Join-Path $env:ProgramFiles 'Smallstep\step.exe'),
+        (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links\step.exe')
+    )
+    foreach ($c in $candidates) {
+        if (Test-Path -LiteralPath $c) { return $c }
+    }
+    $found = Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages') -Filter 'step.exe' -Recurse -File -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if ($found) { return $found.FullName }
+    return $null
+}
+
+function Invoke-Step {
+    <#
+    This function runs step and reports whether it succeeded. The error
+    preference is relaxed while it runs, since Windows PowerShell 5.1 can turn a
+    native program's progress output on stderr into a terminating error.
+
+    :param Arguments: the arguments for step
+    :return: True if step exited with status 0
+    #>
+    param([string[]]$Arguments)
+    $saved = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $script:step @Arguments | Out-Host
+        return ($LASTEXITCODE -eq 0)
+    } finally {
+        $ErrorActionPreference = $saved
+    }
+}
+
+function Get-Chain {
+    <#
+    This function reads the certificates in a PEM file (the certificate, then
+    the intermediate that signed it).
+
+    :param Path: the PEM file
+    :return: the certificates, in file order (nothing if the file is missing)
+    #>
+    param([string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) { return @() }
+    $text = [IO.File]::ReadAllText($Path)
+    $blocks = [regex]::Matches($text, '-----BEGIN CERTIFICATE-----(.+?)-----END CERTIFICATE-----', 'Singleline')
+    foreach ($b in $blocks) {
+        $bytes = [Convert]::FromBase64String(($b.Groups[1].Value -replace '\s', ''))
+        New-Object Security.Cryptography.X509Certificates.X509Certificate2 (, $bytes)
+    }
+}
+
+function Set-SunshineOption {
+    <#
+    This function sets one "key = value" line in sunshine.conf, replacing the
+    line if the key is there and appending it otherwise.
+
+    :param Key: the option name (e.g., cert)
+    :param Value: the value to set
+    :return: True if the file was changed
+    #>
+    param([string]$Key, [string]$Value)
+    $lines = @()
+    if (Test-Path -LiteralPath $conf) { $lines = @([IO.File]::ReadAllLines($conf)) }
+    $want = "$Key = $Value"
+    $pattern = '^\s*' + [regex]::Escape($Key) + '\s*='
+    $found = $false
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match $pattern) {
+            if ($lines[$i] -eq $want) { return $false }
+            $lines[$i] = $want
+            $found = $true
+            break
+        }
+    }
+    if (-not $found) { $lines += $want }
+    [IO.File]::WriteAllLines($conf, [string[]]$lines, (New-Object Text.UTF8Encoding $false))
+    return $true
+}
+
+# nothing to configure until Sunshine and step are installed (60-apps installs both)
+if (-not (Test-Path -LiteralPath $conf)) {
+    Write-Warning "Sunshine's config was not found at $conf; skipping its certificate."
+    return
+}
+$script:step = Find-Step
+if (-not $script:step) {
+    Write-Warning 'step (Smallstep.step) is not installed yet; skipping the Sunshine certificate.'
+    return
+}
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+# fetch the homelab root, checked against the fingerprint, unless the copy here already matches it
+function Test-Root {
+    <#
+    This function checks the saved root against the fingerprint in windows.yaml.
+
+    :return: the root certificate if it matches, otherwise nothing
+    #>
+    $cert = @(Get-Chain $root) | Select-Object -First 1
+    if (-not $cert) { return $null }
+    $hash = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($cert.RawData)) -replace '-', ''
+    if ($hash.ToLower() -eq $fingerprint) { return $cert }
+    return $null
+}
+$rootCert = Test-Root
+if (-not $rootCert) {
+    if (-not (Invoke-Step @('ca', 'root', $root, '--ca-url', $caUrl, '--fingerprint', $fingerprint, '--force'))) {
+        throw "Could not fetch the homelab root from $caUrl (is step-ca up, and is the fingerprint in windows.yaml right?)"
+    }
+
+    # step checks the fingerprint too; checking again here costs nothing
+    $rootCert = Test-Root
+    if (-not $rootCert) {
+        Remove-Item -LiteralPath $root -Force -ErrorAction SilentlyContinue
+        throw "The root that step-ca sent does not match the fingerprint in windows.yaml; nothing was changed."
+    }
+    Write-Step 'set  fetched the homelab root from step-ca'
+}
+
+# decide whether a new certificate is needed, using the earliest date in the chain
+$chain = @(Get-Chain $crt)
+$reason = $null
+if ($chain.Count -eq 0 -or -not (Test-Path -LiteralPath $key)) {
+    $reason = 'there is none'
+} else {
+    $leaf = $chain[0]
+    $ends = ($chain | Sort-Object NotAfter | Select-Object -First 1).NotAfter
+    $daysLeft = [int][Math]::Floor(($ends - (Get-Date)).TotalDays)
+    if ($ends -le (Get-Date)) {
+        $reason = "it expired on $($ends.ToString('yyyy-MM-dd'))"
+    } elseif ($leaf.GetNameInfo('DnsName', $false) -ne $name) {
+        $reason = "it is for $($leaf.GetNameInfo('DnsName', $false)), not $name"
+    } elseif ($chain.Count -gt 1 -and $chain[-1].Issuer -ne $rootCert.Subject) {
+        $reason = 'it does not chain to the current homelab root'
+    } elseif ($env:DOTFILES_RENEW_SUNSHINE -eq '1') {
+        $reason = 'DOTFILES_RENEW_SUNSHINE=1 is set'
+    } elseif ($daysLeft -lt $warnDays) {
+        Write-Warning ("Sunshine's certificate stops working on {0} ({1} days). Renew it when convenient with DOTFILES_RENEW_SUNSHINE=1 (see MAINTENANCE.md), then re-pair Moonlight." -f $ends.ToString('yyyy-MM-dd'), $daysLeft)
+    } else {
+        Write-Step ("ok   Sunshine certificate for $name, valid until {0} ({1} days)" -f $ends.ToString('yyyy-MM-dd'), $daysLeft)
+    }
+}
+
+if ($chain.Count -eq 1) {
+    Write-Warning "$crt holds no intermediate, so browsers may not trust Sunshine's web UI."
+}
+
+# request a new certificate: a new key on this PC, port 80 open to the LAN only for the ACME check
+$issued = $false
+if ($reason) {
+    Write-Step "set  requesting a Sunshine certificate for $name because $reason"
+    $rule = 'dotfiles-acme-http'
+    Remove-NetFirewallRule -Name $rule -ErrorAction SilentlyContinue
+    New-NetFirewallRule -Name $rule -DisplayName 'dotfiles: ACME check for the Sunshine certificate' -Direction Inbound `
+        -Protocol TCP -LocalPort 80 -Action Allow -RemoteAddress LocalSubnet -Profile Any | Out-Null
+    try {
+        $ok = Invoke-Step @('ca', 'certificate', $name, "$crt.new", "$key.new",
+            '--provisioner', $provisioner, '--ca-url', $caUrl, '--root', $root,
+            '--kty', 'RSA', '--size', '2048', '--not-after', $lifetime, '--force')
+    } finally {
+        Remove-NetFirewallRule -Name $rule -ErrorAction SilentlyContinue
+    }
+    if (-not $ok) {
+        Remove-Item -LiteralPath "$crt.new", "$key.new" -Force -ErrorAction SilentlyContinue
+        throw "step-ca did not issue the certificate (check that the $provisioner provisioner exists and that $name resolves to this PC)"
+    }
+
+    # restrict the key, keep the previous pair, and move the new one into place
+    icacls.exe "$key.new" /inheritance:r /grant 'SYSTEM:(R)' /grant 'BUILTIN\Administrators:(F)' | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "icacls could not restrict $key.new (exit $LASTEXITCODE)" }
+    foreach ($f in $crt, $key) {
+        if (Test-Path -LiteralPath $f) { Move-Item -LiteralPath $f -Destination "$f.bak" -Force }
+        Move-Item -LiteralPath "$f.new" -Destination $f -Force
+    }
+    $issued = $true
+    Write-Step 'set  new Sunshine certificate installed'
+}
+
+# point Sunshine at the files (forward slashes, which Windows accepts) and restart it if anything changed
+$changed = $issued
+if (Set-SunshineOption 'cert' ($crt -replace '\\', '/')) { $changed = $true }
+if (Set-SunshineOption 'pkey' ($key -replace '\\', '/')) { $changed = $true }
+$service = Get-Service -Name 'SunshineService' -ErrorAction SilentlyContinue
+if (-not $service) { $service = Get-Service | Where-Object { $_.DisplayName -like 'Sunshine*' } | Select-Object -First 1 }
+if ($changed) {
+    if ($service) {
+        Restart-Service -InputObject $service -Force
+        Write-Step 'set  restarted Sunshine'
+        Start-Sleep -Seconds 5
+    } else {
+        Write-Warning 'The Sunshine service was not found; restart Sunshine to load its certificate.'
+    }
+    Write-Warning 'Sunshine has a new certificate: re-pair Moonlight on every client (see MAINTENANCE.md).'
+}
+
+# check the live web UI the way a browser would: trusted chain, intermediate included, right name
+if ($service) { $service.Refresh() }
+if ($service -and $service.Status -eq 'Running') {
+    if (Invoke-Step @('certificate', 'verify', "https://$($name):$webPort", '--roots', $root, '--host', $name)) {
+        Write-Step "ok   https://$($name):$webPort presents a trusted chain"
+    } else {
+        Write-Warning "https://$($name):$webPort did not verify against the homelab root (is Sunshine running, and does it send the intermediate?)"
+    }
+}
