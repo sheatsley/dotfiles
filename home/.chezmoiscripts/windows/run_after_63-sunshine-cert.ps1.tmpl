@@ -76,13 +76,18 @@ function Invoke-Step {
     native program's progress output on stderr into a terminating error.
 
     :param Arguments: the arguments for step
+    :param Quiet: discard step's output (for attempts expected to fail, such as checks while Sunshine restarts)
     :return: True if step exited with status 0
     #>
-    param([string[]]$Arguments)
+    param([string[]]$Arguments, [switch]$Quiet)
     $saved = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     try {
-        & $script:step @Arguments | Out-Host
+        if ($Quiet) {
+            & $script:step @Arguments 2>&1 | Out-Null
+        } else {
+            & $script:step @Arguments | Out-Host
+        }
         return ($LASTEXITCODE -eq 0)
     } finally {
         $ErrorActionPreference = $saved
@@ -257,7 +262,7 @@ if ($service -and $service.Status -eq 'Running') {
     $verified = $false
     for ($try = 1; $try -le 6 -and -not $verified; $try++) {
         if ($try -gt 1) { Start-Sleep -Seconds 5 }
-        $verified = Invoke-Step @('certificate', 'verify', "https://$($name):$webPort", '--roots', $root, '--host', $name)
+        $verified = Invoke-Step @('certificate', 'verify', "https://$($name):$webPort", '--roots', $root, '--host', $name) -Quiet:($try -lt 6)
     }
     if ($verified) {
         Write-Step "ok   https://$($name):$webPort presents a trusted chain"

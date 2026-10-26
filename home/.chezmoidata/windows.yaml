@@ -69,6 +69,8 @@ windows:
     - name: VB-Audio Virtual Cable
       url: https://vb-audio.com/Cable/
       detect: 'VBCABLE*'
+  sunshine_options:         # lines set in Sunshine's config (sunshine.conf); Sunshine restarts when one changes
+    csrf_allowed_origins: https://cx4200a.lan   # lets the web UI accept changes when opened by name from another computer (comma-separated https:// origins)
   sunshine_cert:            # Sunshine's certificate from the homelab CA (see "Sunshine's certificate" in MAINTENANCE.md)
     name: cx4200a.lan       # the name it is for: this PC on the LAN
     ca_url: https://step-ca.lan:9000
