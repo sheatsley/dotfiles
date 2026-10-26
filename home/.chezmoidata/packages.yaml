@@ -14,6 +14,7 @@ packages:
       - { name: "pinentry-mac", desc: "Pinentry for GPG on Mac" }
       - { name: "python", desc: "Interpreted, interactive, object-oriented programming language" }
       - { name: "chezmoi", desc: "Manage your dotfiles across multiple diverse machines, securely" }
+      - { name: "wakeonlan", desc: "Sends magic packets to wake up network-devices" }
     casks:
       - { name: "discord", desc: "Voice and text chat software" }
       - { name: "firefox", desc: "Web browser" }
