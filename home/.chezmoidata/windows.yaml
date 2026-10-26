@@ -72,9 +72,9 @@ windows:
   sunshine_options:         # lines set in Sunshine's config (sunshine.conf); Sunshine restarts when one changes
     csrf_allowed_origins: https://cx4200a.lan   # lets the web UI accept changes when opened by name from another computer (comma-separated https:// origins)
   sunshine_cert:            # Sunshine's certificate from the homelab CA (see "Sunshine's certificate" in MAINTENANCE.md)
+    enabled: true           # false leaves Sunshine's certificate alone (see MAINTENANCE.md to go back to its own)
     name: cx4200a.lan       # the name it is for: this PC on the LAN
     ca_url: https://step-ca.lan:9000
-    root_fingerprint: '3e3fc974db0ca86ff46b46536c174c9ee710c686d8f3e35535c8cec06fa63760'    # SHA-256 of the homelab root (`step certificate fingerprint root_ca.crt`); empty skips the certificate
     provisioner: sunshine   # the step-ca ACME provisioner that allows long-lived certificates for this name only
     lifetime: 19680h        # 820 days; Apple refuses server certificates valid for more than 825
     warn_days: 60           # each apply warns once fewer days than this remain
@@ -96,4 +96,4 @@ windows:
     influx2:
       address: https://influxdb.lan:8086
       org: sheatsley-systems
-      bucket: proxmox
+      bucket: windows

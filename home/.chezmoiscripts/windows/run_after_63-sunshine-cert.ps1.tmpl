@@ -15,22 +15,22 @@ matches the name or the root), or when DOTFILES_RENEW_SUNSHINE=1 is set. The
 date that counts is the earliest in the chain, since the certificate stops
 working when the step-ca intermediate that signed it expires.
 
-A request goes like this: the root is downloaded from step-ca and checked
-against the fingerprint in windows.yaml (Windows cannot decrypt the copy in
-this repo); a new key is made on this PC and never leaves it (readable only by
+A request goes like this: step trusts step-ca through the homelab root that
+the dotfiles copy to ~/.config/homelab/root_ca.crt (the signed commit vouches
+for it); a new key is made on this PC and never leaves it (readable only by
 SYSTEM, which Sunshine runs as, and Administrators); step-ca's {{ $c.provisioner }}
 provisioner checks over ACME that this PC answers for {{ $c.name }} on port 80,
 which is opened to the local network only for the request; and Sunshine is
 pointed at the new files and restarted. Its own certificate stays in its
 credentials folder as a fallback. Every apply then checks the live web UI with
-step, which also proves Sunshine sends the intermediate along. With no
-fingerprint set, the script does nothing. It requires an elevated session.
+step, which also proves Sunshine sends the intermediate along. Without the
+root file, or with enabled set to false in windows.yaml, the script does
+nothing. It requires an elevated session.
 #>
 Assert-Admin
 
 $name = {{ squote $c.name }}
 $caUrl = {{ squote $c.ca_url }}
-$fingerprint = ({{ squote $c.root_fingerprint }} -replace '[:\s]', '').ToLower()
 $provisioner = {{ squote $c.provisioner }}
 $lifetime = {{ squote $c.lifetime }}
 $warnDays = {{ $c.warn_days }}
@@ -39,11 +39,15 @@ $webPort = 47990   # Sunshine's web UI (its base port + 1)
 $dir = Join-Path $env:ProgramData 'dotfiles\sunshine'
 $crt = Join-Path $dir 'sunshine.crt'
 $key = Join-Path $dir 'sunshine.key'
-$root = Join-Path $dir 'root_ca.crt'
+$root = Join-Path $HOME '.config\homelab\root_ca.crt'
 $conf = Join-Path $env:ProgramFiles 'Sunshine\config\sunshine.conf'
 
-if (-not $fingerprint) {
-    Write-Step 'ok   no homelab root fingerprint in windows.yaml; skipped'
+{{- if not $c.enabled }}
+Write-Step 'ok   sunshine_cert.enabled is false; Sunshine keeps its own certificate'
+return
+{{- end }}
+if (-not (Test-Path -LiteralPath $root)) {
+    Write-Step 'ok   no homelab root at ~/.config/homelab/root_ca.crt; skipped'
     return
 }
 
@@ -152,33 +156,8 @@ if (-not $script:step) {
 }
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
-# fetch the homelab root, checked against the fingerprint, unless the copy here already matches it
-function Test-Root {
-    <#
-    This function checks the saved root against the fingerprint in windows.yaml.
-
-    :return: the root certificate if it matches, otherwise nothing
-    #>
-    $cert = @(Get-Chain $root) | Select-Object -First 1
-    if (-not $cert) { return $null }
-    $hash = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($cert.RawData)) -replace '-', ''
-    if ($hash.ToLower() -eq $fingerprint) { return $cert }
-    return $null
-}
-$rootCert = Test-Root
-if (-not $rootCert) {
-    if (-not (Invoke-Step @('ca', 'root', $root, '--ca-url', $caUrl, '--fingerprint', $fingerprint, '--force'))) {
-        throw "Could not fetch the homelab root from $caUrl (is step-ca up, and is the fingerprint in windows.yaml right?)"
-    }
-
-    # step checks the fingerprint too; checking again here costs nothing
-    $rootCert = Test-Root
-    if (-not $rootCert) {
-        Remove-Item -LiteralPath $root -Force -ErrorAction SilentlyContinue
-        throw "The root that step-ca sent does not match the fingerprint in windows.yaml; nothing was changed."
-    }
-    Write-Step 'set  fetched the homelab root from step-ca'
-}
+# the homelab root, which the certificate must chain to
+$rootCert = @(Get-Chain $root) | Select-Object -First 1
 
 # decide whether a new certificate is needed, using the earliest date in the chain
 $chain = @(Get-Chain $crt)

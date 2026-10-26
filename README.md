@@ -13,7 +13,7 @@ Machine configuration for two Macs (macbook, mini) and a Windows gaming PC, mana
                              (Windows) enable automatic sign-in, save the NAS password, set the OhmGraphite
                              token; each reads a line of stdin
     brew-sync                adds the Homebrew packages installed on a Mac to .chezmoidata/packages.yaml (alias in .zshrc)
-    import-homelab-root      brings a homelab root certificate into the dotfiles (encrypted copy and the Windows fingerprint); called by the homelab's bin/init-root
+    import-homelab-root      copies a homelab root certificate into the dotfiles (home/dot_config/homelab); called by the homelab's bin/init-root
     diagnose-taskbar.ps1     prints the app IDs of pinned shortcuts and running windows (to debug duplicated taskbar icons; not part of apply)
     MAINTENANCE.md           how to change things: which file to edit and which command to run
     .gitattributes           pins LF line endings (Git for Windows would otherwise convert to CRLF)
@@ -78,6 +78,7 @@ Re-run any time: every step probes first, so finished steps are skipped and fail
 |---|---|
 | `05-execution-policy` | lets PowerShell run local scripts (sets the current user to RemoteSigned if nothing sets a policy) |
 | `10-network-private` | sets connected networks to Private |
+| `12-homelab-root` | trusts the homelab root (`~/.config/homelab/root_ca.crt`) in the machine-wide root store, then removes the previous root after a rotation |
 | `20-keyboard`, `21-dark-mode`, `22-explorer` | keyboard repeat, dark theme, show hidden files and extensions |
 | `23-desktop` | solid black background, hides the built-in desktop icons |
 | `25-quick-access` | pins Recycle Bin, Desktop, Documents, Downloads, Videos, in that order |
@@ -142,8 +143,9 @@ once they exist the scripts exit without asking. Ways to supply the passwords:
 
 ## Secrets
 
-Four files are stored encrypted (`encrypted_*` in the source state): `~/.config/git/repos`,
-`~/.ssh/known_hosts`, `~/.ssh/config`, and the homelab root certificate `~/.config/homelab/root_ca.crt`. The ssh public key `~/.ssh/1A2405C9E6BFBE34.pub` is stored as a plain file, since it is
+Three files are stored encrypted (`encrypted_*` in the source state): `~/.config/git/repos`,
+`~/.ssh/known_hosts`, and `~/.ssh/config`. The homelab root certificate `~/.config/homelab/root_ca.crt` is stored as a plain
+file, since a root certificate is public by design and the signed commit vouches for it. The ssh public key `~/.ssh/1A2405C9E6BFBE34.pub` is stored as a plain file, since it is
 public. chezmoi decrypts them on every `apply`, so
 expect the YubiKey to ask for its PIN (and a touch, depending on how the key is set up). Add or update one with
 

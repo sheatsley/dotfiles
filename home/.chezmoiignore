@@ -27,8 +27,6 @@
 .config/git/**
 .config/homebrew
 .config/homebrew/**
-.config/homelab
-.config/homelab/**
 .config/hyperion
 .config/hyperion/**
 .config/pip

@@ -1,0 +1,46 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script makes Windows trust the homelab's root certificate, so that
+everything relying on Windows' own trust accepts the .lan services: OhmGraphite
+sending to InfluxDB over HTTPS, Edge and Chrome on this PC, and PowerShell's
+web requests. The root is ~/.config/homelab/root_ca.crt, which chezmoi copies
+from the repo (import-homelab-root puts it there, and the signed commit vouches
+for it); without it, nothing happens. It goes into the machine-wide root store
+(Cert:\LocalMachine\Root) unless it is already there. After a root rotation, the
+previous root is removed: only self-signed certificates with exactly the same
+subject as the current root and a different thumbprint, and only once the
+current root is in the store, so there is never a moment with no homelab root.
+The root is name constrained to .lan names and private addresses, so trusting it
+cannot make Windows accept an outside site. It requires an elevated session.
+#>
+Assert-Admin
+
+$file = Join-Path $HOME '.config\homelab\root_ca.crt'
+$store = 'Cert:\LocalMachine\Root'
+
+if (-not (Test-Path -LiteralPath $file)) {
+    Write-Step 'ok   no homelab root at ~/.config/homelab/root_ca.crt; skipped'
+    return
+}
+$root = New-Object Security.Cryptography.X509Certificates.X509Certificate2 $file
+
+# add the root unless the store already has it
+if (Test-Path -LiteralPath (Join-Path $store $root.Thumbprint)) {
+    Write-Step "ok   homelab root is trusted ($($root.Subject))"
+} else {
+    Import-Certificate -FilePath $file -CertStoreLocation $store | Out-Null
+    if (-not (Test-Path -LiteralPath (Join-Path $store $root.Thumbprint))) {
+        throw "Windows still does not list the homelab root in $store after importing it."
+    }
+    Write-Step "set  trusted the homelab root ($($root.Subject), thumbprint $($root.Thumbprint))"
+}
+
+# remove previous roots: same subject, self-signed, different thumbprint
+$previous = @(Get-ChildItem -Path $store | Where-Object {
+    $_.Subject -eq $root.Subject -and $_.Issuer -eq $_.Subject -and $_.Thumbprint -ne $root.Thumbprint
+})
+foreach ($old in $previous) {
+    Remove-Item -LiteralPath (Join-Path $store $old.Thumbprint) -Force
+    Write-Step "set  removed the previous homelab root (thumbprint $($old.Thumbprint))"
+}

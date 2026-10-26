@@ -69,9 +69,9 @@ All the values are in `home/.chezmoidata/windows.yaml`; edit one and apply.
 | Taskbar order | `taskbar` | an id (fixed Windows app) or a `match` on the Start menu name; applies at the next sign-in. If an app shows a second icon when it runs, run `diagnose-taskbar.ps1` with the app open and add `rebuild: true` (plus `aumid` or `target`) to its entry |
 | Taskbar buttons (combining, search box, Task View, Widgets) | `taskbar_options` | `combine` is always, when_full, or never; `search` is hidden, icon, or box; `task_view` and `widgets` are true or false (`widgets: false` removes the Widgets package, which Windows blocks any other way); applies at the next sign-in |
 | A Sunshine setting (anything in its `sunshine.conf`) | `sunshine_options` | one `key: value` per option, as named in Sunshine's configuration docs; apply restarts Sunshine when one changes. Leave `cert` and `pkey` to `sunshine_cert` |
-| Sunshine's certificate (name, CA, root fingerprint, lifetime) | `sunshine_cert` | see "Sunshine's certificate"; an empty `root_fingerprint` turns it off |
+| Sunshine's certificate (on or off, name, CA, lifetime) | `sunshine_cert` | see "Sunshine's certificate" |
 | SSH access to the Windows PC (keys, passwords, shell) | `ssh_server` | `authorized_keys` takes public keys, one per entry (get yours from `ssh-add -L`); `password_login` is false for keys only; `shell` is powershell or cmd |
-| The homelab root certificate | `~/.config/homelab/root_ca.crt` (stored encrypted) and `root_fingerprint` in `windows.yaml` | the homelab's `bin/init-root` runs `import-homelab-root <root_ca.crt>`, which updates both (run it by hand the same way); commit as it prints, then apply on each Mac (`85-homelab-root` trusts the new root and removes the previous one) and on Windows |
+| The homelab root certificate | `home/dot_config/homelab/root_ca.crt` (plain; a root certificate is public) | the homelab's `bin/init-root` runs `import-homelab-root <root_ca.crt>`, which copies it in (run it by hand the same way); commit as it prints, then apply on each Mac (`85-homelab-root`) and on Windows (`12-homelab-root`): each trusts the new root and removes the previous one |
 | An ssh host (name, user) for the Mac | `~/.ssh/config` (stored encrypted) | add a `Host` block to the file, then `chezmoi re-add ~/.ssh/config`; VS Code's Remote - SSH lists these. If `~/.ssh/known_hosts` changes after a first connection, run `chezmoi re-add ~/.ssh/known_hosts` |
 | How long the PC idles before it sleeps | `sleep_after_minutes` | minutes; 0 means never |
 | Quick access pins | `quick_access` | `shell:` names, in order |
@@ -161,18 +161,16 @@ expires, so one issued in the intermediate's last months is cut short, and the w
 An expired certificate is replaced at the next apply without the variable, since there is nothing left to keep;
 re-pair afterwards.
 
-Windows learns which root to trust from `root_fingerprint` in `windows.yaml`, because it cannot decrypt the copy in
-this repo. The fingerprint is not secret (it is a hash of a public certificate), but it must be right: setup's
-signature check on the repo is what stops anyone from substituting their own. `import-homelab-root` keeps it in step
-with the encrypted root (the homelab's `bin/init-root` calls it after creating or rotating the root); you only
-commit what it prints. After a rotation, the next apply on Windows sees that the certificate no longer chains to
-the root, requests a new one, and you re-pair.
+step trusts step-ca through the homelab root that the dotfiles copy to `~/.config/homelab/root_ca.crt`, the same
+file both Macs and Windows trust; your signed commit is what vouches for it. After a root rotation
+(`import-homelab-root`, then apply), the certificate no longer chains to the root, so the next apply requests a new
+one, and you re-pair.
 
 To request a certificate, step-ca checks over ACME that this PC answers for `cx4200a.lan` on port 80, so the
 script opens port 80 to the local network for the request only. Each apply also checks the live web UI against the
 root, the way a browser would, and warns if the chain is incomplete. Sunshine's own certificate stays in its
 `credentials` folder: to go back to it, delete the `cert` and `pkey` lines from
-`C:\Program Files\Sunshine\config\sunshine.conf`, set `root_fingerprint` to empty, and restart Sunshine (then re-pair).
+`C:\Program Files\Sunshine\config\sunshine.conf`, set `sunshine_cert.enabled` to false, and restart Sunshine (then re-pair).
 
 ## Rotating passwords and tokens
 
@@ -195,7 +193,7 @@ Notes:
   machine-wide on that PC can be read by its local administrators.
 - **Unattended reformat.** All three can be piped in: `printf '%s\n%s\n%s\n' "$WINPW" "$NASPW" "$TOKEN" | COMPUTER_NAME=CX4200A bash <(curl -L sheatsley.me/setup.sh)`
   (an empty line skips one).
-- **Mac secrets** are the encrypted files (`~/.config/git/repos`, `~/.ssh/known_hosts`, `~/.ssh/config`, and `~/.config/homelab/root_ca.crt`; the ssh public key is stored plain). Edit
+- **Mac secrets** are the encrypted files (`~/.config/git/repos`, `~/.ssh/known_hosts`, and `~/.ssh/config`; the ssh public key and the homelab root are stored plain). Edit
   the file, then `chezmoi re-add <file>`; the YubiKey is needed to decrypt and encrypt.
 - **A new GPG key.** Change `FINGERPRINT` in `setup.sh` (`KEY_ID` is derived from it), `$KeyId` in `setup.ps1`, republish `public.asc` and `setup.sh`, and the `recipient` in
   `home/.chezmoi.toml.tmpl`, re-encrypt the Mac secrets (`re-add` each one), and sign the commit with the new key.

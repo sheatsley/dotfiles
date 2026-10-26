@@ -3,9 +3,9 @@
 
 # This script makes macOS trust the homelab's root certificate, so that Safari
 # accepts the .lan services (the Proxmox web UI, Sunshine, and so on) without a
-# warning. The root is ~/.config/homelab/root_ca.crt, which chezmoi decrypts
-# from the repo (import-homelab-root puts it there); without it, as on a
-# machine set up with DOTFILES_NO_YUBIKEY=1, nothing happens. Trust is checked
+# warning. The root is ~/.config/homelab/root_ca.crt, which chezmoi copies
+# from the repo (import-homelab-root puts it there, and the signed commit
+# vouches for it); without it, nothing happens. Trust is checked
 # first, so once the root is trusted nothing changes and no password is asked
 # for; otherwise the root is added to the System keychain as a trusted root,
 # which takes sudo, and macOS may also ask for your password or Touch ID to
