@@ -72,7 +72,7 @@ windows:
   sunshine_cert:            # Sunshine's certificate from the homelab CA (see "Sunshine's certificate" in MAINTENANCE.md)
     name: cx4200a.lan       # the name it is for: this PC on the LAN
     ca_url: https://step-ca.lan:9000
-    root_fingerprint: ''    # SHA-256 of the homelab root (`step certificate fingerprint root_ca.crt`); empty skips the certificate
+    root_fingerprint: '3e3fc974db0ca86ff46b46536c174c9ee710c686d8f3e35535c8cec06fa63760'    # SHA-256 of the homelab root (`step certificate fingerprint root_ca.crt`); empty skips the certificate
     provisioner: sunshine   # the step-ca ACME provisioner that allows long-lived certificates for this name only
     lifetime: 19680h        # 820 days; Apple refuses server certificates valid for more than 825
     warn_days: 60           # each apply warns once fewer days than this remain
