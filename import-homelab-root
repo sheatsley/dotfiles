@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# This script brings a homelab root certificate into the dotfiles, for the
+# homelab's bin/init-root (after it creates or rotates the root) or for running
+# by hand. It does three things: it copies the certificate to
+# ~/.config/homelab/root_ca.crt, stores that file encrypted in this repo with
+# `chezmoi add --encrypt`, and sets root_fingerprint in
+# home/.chezmoidata/windows.yaml to the certificate's SHA-256 fingerprint
+# (lowercase hex), which the Windows PC uses to fetch and check the root since
+# it cannot decrypt the copy. It does not commit; it prints the signed commit to
+# run. It is safe to rerun: when the copy, the encrypted file, and the
+# fingerprint already match the certificate, it says so and changes nothing.
+# The next `chezmoi apply` on each Mac then trusts the new root and removes the
+# old one from the System keychain (run_after_85-homelab-root). It runs with the
+# bash that ships with macOS (3.2), and needs openssl and chezmoi.
+#
+# usage: import-homelab-root <path-to-root_ca.crt>
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+YAML="$REPO/home/.chezmoidata/windows.yaml"
+TARGET="$HOME/.config/homelab/root_ca.crt"
+
+log() {
+  # This function prints a progress line.
+  #
+  # :param $*: the text to print
+  # :return: None
+  printf '%s\n' "$*"
+}
+
+die() {
+  # This function prints an error to stderr and exits with status 1.
+  #
+  # :param $*: the message to print
+  # :return: does not return
+  printf 'ERROR: %s\n' "$*" >&2
+  exit 1
+}
+
+# check the argument: a readable certificate that is a self-signed CA
+[[ $# -eq 1 ]] || die "usage: import-homelab-root <path-to-root_ca.crt>"
+src="$1"
+[[ -f "$src" ]] || die "$src does not exist"
+openssl x509 -in "$src" -noout >/dev/null 2>&1 || die "$src is not a PEM certificate"
+openssl x509 -in "$src" -noout -text | grep -q 'CA:TRUE' || die "$src is not a CA certificate"
+subject="$(openssl x509 -in "$src" -noout -subject)"
+issuer="$(openssl x509 -in "$src" -noout -issuer)"
+[[ "${subject#subject=}" == "${issuer#issuer=}" ]] || die "$src is not self-signed, so it is not a root"
+
+# make sure chezmoi works on this repo, so the encrypted copy lands here
+source_dir="$(chezmoi source-path)" || die "chezmoi is not set up (run setup.sh first)"
+[[ "$source_dir" == "$REPO/home" ]] || die "chezmoi's source is $source_dir, not $REPO/home; run the copy of this script in that repo"
+
+# the fingerprint in the form windows.yaml keeps it: lowercase hex, no colons
+fp="$(openssl x509 -in "$src" -noout -fingerprint -sha256 | cut -d= -f2 | tr -d ':' | tr 'A-F' 'a-f')"
+[[ "${#fp}" -eq 64 ]] || die "could not read the SHA-256 fingerprint of $src"
+[[ "$(grep -c '^ *root_fingerprint:' "$YAML")" -eq 1 ]] || die "expected one root_fingerprint line in $YAML"
+
+# what is already in place
+same_file=0
+if [[ -f "$TARGET" ]] && cmp -s "$src" "$TARGET"; then same_file=1; fi
+same_source=0
+if [[ $same_file -eq 1 ]] && chezmoi verify "$TARGET" >/dev/null 2>&1; then same_source=1; fi
+same_fp=0
+if grep -q "^ *root_fingerprint: '$fp'" "$YAML"; then same_fp=1; fi
+if [[ $same_file -eq 1 && $same_source -eq 1 && $same_fp -eq 1 ]]; then
+  log "ok   the dotfiles already hold this root (SHA-256 $fp); nothing changed"
+  exit 0
+fi
+
+# copy the certificate into place and store it encrypted in the repo
+if [[ $same_file -eq 0 ]]; then
+  mkdir -p "$(dirname "$TARGET")"
+  cp "$src" "$TARGET"
+  chmod 0644 "$TARGET"
+  log "set  copied the root to ~/.config/homelab/root_ca.crt"
+fi
+if [[ $same_source -eq 0 ]]; then
+  chezmoi add --encrypt "$TARGET"
+  log "set  stored it encrypted in the repo"
+fi
+
+# set the fingerprint for Windows, keeping the rest of the line (its comment)
+if [[ $same_fp -eq 0 ]]; then
+  tmp="$(mktemp "$YAML.XXXXXX")"
+  sed -E "s/^( *root_fingerprint: )'[^']*'/\\1'$fp'/" "$YAML" > "$tmp"
+  grep -q "^ *root_fingerprint: '$fp'" "$tmp" || { rm -f "$tmp"; die "could not set root_fingerprint in $YAML"; }
+  cat "$tmp" > "$YAML"
+  rm -f "$tmp"
+  log "set  root_fingerprint in windows.yaml = $fp"
+fi
+
+# the commit is left to you, since it must be signed
+log ""
+log "Review and commit (signed):"
+log "  git -C \"$REPO\" add home/dot_config/homelab home/.chezmoidata/windows.yaml"
+log "  git -C \"$REPO\" commit -S -m \"Update the homelab root\""
+log "Then run chezmoi apply on each Mac (trusts the new root, removes the old one), and on Windows."

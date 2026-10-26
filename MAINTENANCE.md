@@ -70,7 +70,7 @@ All the values are in `home/.chezmoidata/windows.yaml`; edit one and apply.
 | Taskbar buttons (combining, search box, Task View, Widgets) | `taskbar_options` | `combine` is always, when_full, or never; `search` is hidden, icon, or box; `task_view` and `widgets` are true or false (`widgets: false` removes the Widgets package, which Windows blocks any other way); applies at the next sign-in |
 | Sunshine's certificate (name, CA, root fingerprint, lifetime) | `sunshine_cert` | see "Sunshine's certificate"; an empty `root_fingerprint` turns it off |
 | SSH access to the Windows PC (keys, passwords, shell) | `ssh_server` | `authorized_keys` takes public keys, one per entry (get yours from `ssh-add -L`); `password_login` is false for keys only; `shell` is powershell or cmd |
-| The homelab root certificate (Mac) | `~/.config/homelab/root_ca.crt` (stored encrypted; the homelab tooling writes it) | `chezmoi add --encrypt ~/.config/homelab/root_ca.crt`, then apply; `85-homelab-root` trusts it. After a root rotation, delete the old root in Keychain Access when the apply warns about it |
+| The homelab root certificate | `~/.config/homelab/root_ca.crt` (stored encrypted) and `root_fingerprint` in `windows.yaml` | the homelab's `bin/init-root` runs `import-homelab-root <root_ca.crt>`, which updates both (run it by hand the same way); commit as it prints, then apply on each Mac (`85-homelab-root` trusts the new root and removes the previous one) and on Windows |
 | An ssh host (name, user) for the Mac | `~/.ssh/config` (stored encrypted) | add a `Host` block to the file, then `chezmoi re-add ~/.ssh/config`; VS Code's Remote - SSH lists these. If `~/.ssh/known_hosts` changes after a first connection, run `chezmoi re-add ~/.ssh/known_hosts` |
 | How long the PC idles before it sleeps | `sleep_after_minutes` | minutes; 0 means never |
 | Quick access pins | `quick_access` | `shell:` names, in order |
@@ -162,9 +162,9 @@ re-pair afterwards.
 
 Windows learns which root to trust from `root_fingerprint` in `windows.yaml`, because it cannot decrypt the copy in
 this repo. The fingerprint is not secret (it is a hash of a public certificate), but it must be right: setup's
-signature check on the repo is what stops anyone from substituting their own. After a root rotation, put the new
-root's fingerprint there (`step certificate fingerprint root_ca.crt`, or the SHA-256 that `openssl x509 -noout
--fingerprint -sha256` prints, with or without colons); the next apply sees that the certificate no longer chains to
+signature check on the repo is what stops anyone from substituting their own. `import-homelab-root` keeps it in step
+with the encrypted root (the homelab's `bin/init-root` calls it after creating or rotating the root); you only
+commit what it prints. After a rotation, the next apply on Windows sees that the certificate no longer chains to
 the root, requests a new one, and you re-pair.
 
 To request a certificate, step-ca checks over ACME that this PC answers for `cx4200a.lan` on port 80, so the

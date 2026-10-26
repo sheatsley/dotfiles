@@ -4,15 +4,18 @@
 # This script makes macOS trust the homelab's root certificate, so that Safari
 # accepts the .lan services (the Proxmox web UI, Sunshine, and so on) without a
 # warning. The root is ~/.config/homelab/root_ca.crt, which chezmoi decrypts
-# from the repo (the homelab's own tooling puts it there); without it, as on a
+# from the repo (import-homelab-root puts it there); without it, as on a
 # machine set up with DOTFILES_NO_YUBIKEY=1, nothing happens. Trust is checked
 # first, so once the root is trusted nothing changes and no password is asked
 # for; otherwise the root is added to the System keychain as a trusted root,
 # which takes sudo, and macOS may also ask for your password or Touch ID to
-# change the trust settings. Older homelab roots (another certificate of the
-# same name) are reported but never removed, since deleting a trusted root by
-# accident breaks every site that relies on it. SECURITY names the tool and
-# exists only so that the tests can replace it.
+# change the trust settings. After a root rotation, the previous root is then
+# removed (its trust setting and the certificate itself), so a key that may
+# have leaked can no longer vouch for anything. Only self-signed certificates
+# with exactly the same name as the current root are removed, and only after
+# the current root is trusted, so there is never a moment with no homelab
+# root. SECURITY names the tool and exists only so that the tests can replace
+# it.
 sec="${SECURITY:-/usr/bin/security}"
 keychain=/Library/Keychains/System.keychain
 cert="$HOME/.config/homelab/root_ca.crt"
@@ -37,11 +40,22 @@ else
   log "set  homelab root trusted"
 fi
 
-# report other certificates of the same name (an older homelab root) for removal by hand
+# remove previous roots: self-signed certificates with the same name but a different fingerprint
 if [[ -n "$cn" ]]; then
-  others="$("$sec" find-certificate -a -Z -c "$cn" "$keychain" 2>/dev/null | sed -n 's/^SHA-256 hash: *//p' | tr '[:lower:]' '[:upper:]' | grep -vx "$fp" || true)"
-  while read -r hash; do
-    [[ -n "$hash" ]] || continue
-    log "WARN another '$cn' certificate is in the System keychain (SHA-256 $hash); if it is an old homelab root, delete it in Keychain Access"
-  done <<<"$others"
+  work="$(mktemp -d)"
+  trap 'rm -rf "$work"' EXIT
+  "$sec" find-certificate -a -c "$cn" -p "$keychain" 2>/dev/null \
+    | awk -v dir="$work" '/-----BEGIN CERTIFICATE-----/ { n++ } n { print > (dir "/" n ".pem") }' || true
+  for pem in "$work"/*.pem; do
+    [[ -e "$pem" ]] || continue
+    other_cn="$(openssl x509 -in "$pem" -noout -subject -nameopt multiline | sed -n 's/^ *commonName *= *//p')"
+    other_fp="$(openssl x509 -in "$pem" -noout -fingerprint -sha256 | cut -d= -f2 | tr -d ':' | tr '[:lower:]' '[:upper:]')"
+    subject="$(openssl x509 -in "$pem" -noout -subject)"
+    issuer="$(openssl x509 -in "$pem" -noout -issuer)"
+    [[ "$other_cn" == "$cn" && "$other_fp" != "$fp" && "${subject#subject=}" == "${issuer#issuer=}" ]] || continue
+    sha1="$(openssl x509 -in "$pem" -noout -fingerprint -sha1 | cut -d= -f2 | tr -d ':')"
+    sudo "$sec" remove-trusted-cert -d "$pem" || true
+    sudo "$sec" delete-certificate -Z "$sha1" "$keychain" || die "could not remove the previous homelab root (SHA-256 $other_fp)"
+    log "set  removed the previous homelab root (SHA-256 $other_fp)"
+  done
 fi

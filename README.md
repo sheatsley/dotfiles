@@ -13,6 +13,7 @@ Machine configuration for two Macs (macbook, mini) and a Windows gaming PC, mana
                              (Windows) enable automatic sign-in, save the NAS password, set the OhmGraphite
                              token; each reads a line of stdin
     brew-sync                adds the Homebrew packages installed on a Mac to .chezmoidata/packages.yaml (alias in .zshrc)
+    import-homelab-root      brings a homelab root certificate into the dotfiles (encrypted copy and the Windows fingerprint); called by the homelab's bin/init-root
     diagnose-taskbar.ps1     prints the app IDs of pinned shortcuts and running windows (to debug duplicated taskbar icons; not part of apply)
     MAINTENANCE.md           how to change things: which file to edit and which command to run
     .gitattributes           pins LF line endings (Git for Windows would otherwise convert to CRLF)
@@ -50,7 +51,7 @@ Machine configuration for two Macs (macbook, mini) and a Windows gaming PC, mana
    | `run_after_60-git-repos` | clones/pulls the repos in `~/.config/git/repos` into `~/repos` (`git_repos`) |
    | `run_onchange_after_70-macos-defaults` | the `defaults write` commands (`macos_defaults`) |
    | `run_after_80-firewall` | turns on the application firewall (asks for sudo only if it is off) |
-   | `run_after_85-homelab-root` | trusts the homelab root (`~/.config/homelab/root_ca.crt`) in the System keychain, and reports older roots of the same name |
+   | `run_after_85-homelab-root` | trusts the homelab root (`~/.config/homelab/root_ca.crt`) in the System keychain, then removes the previous root after a rotation |
 
 Not ported because chezmoi makes them unnecessary: `yadm alt` (replaced by the template and data files),
 `git-crypt unlock` (replaced by chezmoi's gpg encryption), the public-key task (done by `setup.sh`).
