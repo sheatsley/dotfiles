@@ -244,7 +244,6 @@ if ($changed) {
     if ($service) {
         Restart-Service -InputObject $service -Force
         Write-Step 'set  restarted Sunshine'
-        Start-Sleep -Seconds 5
     } else {
         Write-Warning 'The Sunshine service was not found; restart Sunshine to load its certificate.'
     }
@@ -253,10 +252,16 @@ if ($changed) {
 
 # check the live web UI the way a browser would: trusted chain, intermediate included, right name
 if ($service) { $service.Refresh() }
+# (Sunshine takes several seconds to listen again after a restart, so try for about 30 seconds)
 if ($service -and $service.Status -eq 'Running') {
-    if (Invoke-Step @('certificate', 'verify', "https://$($name):$webPort", '--roots', $root, '--host', $name)) {
+    $verified = $false
+    for ($try = 1; $try -le 6 -and -not $verified; $try++) {
+        if ($try -gt 1) { Start-Sleep -Seconds 5 }
+        $verified = Invoke-Step @('certificate', 'verify', "https://$($name):$webPort", '--roots', $root, '--host', $name)
+    }
+    if ($verified) {
         Write-Step "ok   https://$($name):$webPort presents a trusted chain"
     } else {
-        Write-Warning "https://$($name):$webPort did not verify against the homelab root (is Sunshine running, and does it send the intermediate?)"
+        Write-Warning "https://$($name):$webPort did not verify against the homelab root for 30 seconds (is Sunshine running, and does it send the intermediate?)"
     }
 }

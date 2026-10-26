@@ -93,6 +93,7 @@ Re-run any time: every step probes first, so finished steps are skipped and fail
 | `61-ohmgraphite` | downloads OhmGraphite to `C:\Apps\OhmGraphite` |
 | `62-ohmgraphite-service` | writes its config from the template, installs the service, starts it once the token is set |
 | `63-sunshine-cert` | gives Sunshine a long-lived certificate from the homelab CA and warns before it runs out (`sunshine_cert`) |
+| `64-sunshine-options` | sets the Sunshine options in `sunshine_options` (e.g., `csrf_allowed_origins`, so the web UI works by name from the Mac) and restarts Sunshine when one changes |
 | `65-repos` | clones/pulls the public repos in `windows.yaml` (e.g. `games`) into `~/repos` |
 | `70-taskbar` | pins the taskbar apps in order (a layout file plus the Start layout policy; applies at the next sign-in) |
 | `71-taskbar-options` | taskbar buttons: combine when full, hide search, Task View, and Widgets (removed with its package; applies at the next sign-in) |

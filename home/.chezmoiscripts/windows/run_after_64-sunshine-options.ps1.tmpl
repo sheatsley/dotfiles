@@ -1,0 +1,76 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script sets the Sunshine options listed under sunshine_options in
+.chezmoidata/windows.yaml, one "key = value" line each in sunshine.conf, and
+restarts Sunshine when one of them changed (it reads its config only when it
+starts). Lines it does not manage are left alone, including cert and pkey,
+which 63-sunshine-cert sets. For example, csrf_allowed_origins lets the web UI
+accept changes when it is opened from another computer by name
+(https://cx4200a.lan:47990), not only from this PC through localhost; Sunshine
+accepts a comma-separated list of https:// origins, with the port optional. It
+requires an elevated session.
+#>
+Assert-Admin
+
+$conf = Join-Path $env:ProgramFiles 'Sunshine\config\sunshine.conf'
+$options = [ordered]@{
+{{- range $key, $value := .windows.sunshine_options }}
+    {{ squote $key }} = {{ squote (print $value) }}
+{{- end }}
+}
+
+function Set-SunshineOption {
+    <#
+    This function sets one "key = value" line in sunshine.conf, replacing the
+    line if the key is there and appending it otherwise.
+
+    :param Key: the option name (e.g., csrf_allowed_origins)
+    :param Value: the value to set
+    :return: True if the file was changed
+    #>
+    param([string]$Key, [string]$Value)
+    $lines = @()
+    if (Test-Path -LiteralPath $conf) { $lines = @([IO.File]::ReadAllLines($conf)) }
+    $want = "$Key = $Value"
+    $pattern = '^\s*' + [regex]::Escape($Key) + '\s*='
+    $found = $false
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match $pattern) {
+            if ($lines[$i] -eq $want) { return $false }
+            $lines[$i] = $want
+            $found = $true
+            break
+        }
+    }
+    if (-not $found) { $lines += $want }
+    [IO.File]::WriteAllLines($conf, [string[]]$lines, (New-Object Text.UTF8Encoding $false))
+    return $true
+}
+
+# nothing to configure until Sunshine is installed (60-apps installs it)
+if (-not (Test-Path -LiteralPath $conf)) {
+    Write-Warning "Sunshine's config was not found at $conf; skipping its options."
+    return
+}
+
+# set each option, then restart Sunshine once if anything changed
+$changed = $false
+foreach ($key in $options.Keys) {
+    if (Set-SunshineOption $key $options[$key]) {
+        Write-Step "set  Sunshine $key = $($options[$key])"
+        $changed = $true
+    } else {
+        Write-Step "ok   Sunshine $key"
+    }
+}
+if ($changed) {
+    $service = Get-Service -Name 'SunshineService' -ErrorAction SilentlyContinue
+    if (-not $service) { $service = Get-Service | Where-Object { $_.DisplayName -like 'Sunshine*' } | Select-Object -First 1 }
+    if ($service) {
+        Restart-Service -InputObject $service -Force
+        Write-Step 'set  restarted Sunshine'
+    } else {
+        Write-Warning 'The Sunshine service was not found; restart Sunshine to load its options.'
+    }
+}
