@@ -11,7 +11,11 @@
 #
 # The prefixes map to github -> git@github.com:{path}.git and
 # gitea -> git@{GITEA_HOST}:{path}.git (GITEA_HOST defaults to gitea.lan).
-# Blank lines and lines starting with # are ignored. A repo that fails does not
+# Blank lines and lines starting with # are ignored. A repo that ships its own
+# git hooks in a .githooks directory (the homelab repo does, for its checks
+# before a commit) is pointed at them with core.hooksPath, since git never
+# turns on hooks from a clone by itself; the list holds only your own repos, so
+# their hooks are your own code. A repo that fails does not
 # stop the others; the script fails at the end if any did, so the next apply
 # retries. The list must not contain the dotfiles repo itself, which lives in
 # ~/repos/chezmoi.
@@ -59,7 +63,13 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     git -C "$dest" pull || { log "ERROR: could not pull $name"; failed=1; }
   else
     log "cloning $name from $host"
-    git clone "$remote" "$dest" || { log "ERROR: could not clone $name"; failed=1; }
+    git clone "$remote" "$dest" || { log "ERROR: could not clone $name"; failed=1; continue; }
+  fi
+
+  # use the repo's own hooks when it ships them
+  if [[ -d "$dest/.githooks" && "$(git -C "$dest" config --get core.hooksPath || true)" != ".githooks" ]]; then
+    git -C "$dest" config core.hooksPath .githooks || { log "ERROR: could not turn on the hooks of $name"; failed=1; continue; }
+    log "set  $name uses its .githooks"
   fi
 done < "$repos"
 

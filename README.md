@@ -48,7 +48,7 @@ Machine configuration for two Macs (macbook, mini) and a Windows gaming PC, mana
    | `run_after_30-pip-packages` | `pip3 install --upgrade` from `~/.config/pip/packages` (`pip_packages`) |
    | `run_after_40-gpg-agent` | makes gpg-agent serve the YubiKey to ssh (`gpg_agent`) |
    | `run_after_50-repo-remote` | switches this repo's remote from https to ssh (`yadm_repo`) |
-   | `run_after_60-git-repos` | clones/pulls the repos in `~/.config/git/repos` into `~/repos` (`git_repos`) |
+   | `run_after_60-git-repos` | clones/pulls the repos in `~/.config/git/repos` into `~/repos` (`git_repos`), and turns on a repo's own hooks when it ships a `.githooks` directory |
    | `run_onchange_after_70-macos-defaults` | the `defaults write` commands (`macos_defaults`) |
    | `run_after_80-firewall` | turns on the application firewall (asks for sudo only if it is off) |
    | `run_after_85-homelab-root` | trusts the homelab root (`~/.config/homelab/root_ca.crt`) in the System keychain, then removes the previous root after a rotation |
