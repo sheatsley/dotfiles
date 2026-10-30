@@ -1,0 +1,20 @@
+{{ template "ps-prelude.ps1" . }}
+
+<#
+This script sets what the Start menu shows, as set under start_menu in
+.chezmoidata/windows.yaml. mobile_device is the "Show mobile device in Start"
+switch (Settings > Personalization > Start): the Phone Link pane with a linked
+phone's calls, texts, and notifications. It is a per-user value, IsEnabled
+under the Phone Link companion key (1 shows the pane, 0 hides it). Explorer may
+only pick it up after you sign out and back in. It is a per-user setting, so it
+does not require an elevated session.
+#>
+$companion = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Start\Companions\Microsoft.YourPhone_8wekyb3d8bbwe'
+
+# show mobile device in Start
+if (Set-RegValue $companion 'IsEnabled' {{ if .windows.start_menu.mobile_device }}1{{ else }}0{{ end }}) {
+    Write-Step 'set  Start menu: mobile device {{ if .windows.start_menu.mobile_device }}shown{{ else }}hidden{{ end }}'
+    Write-Warning 'The Start menu changes after Explorer restarts (sign out and back in).'
+} else {
+    Write-Step 'ok   Start menu: mobile device {{ if .windows.start_menu.mobile_device }}shown{{ else }}hidden{{ end }}'
+}

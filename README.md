@@ -99,6 +99,7 @@ Re-run any time: every step probes first, so finished steps are skipped and fail
 | `70-taskbar` | pins the taskbar apps in order (a layout file plus the Start layout policy; applies at the next sign-in) |
 | `71-taskbar-options` | taskbar buttons: combine when full, hide search, Task View, and Widgets (removed with its package; applies at the next sign-in) |
 | `72-onedrive` | disables OneDrive by policy, uninstalls it, and removes its sign-in entry and Explorer folder |
+| `73-start-menu` | hides the Phone Link mobile device pane in Start (`start_menu`; applies at the next sign-in) |
 | `75-fancontrol` | copies `~/.config/fancontrol/userConfig.json` into FanControl when the repo's copy changes |
 | `80-system-restore` | turns on System Restore, caps its space, and creates a restore point every day (a scheduled task) |
 | `90-desktop-clean` | deletes everything on your Desktop and the Public Desktop, on every apply |

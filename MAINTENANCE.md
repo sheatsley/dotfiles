@@ -74,6 +74,7 @@ All the values are in `home/.chezmoidata/windows.yaml`; edit one and apply.
 | The homelab root certificate | `home/dot_config/homelab/root_ca.crt` (plain; a root certificate is public) | the homelab's `bin/init-root` runs `import-homelab-root <root_ca.crt>`, which copies it in (run it by hand the same way); commit as it prints, then apply on each Mac (`85-homelab-root`) and on Windows (`12-homelab-root`): each trusts the new root and removes the previous one |
 | An ssh host (name, user) for the Mac | `~/.ssh/config` (stored encrypted) | add a `Host` block to the file, then `chezmoi re-add ~/.ssh/config`; VS Code's Remote - SSH lists these. If `~/.ssh/known_hosts` changes after a first connection, run `chezmoi re-add ~/.ssh/known_hosts` |
 | How long the PC idles before it sleeps | `sleep_after_minutes` | minutes; 0 means never |
+| Start menu (the Phone Link mobile device pane) | `start_menu` | `mobile_device` is true or false; applies at the next sign-in |
 | Quick access pins | `quick_access` | `shell:` names, in order |
 | Repos to clone (public ones) | `repos` | cloned into `~/repos/<name>` anonymously, so no YubiKey |
 | The NAS share, user, or location name | `nas` | change `host` here and `NAS_HOST` in `setup.sh` together |

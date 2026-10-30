@@ -39,6 +39,8 @@ windows:
     - {match: 'Steam*', rebuild: true, aumid: 'Valve.Steam.Client'}
     - {match: 'WinDirStat*'}
     - {match: 'Xbox*'}
+  start_menu:
+    mobile_device: false    # "Show mobile device in Start": the Phone Link pane with a phone's calls, texts, and notifications
   taskbar_options:
     combine: when_full      # "Combine taskbar buttons and hide labels": always, when_full, or never
     search: hidden          # the search box: hidden, icon, or box
