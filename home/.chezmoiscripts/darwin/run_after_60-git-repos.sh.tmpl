@@ -19,9 +19,12 @@
 # install). A state file per repo in ~/.local/state/dotfiles/pipx records both.
 # Removing the marker does not uninstall the command (`pipx uninstall <name>`).
 # When pipx is installed, the script also runs `pipx ensurepath`, which adds
-# pipx's command folder to PATH in your shell startup file unless it is already
-# there (it checks the files itself, so once its line is committed this does
-# nothing). Those files are managed by chezmoi, so when pipx does change one,
+# pipx's command folder to PATH in your shell startup files unless they already
+# put it there (once its lines are committed this does nothing). It is run in a
+# clean environment (only HOME and a minimal PATH), because what it inherits
+# from chezmoi, or from the terminal chezmoi was started in, can make it decide
+# there is nothing to do when the files lack the line; its own message is
+# shown, so it always says what it did. Those files are managed by chezmoi, so when pipx does change one,
 # the script says which, for you to `chezmoi re-add` and commit; until then,
 # the next apply asks whether to overwrite it.
 #
@@ -143,16 +146,21 @@ done < "$repos"
 pipx_bin="$(command -v pipx || echo /opt/homebrew/bin/pipx)"
 if [[ -x "$pipx_bin" ]]; then
   before=""
-  for f in .zshrc .zprofile; do
+  for f in .zshrc .zprofile .bashrc .bash_profile .profile; do
     before+="$f:$(file_hash "$HOME/$f") "
   done
-  "$pipx_bin" ensurepath >/dev/null 2>&1 || log "WARNING: pipx ensurepath failed; pipx's commands may not be on PATH"
-  for f in .zshrc .zprofile; do
+  result="$(env -i HOME="$HOME" PATH=/usr/bin:/bin:/opt/homebrew/bin "$pipx_bin" ensurepath 2>&1)" \
+    || log "WARNING: pipx ensurepath failed; pipx's commands may not be on PATH"
+  log "pipx ensurepath: $(printf '%s\n' "$result" | grep -v '^[[:space:]]*$' | head -1)"
+  changed=0
+  for f in .zshrc .zprofile .bashrc .bash_profile .profile; do
     now="$f:$(file_hash "$HOME/$f") "
     if [[ "$before" != *"$now"* ]]; then
       log "NOTE: pipx added its PATH line to ~/$f; run: chezmoi re-add ~/$f, then commit (signed)"
+      changed=1
     fi
   done
+  [[ "$changed" -eq 1 ]] || log "ok   your shell startup files put pipx's commands on PATH"
 fi
 
 [[ "$failed" -eq 0 ]] || die "one or more repos failed (see above)"
