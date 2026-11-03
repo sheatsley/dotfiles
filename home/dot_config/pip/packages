@@ -10,7 +10,6 @@ numpy
 openpyxl
 pandas
 pelican
-pipx
 psutil
 Pympler
 RapidFuzz

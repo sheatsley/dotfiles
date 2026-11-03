@@ -15,6 +15,7 @@ packages:
       - { name: "python", desc: "Interpreted, interactive, object-oriented programming language" }
       - { name: "chezmoi", desc: "Manage your dotfiles across multiple diverse machines, securely" }
       - { name: "wakeonlan", desc: "Sends magic packets to wake up network-devices" }
+      - { name: "pipx", desc: "Execute binaries from Python packages in isolated environments" }
     casks:
       - { name: "discord", desc: "Voice and text chat software" }
       - { name: "firefox", desc: "Web browser" }
