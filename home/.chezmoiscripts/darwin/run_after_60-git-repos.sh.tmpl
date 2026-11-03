@@ -20,11 +20,15 @@
 # Removing the marker does not uninstall the command (`pipx uninstall <name>`).
 # When pipx is installed, the script also runs `pipx ensurepath`, which adds
 # pipx's command folder to PATH in your shell startup files unless they already
-# put it there (once its lines are committed this does nothing). It is run in a
-# clean environment (only HOME and a minimal PATH), because what it inherits
-# from chezmoi, or from the terminal chezmoi was started in, can make it decide
-# there is nothing to do when the files lack the line; its own message is
-# shown, so it always says what it did. Those files are managed by chezmoi, so when pipx does change one,
+# put it there (once its lines are committed this does nothing). pipx picks the
+# shell whose files it edits from the program that launched it (or, when it
+# cannot tell, from SHELL); launched from this bash script it would edit
+# .bashrc and .bash_profile, which zsh never reads. So it is launched from zsh
+# (with a trailing `:` so that zsh does not hand the process over to pipx),
+# with SHELL set to zsh and otherwise a clean environment, which also keeps
+# anything inherited from chezmoi or the terminal from changing its decision;
+# then it edits .zshrc and .zprofile. Its own message is shown when it changed
+# something or could not. Those files are managed by chezmoi, so when pipx does change one,
 # the script says which, for you to `chezmoi re-add` and commit; until then,
 # the next apply asks whether to overwrite it.
 #
@@ -149,18 +153,27 @@ if [[ -x "$pipx_bin" ]]; then
   for f in .zshrc .zprofile .bashrc .bash_profile .profile; do
     before+="$f:$(file_hash "$HOME/$f") "
   done
-  result="$(env -i HOME="$HOME" PATH=/usr/bin:/bin:/opt/homebrew/bin "$pipx_bin" ensurepath 2>&1)" \
+  result="$(env -i HOME="$HOME" SHELL=/bin/zsh PATH=/usr/bin:/bin:/opt/homebrew/bin /bin/zsh -c '"$0" ensurepath; :' "$pipx_bin" 2>&1)" \
     || log "WARNING: pipx ensurepath failed; pipx's commands may not be on PATH"
-  log "pipx ensurepath: $(printf '%s\n' "$result" | grep -v '^[[:space:]]*$' | head -1)"
+  said="$(printf '%s\n' "$result" | grep -v '^[[:space:]]*$' | head -1)"
   changed=0
   for f in .zshrc .zprofile .bashrc .bash_profile .profile; do
     now="$f:$(file_hash "$HOME/$f") "
     if [[ "$before" != *"$now"* ]]; then
-      log "NOTE: pipx added its PATH line to ~/$f; run: chezmoi re-add ~/$f, then commit (signed)"
+      case "$f" in
+        .zshrc|.zprofile) log "NOTE: pipx added its PATH line to ~/$f; run: chezmoi re-add ~/$f, then commit (signed)" ;;
+        *) log "WARNING: pipx changed ~/$f, which zsh does not read; delete the line (or the file, if pipx created it)" ;;
+      esac
       changed=1
     fi
   done
-  [[ "$changed" -eq 1 ]] || log "ok   your shell startup files put pipx's commands on PATH"
+  if [[ "$changed" -eq 1 ]]; then
+    log "pipx ensurepath: $said"
+  elif [[ "$result" == *"not added"* ]]; then
+    log "WARNING: pipx ensurepath: $said"
+  else
+    log "ok   your shell startup files put pipx's commands on PATH"
+  fi
 fi
 
 [[ "$failed" -eq 0 ]] || die "one or more repos failed (see above)"

@@ -3,3 +3,6 @@ export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket) # set ssh agent soc
 gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1      # refresh agent tty
 ENABLE_CORRECTION="true"                                     # enable command auto-correction
 alias brew-sync="$HOME/repos/chezmoi/brew-sync"              # add hand-installed brew packages to packages.yaml
+
+# Created by `pipx` on 2026-11-03 19:05:17
+export PATH="$PATH:/Users/sheatsley/.local/bin"
