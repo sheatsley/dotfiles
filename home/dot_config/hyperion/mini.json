@@ -42,7 +42,7 @@
 				"cropTop": 0,
 				"device": "osx",
 				"device_inputs": "0",
-				"enable": true,
+				"enable": false,
 				"fps": 25,
 				"framerates": "25",
 				"height": 1600,
@@ -52,7 +52,7 @@
 				"width": 3840
 			},
 			"general": {
-				"configVersion": "2.1.1",
+				"configVersion": "2.2.1",
 				"name": "My Hyperion Config",
 				"showOptHelp": true,
 				"watchedVersionBranch": "Stable"
@@ -120,10 +120,7 @@
 				"level": "warn"
 			},
 			"network": {
-				"internetAccessAPI": false,
-				"ipWhitelist": [],
-				"localApiAuth": false,
-				"restirctedInternetAccessAPI": false
+				"localApiAuth": false
 			},
 			"osEvents": {
 				"lockEnable": true,
@@ -163,8 +160,8 @@
 						138,
 						0
 					],
-					"effect": "Warm mood blobs",
-					"enable": false,
+					"effect": "Cinema brighten lights",
+					"enable": true,
 					"type": "effect"
 				},
 				"blackborderdetector": {
@@ -270,7 +267,8 @@
 					"audioEnable": false,
 					"audioGrabberDevice": "NONE",
 					"audioPriority": 230,
-					"systemEnable": true,
+					"screenInactiveTimeout": 5,
+					"systemEnable": false,
 					"systemGrabberDevice": "NONE",
 					"systemPriority": 250,
 					"v4lEnable": false,
