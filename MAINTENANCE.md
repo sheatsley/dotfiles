@@ -52,7 +52,7 @@ a script, as OhmGraphite and FanControl have.
 | Change the Dock apps | `home/.chezmoidata/macos.yaml` (`dock_apps`, in order; `path` is the `.app` bundle) | apply (the defaults script reruns when the list changes) |
 | Record Homebrew packages you installed by hand | `brew-sync` (run it from anywhere on a Mac) | adds every installed formula, cask, tap, and Mac App Store app that `packages.yaml` does not list to the end of `common`, with its description; `brew-sync --dry-run` shows the additions first. Move a line to `macbook` or `mini` to make it specific to one Mac, then apply |
 | Add a Homebrew formula, cask, tap, or Mac App Store app | `home/.chezmoidata/packages.yaml` (`common` for both Macs, `macbook` or `mini` for one) | apply (`brew bundle cleanup` also removes what you delete from the list) |
-| Add a pip package | `~/.config/pip/packages` (managed file) | `re-add`, apply |
+| Add a pip package | `~/.config/pip/packages` (managed file) | `re-add`, apply. Don't list `pip` itself: Homebrew's `python` owns it and updates it, and pip cannot replace a copy Homebrew installed |
 | Add a repo to clone into `~/repos` | `~/.config/git/repos` (encrypted) | `re-add` it (the YubiKey decrypts it), apply |
 | A `defaults write` setting | `home/.chezmoiscripts/darwin/run_onchange_after_70-macos-defaults.sh.tmpl` | apply (it reruns when the file changes) |
 | A new setup step | a new `run_after_NN-name.sh.tmpl` in `home/.chezmoiscripts/darwin/`, using `sh-prelude.sh` like the others | apply |
