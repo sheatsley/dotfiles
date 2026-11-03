@@ -54,6 +54,7 @@ a script, as OhmGraphite and FanControl have.
 | Add a Homebrew formula, cask, tap, or Mac App Store app | `home/.chezmoidata/packages.yaml` (`common` for both Macs, `macbook` or `mini` for one) | apply (`brew bundle cleanup` also removes what you delete from the list) |
 | Add a pip package | `~/.config/pip/packages` (managed file) | `re-add`, apply. Don't list `pip` itself: Homebrew's `python` owns it and updates it, and pip cannot replace a copy Homebrew installed |
 | Add a repo to clone into `~/repos` | `~/.config/git/repos` (encrypted) | `re-add` it (the YubiKey decrypts it), apply |
+| Install a repo you develop as a command (what `pipx install .` did by hand) | `~/.config/git/repos`: add ` pipx` after the repo, e.g. `gitea:sheatsley/mytool pipx` | `re-add`, apply. It is installed editable, so edits and pulls take effect at once; the apply reinstalls it only when `pyproject.toml` (or `setup.cfg`/`setup.py`) changes or Homebrew's Python moves to a new version. Dropping the marker does not uninstall it: `pipx uninstall <name>`. The first time (and if pipx ever moves its folder), `pipx ensurepath` adds a PATH line to `~/.zshrc` and the apply says so: `chezmoi re-add ~/.zshrc` and commit |
 | A `defaults write` setting | `home/.chezmoiscripts/darwin/run_onchange_after_70-macos-defaults.sh.tmpl` | apply (it reruns when the file changes) |
 | A new setup step | a new `run_after_NN-name.sh.tmpl` in `home/.chezmoiscripts/darwin/`, using `sh-prelude.sh` like the others | apply |
 

@@ -4,10 +4,26 @@
 # This script clones or pulls the git repos listed in ~/.config/git/repos (the
 # git_repos task of the yadm bootstrap) into ~/repos. The list is encrypted in
 # the source state and decrypted by chezmoi (it used to be a git-crypt file).
-# Each non-comment line is a host prefix and a repo path:
+# Each non-comment line is a host prefix and a repo path, optionally followed
+# by markers:
 #
 #     github:sheatsley/attacks
-#     gitea:sheatsley/private-project
+#     gitea:sheatsley/private-project pipx
+#
+# The pipx marker installs the repo as a command with `pipx install --editable`,
+# for tools you are developing: the command runs your working copy, so edits
+# and pulls take effect at once. It is reinstalled only when what an editable
+# install cannot pick up by itself changes: the project's metadata (dependencies
+# and command names, in pyproject.toml, setup.cfg, or setup.py) or the Python
+# pipx uses (Homebrew moves to a new one each year, which breaks the old
+# install). A state file per repo in ~/.local/state/dotfiles/pipx records both.
+# Removing the marker does not uninstall the command (`pipx uninstall <name>`).
+# When pipx is installed, the script also runs `pipx ensurepath`, which adds
+# pipx's command folder to PATH in your shell startup file unless it is already
+# there (it checks the files itself, so once its line is committed this does
+# nothing). Those files are managed by chezmoi, so when pipx does change one,
+# the script says which, for you to `chezmoi re-add` and commit; until then,
+# the next apply asks whether to overwrite it.
 #
 # The prefixes map to github -> git@github.com:{path}.git and
 # gitea -> git@{GITEA_HOST}:{path}.git (GITEA_HOST defaults to gitea.lan).
@@ -20,6 +36,7 @@
 # retries. The list must not contain the dotfiles repo itself, which lives in
 # ~/repos/chezmoi.
 directory="$HOME/repos"
+pipx_state="$HOME/.local/state/dotfiles/pipx"
 repos="$HOME/.config/git/repos"
 gitea_host="${GITEA_HOST:-gitea.lan}"
 
@@ -29,6 +46,42 @@ if [[ ! -f "$repos" ]]; then
   exit 0
 fi
 mkdir -p "$directory"
+
+pipx_install() {
+  # This function installs a repo as an editable pipx command, or reinstalls it
+  # when its metadata or pipx's Python changed since the last install.
+  #
+  # :param $1: the repo's folder
+  # :param $2: the repo's name (for messages and the state file)
+  # :return: 0 if the command is installed and current, 1 otherwise
+  local dest="$1" name="$2" pipx_bin meta f want
+  pipx_bin="$(command -v pipx || echo /opt/homebrew/bin/pipx)"
+  [[ -x "$pipx_bin" ]] || { log "ERROR: pipx is not installed (the brew bundle step installs it), so $name cannot be installed"; return 1; }
+  meta=""
+  for f in pyproject.toml setup.cfg setup.py; do
+    [[ -f "$dest/$f" ]] && meta+="$f:$(shasum -a 256 < "$dest/$f" | cut -d' ' -f1) "
+  done
+  [[ -n "$meta" ]] || { log "WARNING: $name is marked pipx but has no pyproject.toml, setup.cfg, or setup.py; skipped"; return 0; }
+  want="$(printf '%s\n%s' "$("$pipx_bin" environment --value PIPX_DEFAULT_PYTHON)" "$meta")"
+  if [[ -f "$pipx_state/$name" && "$(cat "$pipx_state/$name")" == "$want" ]]; then
+    log "ok   $name is installed with pipx (editable)"
+    return 0
+  fi
+  "$pipx_bin" install --editable --force "$dest" || { log "ERROR: pipx could not install $name"; return 1; }
+  mkdir -p "$pipx_state"
+  printf '%s' "$want" > "$pipx_state/$name"
+  log "set  $name installed with pipx (editable)"
+}
+
+file_hash() {
+  # This function prints a file's SHA-256, or nothing if the file is missing.
+  #
+  # :param $1: the file
+  # :return: None
+  if [[ -f "$1" ]]; then
+    shasum -a 256 < "$1" | cut -d' ' -f1
+  fi
+}
 
 failed=0
 while IFS= read -r line || [[ -n "$line" ]]; do
@@ -44,8 +97,16 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     log "WARNING: skipping malformed entry (expected host:owner/repo): $line"
     continue
   fi
-  host="$(printf '%s' "${line%%:*}" | tr '[:upper:]' '[:lower:]')"
-  path="${line#*:}"
+  read -r spec markers <<<"$line"
+  host="$(printf '%s' "${spec%%:*}" | tr '[:upper:]' '[:lower:]')"
+  path="${spec#*:}"
+  use_pipx=0
+  for marker in $markers; do
+    case "$marker" in
+      pipx) use_pipx=1 ;;
+      *) log "WARNING: ignoring unknown marker '$marker' in entry: $line (known: pipx)" ;;
+    esac
+  done
   case "$host" in
     github) remote="git@github.com:${path}.git" ;;
     gitea) remote="git@${gitea_host}:${path}.git" ;;
@@ -71,6 +132,27 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     git -C "$dest" config core.hooksPath .githooks || { log "ERROR: could not turn on the hooks of $name"; failed=1; continue; }
     log "set  $name uses its .githooks"
   fi
+
+  # install the repo as a command when it is marked pipx
+  if [[ "$use_pipx" -eq 1 ]]; then
+    pipx_install "$dest" "$name" || failed=1
+  fi
 done < "$repos"
+
+# let pipx put its command folder on PATH, and report a change to a managed startup file
+pipx_bin="$(command -v pipx || echo /opt/homebrew/bin/pipx)"
+if [[ -x "$pipx_bin" ]]; then
+  before=""
+  for f in .zshrc .zprofile; do
+    before+="$f:$(file_hash "$HOME/$f") "
+  done
+  "$pipx_bin" ensurepath >/dev/null 2>&1 || log "WARNING: pipx ensurepath failed; pipx's commands may not be on PATH"
+  for f in .zshrc .zprofile; do
+    now="$f:$(file_hash "$HOME/$f") "
+    if [[ "$before" != *"$now"* ]]; then
+      log "NOTE: pipx added its PATH line to ~/$f; run: chezmoi re-add ~/$f, then commit (signed)"
+    fi
+  done
+fi
 
 [[ "$failed" -eq 0 ]] || die "one or more repos failed (see above)"
