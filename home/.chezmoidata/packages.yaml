@@ -16,6 +16,8 @@ packages:
       - { name: "chezmoi", desc: "Manage your dotfiles across multiple diverse machines, securely" }
       - { name: "wakeonlan", desc: "Sends magic packets to wake up network-devices" }
       - { name: "pipx", desc: "Execute binaries from Python packages in isolated environments" }
+      - { name: "age", desc: "Simple, modern, secure file encryption" }
+      - { name: "gh", desc: "GitHub command-line tool" }
     casks:
       - { name: "discord", desc: "Voice and text chat software" }
       - { name: "firefox", desc: "Web browser" }
