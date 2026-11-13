@@ -8,3 +8,9 @@
   name = Ryan Sheatsley
   email = ryan@sheatsley.me
   signingkey = 1A2405C9E6BFBE34
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
