@@ -4,7 +4,8 @@
 # edit a list here and run `chezmoi apply`; packages that are not listed are removed by the
 # cleanup step of the brew bundle script.
 packages:
-  taps: []
+  taps:
+    - "sheatsley/tap"
   common:
     brews:
       - { name: "zstd", desc: "Zstandard is a real-time compression algorithm" }
