@@ -44,7 +44,7 @@ Machine configuration for two Macs (macbook, mini) and a Windows gaming PC, mana
    | Script | What it does (old yadm bootstrap task) |
    |---|---|
    | `run_after_10-computer-name` | sets ComputerName, HostName, LocalHostName to the machine (`computer_name`) |
-   | `run_after_20-brew-bundle` | `brew update`, a signature check of each tap in `signed_taps` (refuses to install anything unless its `HEAD` is signed by your key), `brew bundle install`, `brew bundle cleanup --force`, then removes the quarantine flag from the apps your own tap installed (`brew_packages`) |
+   | `run_after_20-brew-bundle` | `brew update`, a signature check of each tap marked `signed: true` (refuses to install anything unless its `HEAD` is signed by your key), `brew bundle install`, `brew bundle cleanup --force`, then removes the quarantine flag from the apps your own tap installed (`brew_packages`) |
    | `run_after_30-pip-packages` | `pip3 install --upgrade` from `~/.config/pip/packages` (`pip_packages`) |
    | `run_after_40-gpg-agent` | makes gpg-agent serve the YubiKey to ssh (`gpg_agent`) |
    | `run_after_50-repo-remote` | switches this repo's remote from https to ssh (`yadm_repo`) |

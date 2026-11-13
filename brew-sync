@@ -163,7 +163,7 @@ def main():
         if kind == "mas":
             new[kind].append(f"- {{ name: {quote(name)}, id: {mas_id} }}")
         elif kind == "tap":
-            new[kind].append(f"- {quote(name)}")
+            new[kind].append(f"- {{ name: {quote(name)} }}")
         else:
             new[kind].append(f"- {{ name: {quote(name)}, desc: {quote(desc)} }}")
 
@@ -178,7 +178,7 @@ def main():
             lines[head] = "  taps:"
             lines[head + 1 : head + 1] = ["    " + e for e in new["tap"]]
         else:
-            # the taps list ends at the next key (signed_taps follows it)
+            # the taps list ends at the next key
             last = head
             for i in range(head + 1, len(lines)):
                 if re.match(r"^    -\s", lines[i]):

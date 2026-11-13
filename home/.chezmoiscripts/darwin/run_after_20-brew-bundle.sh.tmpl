@@ -9,7 +9,7 @@
 # switch of brew bundle install), so what the Brewfile says is exactly what is
 # installed. Mac App Store entries require being signed in to the App Store.
 #
-# The taps in packages.signed_taps (your own) are checked first: Homebrew and
+# The taps marked signed in packages.taps (your own) are checked first: Homebrew and
 # every tap are updated once, then each signed tap's HEAD must carry a good
 # signature (git %G? is G) from the pinned key in keys.yaml (its primary-key
 # fingerprint, %GP), or nothing is installed. Each cask and formula pins the
@@ -29,7 +29,7 @@ brewfile="$HOME/.config/homebrew/Brewfile"
 [[ -f "$brewfile" ]] || die "missing $brewfile"
 
 fingerprint={{ quote .gpg.fingerprint }}
-signed_taps=({{ range .packages.signed_taps }} {{ quote . }}{{ end }} )
+signed_taps=({{ range .packages.taps }}{{ if index . "signed" }} {{ quote .name }}{{ end }}{{ end }} )
 apps_dir="${APPLICATIONS_DIR:-/Applications}"
 verify=1
 if [[ "${DOTFILES_SKIP_VERIFY:-}" == "1" ]]; then

@@ -1,5 +1,5 @@
 # The GPG key (on the YubiKey) that signs the dotfiles repo and the taps listed in
-# packages.signed_taps. The brew bundle script refuses a signed tap whose HEAD is not
+# packages.taps marked signed. The brew bundle script refuses a signed tap whose HEAD is not
 # signed by this fingerprint. Keep it equal to FINGERPRINT in setup.sh and $Fingerprint in
 # setup.ps1, which need their own copies because they run before the repo has been cloned
 # and verified (both refuse a HEAD not signed by exactly this key).

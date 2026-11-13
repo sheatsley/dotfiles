@@ -176,7 +176,7 @@ root, the way a browser would, and warns if the chain is incomplete. Sunshine's 
 
 ## Your Homebrew tap
 
-`sheatsley/tap` (github.com/sheatsley/homebrew-tap) is listed in `signed_taps` in
+`sheatsley/tap` (github.com/sheatsley/homebrew-tap) is listed with `signed: true` under `taps` in
 `home/.chezmoidata/packages.yaml`, so every apply on a Mac checks it before installing anything. After
 `brew update`, the tap clone's `HEAD` must carry a good signature (`G`) from the key pinned in
 `home/.chezmoidata/keys.yaml`, compared by its primary-key fingerprint. Each cask and formula pins the SHA-256
@@ -197,7 +197,7 @@ tap through GitHub's web UI**: GitHub signs those commits with its own key, so t
 **Adding a cask or formula to it:** list it by its full name, e.g. `sheatsley/tap/stagehand`, in a cask or brew
 list. **Adding another tap that isn't yours:** add it to `taps` only, and trust just what you install from it,
 e.g. `tap "user/repo", trusted: { cask: "name" }` in the Brewfile template; ask first, since the template
-trusts only `signed_taps` today. **The key:** `gpg.fingerprint` in `keys.yaml` must equal `FINGERPRINT` in
+trusts only taps marked `signed: true` today. A tap that `brew-sync` adds is never marked signed; only you can add the marker. **The key:** `gpg.fingerprint` in `keys.yaml` must equal `FINGERPRINT` in
 `setup.sh` and `$Fingerprint` in `setup.ps1` (which need their own copies, since they run before the repo is
 verified).
 
