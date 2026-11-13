@@ -2,11 +2,17 @@
   This file generates ~/.config/homebrew/Brewfile from .chezmoidata/packages.yaml:
   the taps, then the packages common to every Mac, then the packages for this
   machine (.machine, chosen at `chezmoi init`). It replaces the
-  Brewfile##hostname.* alternates that yadm used.
+  Brewfile##hostname.* alternates that yadm used. A tap in signed_taps is
+  trusted as a whole (Homebrew 6 ignores packages from untrusted non-official
+  taps, and brew bundle cleanup resets the trust to what this file declares);
+  the brew bundle script checks its signature before brew bundle reads this.
 */ -}}
 {{- $sets := list .packages.common (index .packages .machine) -}}
+{{- range .packages.signed_taps -}}
+{{-   if not (has . $.packages.taps) }}{{ fail (printf "packages.signed_taps lists %s, which is not in packages.taps" .) }}{{ end -}}
+{{- end -}}
 {{- range .packages.taps -}}
-tap {{ . | quote }}
+tap {{ . | quote }}{{ if has . $.packages.signed_taps }}, trusted: true{{ end }}
 {{ end -}}
 {{- range $sets -}}
 {{-   range .brews -}}

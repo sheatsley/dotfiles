@@ -50,7 +50,7 @@
 set -euo pipefail
 
 REPO="sheatsley/dotfiles"
-FINGERPRINT="D4FA4A5C5DA6CCB90433D9921A2405C9E6BFBE34"
+FINGERPRINT="D4FA4A5C5DA6CCB90433D9921A2405C9E6BFBE34"   # keep equal to gpg.fingerprint in home/.chezmoidata/keys.yaml
 KEY_ID="${FINGERPRINT: -16}"
 KEY_URL="${KEY_URL:-https://sheatsley.me/public.asc}"
 SRC="$HOME/repos/chezmoi"
@@ -200,17 +200,23 @@ sync_repo() {
 
 verify_head() {
   # This function refuses to continue unless HEAD carries a good signature from
-  # the trusted key, so that nothing in the repo runs unless you signed it.
+  # your key, so that nothing in the repo runs unless you signed it. git's %G?
+  # must be G (a good signature from a key gpg trusts) and %GP, the fingerprint
+  # of the signing key's primary key, must be $FINGERPRINT: a key gpg merely
+  # trusts (one you certified, say) is not enough.
   #
-  # :return: None (exits if the signature is not good)
-  local status
+  # :return: None (exits if the signature is not good or not yours)
+  local sig status fpr
   if [[ "${DOTFILES_SKIP_VERIFY:-}" == "1" ]]; then
     echo "setup: skipping signature verification (DOTFILES_SKIP_VERIFY=1)" >&2
     return 0
   fi
   log "Verifying the signature on HEAD"
-  status="$(git -c "gpg.program=$(command -v gpg)" -C "$SRC" log -1 --format=%G? HEAD)"
-  [[ "$status" == "G" ]] || die "HEAD is not signed by a trusted key (git status '$status'); refusing to apply"
+  sig="$(git -c "gpg.program=$(command -v gpg)" -C "$SRC" log -1 --format='%G? %GP' HEAD)"
+  status="${sig%% *}"
+  fpr="${sig#* }"
+  [[ "$status" == "G" && "$fpr" == "$FINGERPRINT" ]] \
+    || die "HEAD is not signed by your key $FINGERPRINT (git status '${status:-none}', key '${fpr:-none}'); refusing to apply"
 }
 
 setup_macos() {

@@ -174,6 +174,39 @@ root, the way a browser would, and warns if the chain is incomplete. Sunshine's 
 `credentials` folder: to go back to it, delete the `cert` and `pkey` lines from
 `C:\Program Files\Sunshine\config\sunshine.conf`, set `sunshine_cert.enabled` to false, and restart Sunshine (then re-pair).
 
+## Your Homebrew tap
+
+`sheatsley/tap` (github.com/sheatsley/homebrew-tap) is listed in `signed_taps` in
+`home/.chezmoidata/packages.yaml`, so every apply on a Mac checks it before installing anything. After
+`brew update`, the tap clone's `HEAD` must carry a good signature (`G`) from the key pinned in
+`home/.chezmoidata/keys.yaml`, compared by its primary-key fingerprint. Each cask and formula pins the SHA-256
+of what it downloads, so a signed `HEAD` also vouches for the downloads. `brew bundle` then runs with
+auto-update off, so no newer, unchecked tap commit can arrive in between. Its Brewfile line trusts the tap as a
+whole (`tap "sheatsley/tap", trusted: true`): Homebrew 6 ignores packages from untrusted non-official taps, and
+`brew bundle cleanup` resets the trust to what the Brewfile says. Your apps are signed ad hoc but not
+notarized, so after the install the quarantine flag is removed from the apps that this tap's casks installed,
+and only from those.
+
+**If the apply stops with "the HEAD of sheatsley/tap … is not signed by your key":** the newest tap commit
+was not signed with your YubiKey. The message shows git's status (`N`: unsigned; `G` with another key: signed,
+but not by you) and the commit. Nothing was installed. If you made that commit, sign it again
+(`git commit --amend -S --no-edit`, then push with `--force-with-lease`). If you did not, someone else
+pushed to the tap: don't install, check the commit on GitHub, and secure the account. **Never commit to the
+tap through GitHub's web UI**: GitHub signs those commits with its own key, so the check (correctly) fails.
+
+**Adding a cask or formula to it:** list it by its full name, e.g. `sheatsley/tap/stagehand`, in a cask or brew
+list. **Adding another tap that isn't yours:** add it to `taps` only, and trust just what you install from it,
+e.g. `tap "user/repo", trusted: { cask: "name" }` in the Brewfile template; ask first, since the template
+trusts only `signed_taps` today. **The key:** `gpg.fingerprint` in `keys.yaml` must equal `FINGERPRINT` in
+`setup.sh` and `$Fingerprint` in `setup.ps1` (which need their own copies, since they run before the repo is
+verified).
+
+Known limits:
+- The check runs on every `chezmoi apply`, not on a `brew upgrade` you run yourself in between. That trusts
+  GitHub as usual, and an app upgraded that way is quarantined again until the next apply.
+- Only `HEAD` is checked. Someone with access to the tap could make you install an *older* version you signed
+  (a rollback), but not anything you never signed.
+
 ## Rotating passwords and tokens
 
 None of these is in the repo, so rotating one never touches git. Each is a one-time setting that `setup.sh` skips
@@ -197,7 +230,7 @@ Notes:
   (an empty line skips one).
 - **Mac secrets** are the encrypted files (`~/.config/git/repos`, `~/.ssh/known_hosts`, and `~/.ssh/config`; the ssh public key and the homelab root are stored plain). Edit
   the file, then `chezmoi re-add <file>`; the YubiKey is needed to decrypt and encrypt.
-- **A new GPG key.** Change `FINGERPRINT` in `setup.sh` (`KEY_ID` is derived from it), `$KeyId` in `setup.ps1`, republish `public.asc` and `setup.sh`, and the `recipient` in
+- **A new GPG key.** Change `FINGERPRINT` in `setup.sh` (`KEY_ID` is derived from it), `$Fingerprint` in `setup.ps1` (`$KeyId` likewise), `gpg.fingerprint` in `home/.chezmoidata/keys.yaml`, republish `public.asc` and `setup.sh`, and the `recipient` in
   `home/.chezmoi.toml.tmpl`, re-encrypt the Mac secrets (`re-add` each one), and sign the commit with the new key.
 
 ## Moving OhmGraphite to a different InfluxDB
@@ -240,7 +273,7 @@ Test the card steps on the real Mac, with the old setup still available as a fal
 | `MACHINE` | macOS | `macbook` or `mini`; skips the "Which Mac is this" question at `chezmoi init` (asked once, then remembered in `~/.config/chezmoi/chezmoi.toml`) |
 | `COMPUTER_NAME` | Windows | sets the computer name without prompting; required when `setup.sh` has no terminal to ask on a first run, and renames the PC on a re-run |
 | `DOTFILES_SKIP_SYNC=1` | both | testing: use the checkout already at `~/repos/chezmoi` as it is, with no clone or pull (for trying changes before you push) |
-| `DOTFILES_SKIP_VERIFY=1` | both | testing: do not require `HEAD` to carry a good signature from your key (for unsigned or uncommitted work); a warning is printed |
+| `DOTFILES_SKIP_VERIFY=1` | both | testing: do not require `HEAD` to carry a good signature from your key (for unsigned or uncommitted work); a warning is printed. On a Mac it also skips the signature check of your Homebrew tap and leaves its apps quarantined |
 | `KEY_URL` | both | testing: where `setup.sh` downloads the public key from (default `https://sheatsley.me/public.asc`); the key must still match the pinned `FINGERPRINT` |
 | `DOTFILES_NO_YUBIKEY=1` | macOS | testing on a machine that cannot see the YubiKey (e.g., a macOS VM): leaves out the encrypted files and skips `run_after_40-gpg-agent` and `run_after_50-repo-remote`; `run_after_60-git-repos` then skips itself because its list is encrypted. Not for real use |
 | `DOTFILES_FORCE_AUTOLOGON=1` | Windows | redo automatic sign-in even if it is already enabled (asks for the password again) |

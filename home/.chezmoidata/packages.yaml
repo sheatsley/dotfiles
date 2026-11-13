@@ -3,8 +3,15 @@
 # the machine chosen at `chezmoi init` (.machine). it replaces the Brewfile##hostname.* files.
 # edit a list here and run `chezmoi apply`; packages that are not listed are removed by the
 # cleanup step of the brew bundle script.
+#
+# signed_taps lists the taps whose HEAD must carry a good signature from the key in keys.yaml
+# before anything is installed (each must also be in taps). Their Brewfile line trusts the
+# whole tap (Homebrew 6 ignores packages from other taps unless trusted), and the quarantine
+# flag is removed from the apps their casks install. Any other tap added later should trust
+# only the packages it is for (e.g. tap "user/repo", trusted: { cask: "name" }).
 packages:
-  taps:
+  taps: []
+  signed_taps:
     - "sheatsley/tap"
   common:
     brews:
@@ -45,4 +52,5 @@ packages:
     casks:
       - { name: "airfoil", desc: "Sends audio from computer to outputs" }
       - { name: "loopback", desc: "Cable-free audio router" }
+      - { name: "sheatsley/tap/stagehand", desc: "Menu bar app that reconnects Sidecar and restores Stage Manager stages" }
     mas: []

@@ -44,7 +44,7 @@ Machine configuration for two Macs (macbook, mini) and a Windows gaming PC, mana
    | Script | What it does (old yadm bootstrap task) |
    |---|---|
    | `run_after_10-computer-name` | sets ComputerName, HostName, LocalHostName to the machine (`computer_name`) |
-   | `run_after_20-brew-bundle` | `brew bundle install`, then `brew bundle cleanup --force`, from the generated Brewfile (`brew_packages`) |
+   | `run_after_20-brew-bundle` | `brew update`, a signature check of each tap in `signed_taps` (refuses to install anything unless its `HEAD` is signed by your key), `brew bundle install`, `brew bundle cleanup --force`, then removes the quarantine flag from the apps your own tap installed (`brew_packages`) |
    | `run_after_30-pip-packages` | `pip3 install --upgrade` from `~/.config/pip/packages` (`pip_packages`) |
    | `run_after_40-gpg-agent` | makes gpg-agent serve the YubiKey to ssh (`gpg_agent`) |
    | `run_after_50-repo-remote` | switches this repo's remote from https to ssh (`yadm_repo`) |
@@ -132,7 +132,7 @@ once they exist the scripts exit without asking. Ways to supply the passwords:
 | `MACHINE` | (macOS) skip the "Which Mac is this" question: `macbook` or `mini` |
 | `COMPUTER_NAME` | (Windows) set the computer name without prompting (also renames on a re-run) |
 | `DOTFILES_SKIP_SYNC=1` | use the local repo as it is, without cloning or pulling |
-| `DOTFILES_SKIP_VERIFY=1` | do not require a signed `HEAD` (for testing with unsigned commits) |
+| `DOTFILES_SKIP_VERIFY=1` | do not require a signed `HEAD`, of this repo or of your Homebrew tap (for testing with unsigned commits) |
 | `DOTFILES_NO_YUBIKEY=1` | (macOS) testing without the YubiKey (a VM): skips the encrypted files and the steps that need the card |
 | `DOTFILES_FORCE_AUTOLOGON=1` | (Windows) redo automatic sign-in even if it is already enabled (asks for the password again) |
 | `DOTFILES_FORCE_NAS=1` | (Windows) replace the saved NAS password |

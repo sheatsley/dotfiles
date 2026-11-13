@@ -178,7 +178,13 @@ def main():
             lines[head] = "  taps:"
             lines[head + 1 : head + 1] = ["    " + e for e in new["tap"]]
         else:
-            last = max(i for i in range(head, len(lines)) if i == head or re.match(r"^    -\s", lines[i]))
+            # the taps list ends at the next key (signed_taps follows it)
+            last = head
+            for i in range(head + 1, len(lines)):
+                if re.match(r"^    -\s", lines[i]):
+                    last = i
+                elif re.match(r"^\s*\w", lines[i]):
+                    break
             lines[last + 1 : last + 1] = ["    " + e for e in new["tap"]]
     for kind, key in (("brew", "brews"), ("cask", "casks"), ("mas", "mas")):
         if new[kind]:

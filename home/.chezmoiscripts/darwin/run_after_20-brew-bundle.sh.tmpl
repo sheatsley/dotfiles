@@ -8,14 +8,109 @@
 # listed (brew bundle cleanup; recent Homebrew versions dropped the --cleanup
 # switch of brew bundle install), so what the Brewfile says is exactly what is
 # installed. Mac App Store entries require being signed in to the App Store.
+#
+# The taps in packages.signed_taps (your own) are checked first: Homebrew and
+# every tap are updated once, then each signed tap's HEAD must carry a good
+# signature (git %G? is G) from the pinned key in keys.yaml (its primary-key
+# fingerprint, %GP), or nothing is installed. Each cask and formula pins the
+# SHA-256 of what it downloads, so a good signature on HEAD also covers the
+# downloads. brew bundle then runs with auto-update off, so no newer, unchecked
+# tap commit can arrive between the check and the install, and the Brewfile
+# grants the tap its trust only after the check. Finally the quarantine flag is
+# removed from the apps those casks installed (your apps are signed ad hoc but
+# not notarized, so macOS would block each on first launch), and only from
+# those. DOTFILES_SKIP_VERIFY=1 (for testing in a VM with unsigned commits)
+# skips the check and the quarantine removal, with a warning. APPLICATIONS_DIR
+# names the folder casks install apps into and exists only for the tests.
 load_brew
 
 # check that the Brewfile was generated
 brewfile="$HOME/.config/homebrew/Brewfile"
 [[ -f "$brewfile" ]] || die "missing $brewfile"
 
-# install and update, then remove what is not listed
+fingerprint={{ quote .gpg.fingerprint }}
+signed_taps=({{ range .packages.signed_taps }} {{ quote . }}{{ end }} )
+apps_dir="${APPLICATIONS_DIR:-/Applications}"
+verify=1
+if [[ "${DOTFILES_SKIP_VERIFY:-}" == "1" ]]; then
+  verify=0
+  log "WARNING: DOTFILES_SKIP_VERIFY=1: the signed taps are NOT checked, and their apps keep the quarantine flag"
+fi
+
+check_tap() {
+  # This function taps a signed tap if needed (without trusting it; the
+  # Brewfile does that later) and refuses to continue unless its HEAD is signed
+  # by the pinned key.
+  #
+  # :param $1: the tap (e.g. sheatsley/tap)
+  # :return: None (exits if the signature is missing, bad, or from another key)
+  local tap="$1" dir sig status fpr
+  if ! brew tap | grep -x "$tap" >/dev/null; then
+    log "tapping $tap"
+    brew tap "$tap" || die "could not tap $tap"
+  fi
+  dir="$(brew --repository "$tap")"
+  sig="$(git -c "gpg.program=$(command -v gpg)" -C "$dir" log -1 --format='%G? %GP' HEAD 2>/dev/null || true)"
+  status="${sig%% *}"
+  fpr="${sig#* }"
+  if [[ "$status" != "G" || "$fpr" != "$fingerprint" ]]; then
+    die "the HEAD of $tap ($(git -C "$dir" rev-parse --short HEAD 2>/dev/null || echo unknown)) is not signed by your key (git status '${status:-none}', key '${fpr:-none}'); refusing to install anything (see MAINTENANCE.md, 'Your Homebrew tap')"
+  fi
+  log "ok   $tap HEAD $(git -C "$dir" rev-parse --short HEAD) is signed by your key"
+}
+
+unquarantine_tap_apps() {
+  # This function removes the quarantine flag from the apps that the casks of a
+  # signed tap installed, reading the app names from Homebrew; an app that has
+  # no flag is left alone, so reruns change nothing.
+  #
+  # :param $1: the tap
+  # :return: None
+  local tap="$1" cask app path
+  while IFS= read -r cask; do
+    [[ -n "$cask" ]] || continue
+    while IFS= read -r app; do
+      [[ -n "$app" ]] || continue
+      path="$apps_dir/$app"
+      [[ -d "$path" ]] || continue
+      if xattr -p com.apple.quarantine "$path" >/dev/null 2>&1; then
+        xattr -dr com.apple.quarantine "$path"
+        log "set  removed the quarantine flag from $app ($cask)"
+      fi
+    done < <(brew info --cask --json=v2 "$cask" | python3 -c '
+import json, os, sys
+for c in json.load(sys.stdin).get("casks", []):
+    for artifact in c.get("artifacts", []):
+        if isinstance(artifact, dict) and "app" in artifact:
+            names = [x for x in artifact["app"] if isinstance(x, str)]
+            targets = [x["target"] for x in artifact["app"] if isinstance(x, dict) and "target" in x]
+            if targets or names:
+                print(os.path.basename(targets[0] if targets else names[0]))
+')
+  done < <(brew list --cask --full-name | grep "^$tap/" || true)
+}
+
+# bring Homebrew and every tap up to date once, before the check
+log "updating Homebrew and its taps"
+brew update || log "WARNING: brew update failed; checking the taps as they are"
+
+# refuse to go on unless each signed tap's HEAD is signed by your key
+if [[ "$verify" -eq 1 ]]; then
+  for tap in "${signed_taps[@]}"; do
+    check_tap "$tap"
+  done
+fi
+
+# install and update, then remove what is not listed, with no update in between
+export HOMEBREW_NO_AUTO_UPDATE=1
 log "installing/updating brew packages and mas apps"
 brew bundle install --verbose --file "$brewfile"
 log "removing brew packages that are not listed"
 brew bundle cleanup --force --file "$brewfile"
+
+# let your own apps open without macOS's first-launch block
+if [[ "$verify" -eq 1 ]]; then
+  for tap in "${signed_taps[@]}"; do
+    unquarantine_tap_apps "$tap"
+  done
+fi

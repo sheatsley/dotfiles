@@ -30,7 +30,8 @@ reads BOM-less files as ANSI.
 $ErrorActionPreference = 'Stop'
 
 $Repo  = 'sheatsley/dotfiles'
-$KeyId = '1A2405C9E6BFBE34'
+$Fingerprint = 'D4FA4A5C5DA6CCB90433D9921A2405C9E6BFBE34'   # keep equal to gpg.fingerprint in home/.chezmoidata/keys.yaml
+$KeyId = $Fingerprint.Substring($Fingerprint.Length - 16)
 $Src   = Join-Path $HOME 'repos\chezmoi'
 
 function Step {
@@ -177,6 +178,9 @@ if (Test-KeyTrusted) {
     $fpr = $fprLine.Split(':')[9].Trim()
     if ($fpr -notmatch '^[0-9A-Fa-f]{40,64}$') { throw "Unexpected fingerprint '$fpr' (from line '$fprLine')." }
 
+    # trust it only if it is your key (the key ID alone could match another key)
+    if ($fpr.ToUpper() -ne $Fingerprint) { throw "The key from the card's URL has fingerprint $fpr, not the pinned $Fingerprint; refusing to trust it." }
+
     # hand gpg the trust line in a file (ASCII, LF) rather than stdin, since piping text to a native
     # command in Windows PowerShell can alter the bytes gpg receives
     $trustFile = Join-Path ([IO.Path]::GetTempPath()) "ownertrust-$PID.txt"
@@ -200,17 +204,24 @@ if ($env:DOTFILES_SKIP_SYNC -eq '1') {
     Exec $git @('-C', $Src, 'pull', '--ff-only')
 }
 
-# refuse to run anything unless HEAD carries a good signature from the trusted key
+# refuse to run anything unless HEAD carries a good signature from your key (and only yours)
 if ($env:DOTFILES_SKIP_VERIFY -eq '1') {
     Write-Warning 'Skipping signature verification (DOTFILES_SKIP_VERIFY=1).'
 } else {
-    # git must use Gpg4win's gpg; %G? prints G for a good signature from a trusted key
+    # git must use Gpg4win's gpg; %G? prints G for a good signature from a key gpg trusts, and %GP
+    # the fingerprint of the signing key's primary key, which must be yours
     Step 'Verifying the signature on HEAD'
-    $v = Invoke-Native $git @('-c', "gpg.program=$Gpg", '-C', $Src, 'log', '-1', '--format=%G?', 'HEAD')
-    $status = ($v.Output -split "`n" | Where-Object { $_.Trim() } | Select-Object -Last 1)
-    if ($status) { $status = $status.Trim() }
-    if ($status -ne 'G') {
-        throw "HEAD is not signed by a trusted key (git status '$status'). Refusing to apply."
+    $v = Invoke-Native $git @('-c', "gpg.program=$Gpg", '-C', $Src, 'log', '-1', '--format=%G? %GP', 'HEAD')
+    $line = ($v.Output -split "`n" | Where-Object { $_.Trim() } | Select-Object -Last 1)
+    $status = ''
+    $signer = ''
+    if ($line) {
+        $parts = $line.Trim() -split ' ', 2
+        $status = $parts[0]
+        if ($parts.Count -gt 1) { $signer = $parts[1].Trim() }
+    }
+    if ($status -ne 'G' -or $signer -ne $Fingerprint) {
+        throw "HEAD is not signed by your key $Fingerprint (git status '$status', key '$signer'). Refusing to apply."
     }
 }
 
