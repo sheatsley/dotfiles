@@ -12,6 +12,7 @@
 packages:
   taps:
     - { name: "sheatsley/tap", signed: true }
+    - { name: "hyperion-project/hyperion.ng" }
   common:
     brews:
       - { name: "zstd", desc: "Zstandard is a real-time compression algorithm" }
@@ -52,4 +53,5 @@ packages:
       - { name: "airfoil", desc: "Sends audio from computer to outputs" }
       - { name: "loopback", desc: "Cable-free audio router" }
       - { name: "sheatsley/tap/stagehand", desc: "Menu bar app that reconnects Sidecar and restores Stage Manager stages" }
+      - { name: "hyperion-project/hyperion.ng/hyperion", desc: "Ambient and bias lighting controller" }
     mas: []
