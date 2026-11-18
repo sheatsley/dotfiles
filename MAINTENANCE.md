@@ -49,6 +49,7 @@ a script, as OhmGraphite and FanControl have.
 
 | Change | Where | Then |
 |---|---|---|
+| Which Option key Terminal treats as Meta | `terminal_option_as_meta` in `home/.chezmoidata/macos.yaml` (none, both, left, or right; it changes the default and startup profiles, whatever their names) | apply, then restart Terminal |
 | Change the Dock apps | `home/.chezmoidata/macos.yaml` (`dock_apps`, in order; `path` is the `.app` bundle) | apply (the defaults script reruns when the list changes) |
 | Record Homebrew packages you installed by hand | `brew-sync` (run it from anywhere on a Mac) | adds every installed formula, cask, tap, and Mac App Store app that `packages.yaml` does not list to the end of `common`, with its description; `brew-sync --dry-run` shows the additions first. Move a line to `macbook` or `mini` to make it specific to one Mac, then apply |
 | Add a Homebrew formula, cask, tap, or Mac App Store app | `home/.chezmoidata/packages.yaml` (`common` for both Macs, `macbook` or `mini` for one) | apply (`brew bundle cleanup` also removes what you delete from the list) |

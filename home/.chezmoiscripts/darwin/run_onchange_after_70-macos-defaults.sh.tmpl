@@ -11,7 +11,15 @@
 # for both the built-in trackpad and Bluetooth ones (a Magic Trackpad), which use
 # different domains, and take effect after logging out and back in. The Firefox
 # lines are enterprise policies, which Firefox locks (it shows that it is
-# "managed by your organization").
+# "managed by your organization"). Terminal's "Use Option as Meta" setting lives
+# inside a profile, a nested entry that defaults write cannot reach, so its
+# preferences are exported, changed with PlistBuddy, and imported again. It is set
+# in the default profile (Settings > Profiles > Default, for new windows) and the
+# startup profile (Settings > General > "On startup, open"), whatever their names
+# are (Basic, Clear Dark, ...), once if they are the same; a profile that is named
+# but not in the preferences is reported rather than created. Terminal picks it up
+# when it is restarted (it is not killed here, since the apply usually runs in it).
+# PLISTBUDDY names the tool and exists only so that the tests can replace it.
 failed=0
 defaults() {
   command defaults "$@" || failed=1
@@ -60,6 +68,37 @@ defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -int 1           
 defaults write org.mozilla.firefox EnterprisePoliciesEnabled -bool TRUE                        # let firefox read the policies below
 defaults write org.mozilla.firefox DontCheckDefaultBrowser -bool TRUE                          # firefox: do not check if it is the default browser
 defaults write org.mozilla.firefox OfferToSaveLogins -bool FALSE                               # firefox: do not ask to save passwords
+{{- $meta := 0 }}
+{{- if eq .macos.terminal_option_as_meta "both" }}{{ $meta = 1 }}{{ else if eq .macos.terminal_option_as_meta "left" }}{{ $meta = 2 }}{{ else if eq .macos.terminal_option_as_meta "right" }}{{ $meta = 3 }}{{ end }}
+plistbuddy="${PLISTBUDDY:-/usr/libexec/PlistBuddy}"
+terminal_prefs="$(mktemp)"
+if defaults export com.apple.Terminal "$terminal_prefs"; then
+  # find the default and startup profiles and change each one once
+  done_profiles="/"
+  for key in "Default Window Settings" "Startup Window Settings"; do
+    profile="$("$plistbuddy" -c "Print :'$key'" "$terminal_prefs" 2>/dev/null)" || continue
+    case "$done_profiles" in *"/$profile/"*) continue ;; esac
+    case "$profile" in
+      ""|*"'"*|*:*|*/*) echo "ERROR: Terminal's $key names a profile ($profile) that cannot be changed here; set Use Option as Meta in Terminal's settings" >&2; failed=1; continue ;;
+    esac
+    if ! "$plistbuddy" -c "Print :'Window Settings':'$profile'" "$terminal_prefs" >/dev/null 2>&1; then
+      echo "ERROR: Terminal's $key is $profile, which is not in its preferences; open Terminal's settings once, then apply again" >&2; failed=1; continue
+    fi
+    if "$plistbuddy" -c "Set :'Window Settings':'$profile':useOptionAsMetaKey {{ $meta }}" "$terminal_prefs" 2>/dev/null \
+      || "$plistbuddy" -c "Add :'Window Settings':'$profile':useOptionAsMetaKey integer {{ $meta }}" "$terminal_prefs"; then
+      done_profiles="$done_profiles$profile/"
+    else
+      failed=1
+    fi
+  done
+  # import the changes, if any (none found at all is an error too)
+  if [ "$done_profiles" = "/" ]; then
+    echo "ERROR: no Terminal profile was changed for Use Option as Meta" >&2; failed=1
+  elif defaults import com.apple.Terminal "$terminal_prefs"; then
+    echo "NOTE: Terminal uses Option as Meta ({{ .macos.terminal_option_as_meta }}) in profile(s) $(printf '%s' "${done_profiles#/}" | sed 's:/$::; s:/:, :g') after you restart it" >&2   # terminal: {{ .macos.terminal_option_as_meta }} option key as meta (0 none, 1 both, 2 left, 3 right)
+  fi
+fi
+rm -f "$terminal_prefs"
 for APP in Dock Finder SystemUIServer; do killall "${APP}" 2>/dev/null || true; done    # kill affected applications
 if [ "$failed" -ne 0 ]; then
   echo "ERROR: some defaults could not be written (see the messages above); apply again after fixing the cause." >&2

@@ -2,7 +2,11 @@
 #
 # dock_apps: the apps pinned to the Dock, in order (the Dock is cleared first). path is
 # the application bundle; the name is only used in the comment of the generated command.
+#
+# terminal_option_as_meta: which Option key Terminal treats as Meta, set in its default and startup
+# profiles (Settings > Profiles > Keyboard > "Use Option as Meta"): none, both, left, or right.
 macos:
+  terminal_option_as_meta: left
   dock_apps:
     - { name: "terminal",           path: "/System/Applications/Utilities/Terminal.app" }
     - { name: "moonlight",          path: "/Applications/Moonlight.app" }
