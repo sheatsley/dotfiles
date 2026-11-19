@@ -124,7 +124,8 @@
 			},
 			"osEvents": {
 				"lockEnable": true,
-				"suspendEnable": true
+				"suspendEnable": true,
+				"suspendOnLockEnable": true
 			},
 			"protoServer": {
 				"enable": true,
